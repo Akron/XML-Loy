@@ -1,0 +1,316 @@
+=pod
+
+=head1 NAME
+
+MojoX::XML - Mojo::DOM based XML generator
+
+=head1 SYNOPSIS
+
+  my $xml = MojoX::XML->new('entry');
+  my $env = $xml->add('fun:env' => { foo => 'bar' });
+  $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
+  my $data = $env->add(
+    data => {
+      type  => 'text/plain',
+      -type => 'armour:30'
+    } => <<'B64');
+    VGhpcyBpcyBqdXN0IGEgdGVzdCBzdHJpbmcgZm
+    9yIHRoZSBhcm1vdXIgdHlwZS4gSXQncyBwcmV0
+    dHkgbG9uZyBmb3IgZXhhbXBsZSBpc3N1ZXMu
+  B64
+
+  $data->comment('This is base64 data!');
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <entry xmlns:fun="http://sojolicio.us/ns/fun">
+  #   <fun:env foo="bar">
+  #
+  #     <!-- This is base64 data! -->
+  #     <data type="text/plain">
+  #       VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
+  #       JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
+  #       ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
+  #       IgZXhhbXBsZSBpc3N1ZXMu
+  #     </data>
+  #   </fun:env>
+  # </entry>
+
+
+=head1 DESCRIPTION
+
+L<MojoX::XML> allows for the simple creation
+of serialized XML documents with multiple namespaces and
+pretty printing.
+
+
+=head1 METHODS
+
+L<MojoX::XML> inherits all methods from
+L<Mojo::DOM> and implements the following new ones.
+
+
+=head2 new
+
+  my $xml = MojoX::XML->new(<<'EOF');
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <entry>
+    <fun>Yeah!</fun>
+  <entry>
+  EOF
+
+  my $xml = MojoX::XML->new('Document');
+  my $xml = MojoX::XML->new(Document => { foo => 'bar' });
+  my $xml2 = $xml->new(Document => {id => 'new'}, 'My Doc');
+
+Construct a new L<MojoX::XML> object.
+Accepts either all parameters supported by L<Mojo::DOM> or
+all parameters supported by C<add>.
+
+
+=head2 add
+
+  my $xml = MojoX::XML->new('Document');
+  $xml = $xml->add('Element');
+  $xml = $xml->add(Element => { type => 'text/plain' });
+  $xml = $xml->add(Element => { type => 'text/plain' }, 'Hello World!');
+  $xml = $xml->add(Element => 'Hello World!');
+  $xml = $xml->add(Element => 'Hello World!', 'This is a comment!');
+  $xml = $xml->add(Data => { -type => 'base64' }, 'PdGzjvj..');
+
+  my $element = $xml->new(Element => 'Hello World!');
+  $xml->add($element);
+
+Append a new Element to a C<MojoX::XML> object.
+Returns the root node of the added C<MojoX::XML>
+object.
+
+It accepts either C<MojoX::XML> objects to
+be added, or newly defined elements.
+Parameters to define elements are a tag name, an optional hash reference
+including all attributes of the XML element, an optional text content,
+and an optional comment on the element.
+If the comment should be introduced without text content,
+text content has to be C<undef>.
+
+For rendering element content, a special C<-type> attribute can be used:
+
+=over 2
+
+=item C<escape>      XML escape the content of the node.
+
+=item C<raw>         Treat children as raw data (no pretty printing).
+
+=item C<armour(:n)?> Indent the content and automatically
+                     introduce linebreaks after every
+                     C<n>th characters.
+                     Intended for base64 encoded data.
+                     Defaults to 60 characters
+
+=back
+
+In extension context (see L<Extensions>), a potential prefix is automatically
+prepended. To prevent prefixing in extension context, prepend a C<-> to
+the element name. See L<Extensions> for further information.
+
+  $self->add(Link => { foo => 'bar' });
+  $self->add(-Link => { foo => 'bar' });
+  # Both <Link foo="bar" /> in normal context
+
+
+=head2 comment
+
+  $node = $node->comment('Resource Descriptor');
+
+Prepend a comment to the current node.
+
+
+=head2 add_namespace
+
+  $xml->add_namespace(fun => 'http://sojolicio.us/fun');
+  $xml->add_namespace('http://sojolicio.us/fun');
+  $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
+
+Add namespace to the node's root.
+The first parameter gives the prefix, the second one
+the namespace. The prefix parameter is optional.
+Namespaces are always added to the document's root, that
+means, they have to be unique in the scope of the whole
+document.
+
+
+=head2 add_extension
+
+  $xml->add_extension('Fun', 'MojoX::XML::Atom');
+
+Add an array of packages as extensions to the root
+of the document. See L<Extensions> for further information.
+
+
+=head2 to_pretty_xml
+
+  print $xml->to_pretty_xml;
+
+Returns a stringified, pretty printed XML document.
+
+
+=head1 EXTENSIONS
+
+L<MojoX::XML> allows for inheritance
+and thus provides two ways of extending the functionality:
+By using a derived class as a base class or by extending a
+base class with the C<add_extension> method.
+
+For this purpose three class variables can be set:
+
+=over 2
+
+=item C<$NAMESPACE> Namespace of the extension.
+
+=item C<$PREFIX> Preferred prefix to associate with the namespace.
+
+=item C<$DELEGATE> Delegate extension request to a different module.
+
+=back
+
+These class variables can be defined in a derived L<MojoX::XML> class.
+
+  package Fun;
+  use Mojo::Base 'MojoX::XML';
+
+  our $NAMESPACE = 'http://sojolicio.us/ns/fun';
+  our $PREFIX = 'fun';
+
+  sub add_happy {
+    my $self = shift;
+    my $word = shift;
+
+    my $cool = $self->add('-Cool');
+    my $cry  = uc($word) . '!!! \o/ ';
+    $cool->add(Happy => {foo => 'bar'}, $cry);
+  };
+
+You can use this derived object in your application as you
+would do with any other object class.
+
+  package main;
+  use Fun;
+  my $obj = Fun->new('Fun');
+  $obj->add_happy('Yeah!');
+  print $obj->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <Fun xmlns="http://sojolicio.us/ns/fun">
+  #   <Cool>
+  #     <Happy foo="bar">YEAH!!!! \o/ </Happy>
+  #   </Cool>
+  # </Fun>
+
+The defined namespace C<$NAMESPACE> is introduced as the documents
+namespaces. The prefix C<$PREFIX> is not used for any C<add>
+method.
+
+Without any changes to the class, you can use this module as an
+extension as well.
+
+  my $obj = MojoX::XML->new('object');
+  $obj->add_extension('Fun');
+  $obj->add_happy('Yeah!');
+  print $obj->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <object xmlns:fun="http://sojolicio.us/ns/fun">
+  #   <Cool>
+  #     <fun:Happy foo="bar">YEAH!!!! \o/ </fun:Happy>
+  #   </Cool>
+  # </object>
+
+The defined namespace C<$NAMESPACE> is introduced with the
+prefix C<$PREFIX>. The prefix is prepended to all elements
+added by C<add>, except for element names beginning with a C<->.
+
+New extensions can always be introduced to a base class,
+whether it is derived or not.
+
+  package Atom;
+  use Mojo::Base 'MojoX::XML';
+
+  our $PREFIX = 'atom';
+  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
+
+  # Add id
+  sub add_id {
+    my $self = shift;
+    my $id   = shift;
+    return unless $id;
+    my $element = $self->add('id', $id);
+    $element->parent->attrs('xml:id' => $id);
+    return $self;
+  };
+
+  package main;
+  use Fun;
+  my $obj = Fun->new('Fun');
+  $obj->add_extension('Atom');
+  $obj->add_happy('Yeah!');
+  $obj->add_id('1138');
+  print $obj->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <Fun xmlns="http://sojolicio.us/ns/fun"
+  #      xmlns:atom="http://www.w3.org/2005/Atom"
+  #      xml:id="1138">
+  #   <Cool>
+  #     <Happy foo="bar">YEAH!!!! \o/ </Happy>
+  #   </Cool>
+  #   <atom:id>1138</atom:id>
+  # </Fun>
+
+With the C<add_extension> method, you define module names as extensions.
+If the extension is part of the module but in a package with a different
+name, you can define the C<$DELEGATE> variable in the module namespace
+to link to the intended package.
+
+  package Atom;
+  use Mojo::Base 'Mojolicious::Controller';
+
+  our $DELEGATE = 'Atom::Document';
+
+  # ... (Controller methods)
+
+  package Atom::Document;
+  use Mojo::Base 'MojoX::XML';
+
+  our $PREFIX = 'atom';
+  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
+
+  # ... (Document methods)
+
+Having, for example, a Mojolicious controller class
+'Atom' with an appended document package,
+you can load the controller class and use the document
+class as the extension in your application.
+
+  package main;
+  use MojoX::XML;
+  my $xml = MojoX::XML->new('feed');
+  $xml->add_extension('Atom');
+
+
+=head1 DEPENDENCIES
+
+L<Mojolicious>.
+
+=head1 AVAILABILITY
+
+  https://github.com/Akron/Sojolicious
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2011-2013, Nils Diewald.
+
+This program is free software, you can redistribute it
+and/or modify it under the same terms as Perl.
+
+=cut

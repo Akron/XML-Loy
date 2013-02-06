@@ -1,0 +1,17 @@
+lib/MojoX/XML.pm
+lib/MojoX/XML/GeoRSS.pm
+lib/MojoX/XML/HostMeta.pm
+lib/MojoX/XML/Atom.pm
+lib/MojoX/XML/XRD.pm
+lib/MojoX/XML/ActivityStreams.pm
+t/XML.t
+t/XML-Extensions.t
+t/GeoRSS.t
+t/HostMeta.t
+t/Atom.t
+t/XRD.t
+t/ActivityStreams.t
+Changes
+MANIFEST
+LICENSE
+Makefile.PL
