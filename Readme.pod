@@ -98,15 +98,21 @@ For rendering element content, a special C<-type> attribute can be used:
 
 =over 2
 
-=item C<escape>      XML escape the content of the node.
+=item C<escape>
 
-=item C<raw>         Treat children as raw data (no pretty printing).
+XML escape the content of the node.
 
-=item C<armour(:n)?> Indent the content and automatically
-                     introduce linebreaks after every
-                     C<n>th characters.
-                     Intended for base64 encoded data.
-                     Defaults to 60 characters
+=item C<raw>
+
+Treat children as raw data (no pretty printing).
+
+=item C<armour(:n)?>
+
+Indent the content and automatically
+introduce linebreaks after every
+C<n>th characters.
+Intended for base64 encoded data.
+Defaults to 60 characters
 
 =back
 
@@ -166,11 +172,17 @@ For this purpose three class variables can be set:
 
 =over 2
 
-=item C<$NAMESPACE> Namespace of the extension.
+=item C<$NAMESPACE>
 
-=item C<$PREFIX> Preferred prefix to associate with the namespace.
+Namespace of the extension.
 
-=item C<$DELEGATE> Delegate extension request to a different module.
+=item C<$PREFIX>
+
+Preferred prefix to associate with the namespace.
+
+=item C<$DELEGATE>
+
+Delegate extension request to a different module.
 
 =back
 
