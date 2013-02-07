@@ -7,6 +7,142 @@ MojoX::XML - Mojo::DOM based XML generator
 =head1 SYNOPSIS
 
   my $xml = MojoX::XML->new('entry');
+
+  # Add namespace information for a prefix
+  $xml->add_namespace(
+    fun => 'http://sojolicio.us/ns/fun'
+  );
+
+  # Add elements to the document
+  my $env = $xml->add(
+    'fun:env' => { foo => 'bar' }
+  );
+
+  # Add children to elements of the document
+  my $letter = $env->add(letter => 'Hello World!');
+  $letter->comment('My Greeting');
+
+  # Print the result with pretty indentation
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <entry xmlns:fun="http://sojolicio.us/ns/fun">
+  #   <fun:env foo="bar">
+  #
+  #     <!-- My Greeting -->
+  #     <letter>Hello World!</letter>
+  #   </fun:env>
+  # </entry>
+
+  # Use Mojo::DOM's CSS3 selectors for retrieving nodes
+  print $xml->at('env > *')->text;
+
+  # Hello World!
+
+
+=head1 DESCRIPTION
+
+L<MojoX::XML> allows for the simple creation
+of serialized XML documents with multiple namespaces and
+pretty printing, while giving you the full power of L<Mojo::DOM>.
+
+
+=head1 METHODS
+
+L<MojoX::XML> inherits all methods from
+L<Mojo::DOM> and implements the following new ones.
+
+
+=head2 new
+
+  my $xml = MojoX::XML->new(<<'EOF');
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <entry>
+    <fun>Yeah!</fun>
+  <entry>
+  EOF
+
+  my $xml = MojoX::XML->new('Document');
+  $xml = MojoX::XML->new(Document => { foo => 'bar' });
+
+  my $xml_new = $xml->new(Document => {id => 'new'} => 'My Content');
+
+Construct a new L<MojoX::XML> object.
+Accepts either all parameters supported by L<Mojo::DOM> or
+all parameters supported by C<add>.
+
+
+=head2 add
+
+  my $xml = MojoX::XML->new('Document');
+  $xml->add('Element');
+  my $elem = $xml->add(Element => { type => 'text/plain' });
+  $elem->add(Child => 'I\'m a child element');
+
+  $xml->add(Text => { type => 'text/plain' }, 'Hello World!');
+  $xml->add(Text => 'Hello World!');
+  $xml->add(Text => 'Hello World!', 'This is a comment!');
+  $xml->add(EmptyElement => undef, 'This is an empty element!');
+  $xml->add(Data => { -type => 'base64' }, 'PdGzjvj..');
+
+  $elem = $xml->new(Element => 'Hello World!');
+  $xml->add($elem);
+
+Append a new Element to a C<MojoX::XML> object.
+Returns the root node of the added C<MojoX::XML>
+object.
+
+It accepts either C<MojoX::XML> objects to
+be added, or newly defined elements.
+
+Parameters to define elements are a tag name,
+followed by an optional hash reference
+including all attributes of the XML element,
+an optional text content,
+and an optional comment on the element.
+If the comment should be introduced without text content,
+text content has to be C<undef>.
+
+For rendering element content, a special C<-type> attribute
+can be defined.
+
+=over 2
+
+=item C<escape>
+
+XML escape the content of the node.
+
+  my $xml = MojoX::XML->new('feed');
+  my $html = $xml->add('html' => { -type => 'escape' });
+  $html->add(h1 => { style => 'color: red' } => 'I start blogging!');
+  $html->add(p => 'What a great idea!')->comment('First post');
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <feed>
+  #   <html>
+  #     &lt;h1 style=&quot;color: red&quot;&gt;I start blogging!&lt;/h1&gt;
+  #
+  #     &lt;!-- First post --&gt;
+  #     &lt;p&gt;What a great idea!&lt;/p&gt;
+  #   </html>
+  # </feed>
+
+
+=item C<raw>
+
+Treat children as raw data (no pretty printing).
+
+=item C<armour(:n)?>
+
+Indent the content and automatically
+introduce linebreaks after every
+C<n>th characters.
+Intended for base64 encoded data.
+Defaults to 60 characters
+
+  my $xml = MojoX::XML->new('entry');
   my $env = $xml->add('fun:env' => { foo => 'bar' });
   $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
   my $data = $env->add(
@@ -37,82 +173,6 @@ MojoX::XML - Mojo::DOM based XML generator
   #   </fun:env>
   # </entry>
 
-
-=head1 DESCRIPTION
-
-L<MojoX::XML> allows for the simple creation
-of serialized XML documents with multiple namespaces and
-pretty printing.
-
-
-=head1 METHODS
-
-L<MojoX::XML> inherits all methods from
-L<Mojo::DOM> and implements the following new ones.
-
-
-=head2 new
-
-  my $xml = MojoX::XML->new(<<'EOF');
-  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  <entry>
-    <fun>Yeah!</fun>
-  <entry>
-  EOF
-
-  my $xml = MojoX::XML->new('Document');
-  my $xml = MojoX::XML->new(Document => { foo => 'bar' });
-  my $xml2 = $xml->new(Document => {id => 'new'}, 'My Doc');
-
-Construct a new L<MojoX::XML> object.
-Accepts either all parameters supported by L<Mojo::DOM> or
-all parameters supported by C<add>.
-
-
-=head2 add
-
-  my $xml = MojoX::XML->new('Document');
-  $xml = $xml->add('Element');
-  $xml = $xml->add(Element => { type => 'text/plain' });
-  $xml = $xml->add(Element => { type => 'text/plain' }, 'Hello World!');
-  $xml = $xml->add(Element => 'Hello World!');
-  $xml = $xml->add(Element => 'Hello World!', 'This is a comment!');
-  $xml = $xml->add(Data => { -type => 'base64' }, 'PdGzjvj..');
-
-  my $element = $xml->new(Element => 'Hello World!');
-  $xml->add($element);
-
-Append a new Element to a C<MojoX::XML> object.
-Returns the root node of the added C<MojoX::XML>
-object.
-
-It accepts either C<MojoX::XML> objects to
-be added, or newly defined elements.
-Parameters to define elements are a tag name, an optional hash reference
-including all attributes of the XML element, an optional text content,
-and an optional comment on the element.
-If the comment should be introduced without text content,
-text content has to be C<undef>.
-
-For rendering element content, a special C<-type> attribute can be used:
-
-=over 2
-
-=item C<escape>
-
-XML escape the content of the node.
-
-=item C<raw>
-
-Treat children as raw data (no pretty printing).
-
-=item C<armour(:n)?>
-
-Indent the content and automatically
-introduce linebreaks after every
-C<n>th characters.
-Intended for base64 encoded data.
-Defaults to 60 characters
 
 =back
 
@@ -157,8 +217,11 @@ of the document. See L<Extensions> for further information.
 =head2 to_pretty_xml
 
   print $xml->to_pretty_xml;
+  print $xml->to_pretty_xml(2);
 
 Returns a stringified, pretty printed XML document.
+Optionally accepts a numerical parameter,
+defining the start indentation (defaults to zero).
 
 
 =head1 EXTENSIONS
@@ -316,11 +379,11 @@ L<Mojolicious>.
 
 =head1 AVAILABILITY
 
-  https://github.com/Akron/Sojolicious
+  https://github.com/Akron/MojoX-XML
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, Nils Diewald.
+Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
