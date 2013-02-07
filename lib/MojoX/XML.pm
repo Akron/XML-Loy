@@ -717,7 +717,7 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 -type =E<gt> escape
+=head3 escape
 
 XML escape the content of the node.
 
@@ -739,11 +739,11 @@ XML escape the content of the node.
   # </feed>
 
 
-=head3 -type =E<gt> raw
+=head3 raw
 
 Treat children as raw data (no pretty printing).
 
-=head3 -type =E<gt> armour
+=head3 armour
 
 Indent the content and automatically
 introduce linebreaks after every
