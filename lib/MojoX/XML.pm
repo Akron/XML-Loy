@@ -618,7 +618,7 @@ MojoX::XML - Mojo::DOM based XML generator
 
   # Add elements to the document
   my $env = $xml->add(
-    'env' => { foo => 'bar' }
+    env => { foo => 'bar' }
   );
 
   # Add namespace information for a prefix
@@ -627,7 +627,10 @@ MojoX::XML - Mojo::DOM based XML generator
   );
 
   # Add children to elements of the document
-  my $letter = $env->add('fun:letter' => 'Hello World!');
+  # using namespaces
+  my $letter = $env->add(
+    'fun:letter' => 'Hello World!'
+  );
 
   # Attach comments to elements
   $letter->comment('My Greeting');
@@ -700,7 +703,7 @@ all parameters supported by C<add>.
 
 Add a new element to a L<MojoX::XML> object, either
 as another L<MojoX::XML> object or newly defined.
-Returns the root node of the added C<MojoX::XML>
+Returns the root node of the added L<MojoX::XML>
 object.
 
 Parameters to define elements are a tag name,
@@ -714,7 +717,7 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 escape
+=head3 -type =E<gt> escape
 
 XML escape the content of the node.
 
@@ -736,11 +739,11 @@ XML escape the content of the node.
   # </feed>
 
 
-=head3 raw
+=head3 -type =E<gt> raw
 
 Treat children as raw data (no pretty printing).
 
-=head3 armour
+=head3 -type =E<gt> armour
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -912,7 +915,7 @@ added by C<add>, except for element names beginning with a C<->.
 
 A potential prefix is automatically
 prepended. To prevent prefixing in extension context, prepend a C<-> to
-the element name. See L<Extensions> for further information.
+the element name. See L</Extensions> for further information.
 
   $self->add(Link => { foo => 'bar' });
   $self->add(-Link => { foo => 'bar' });
