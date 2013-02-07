@@ -8,18 +8,20 @@ MojoX::XML - Mojo::DOM based XML generator
 
   my $xml = MojoX::XML->new('entry');
 
+  # Add elements to the document
+  my $env = $xml->add(
+    'env' => { foo => 'bar' }
+  );
+
   # Add namespace information for a prefix
   $xml->add_namespace(
     fun => 'http://sojolicio.us/ns/fun'
   );
 
-  # Add elements to the document
-  my $env = $xml->add(
-    'fun:env' => { foo => 'bar' }
-  );
-
   # Add children to elements of the document
-  my $letter = $env->add(letter => 'Hello World!');
+  my $letter = $env->add('fun:letter' => 'Hello World!');
+
+  # Attach comments to elements
   $letter->comment('My Greeting');
 
   # Print the result with pretty indentation
@@ -27,11 +29,11 @@ MojoX::XML - Mojo::DOM based XML generator
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   # <entry xmlns:fun="http://sojolicio.us/ns/fun">
-  #   <fun:env foo="bar">
+  #   <env foo="bar">
   #
   #     <!-- My Greeting -->
-  #     <letter>Hello World!</letter>
-  #   </fun:env>
+  #     <fun:letter>Hello World!</fun:letter>
+  #   </env>
   # </entry>
 
   # Use Mojo::DOM's CSS3 selectors for retrieving nodes
@@ -83,17 +85,15 @@ all parameters supported by C<add>.
   $xml->add(Text => 'Hello World!');
   $xml->add(Text => 'Hello World!', 'This is a comment!');
   $xml->add(EmptyElement => undef, 'This is an empty element!');
-  $xml->add(Data => { -type => 'base64' }, 'PdGzjvj..');
+  $xml->add(Data => { -type => 'armour' }, 'PdGzjvj..');
 
   $elem = $xml->new(Element => 'Hello World!');
   $xml->add($elem);
 
-Append a new Element to a C<MojoX::XML> object.
+Add a new element to a L<MojoX::XML> object, either
+as another L<MojoX::XML> object or newly defined.
 Returns the root node of the added C<MojoX::XML>
 object.
-
-It accepts either C<MojoX::XML> objects to
-be added, or newly defined elements.
 
 Parameters to define elements are a tag name,
 followed by an optional hash reference
@@ -104,11 +104,9 @@ If the comment should be introduced without text content,
 text content has to be C<undef>.
 
 For rendering element content, a special C<-type> attribute
-can be defined.
+can be defined:
 
-=over 2
-
-=item C<escape>
+=head3 escape
 
 XML escape the content of the node.
 
@@ -130,17 +128,17 @@ XML escape the content of the node.
   # </feed>
 
 
-=item C<raw>
+=head3 raw
 
 Treat children as raw data (no pretty printing).
 
-=item C<armour(:n)?>
+=head3 armour
 
 Indent the content and automatically
 introduce linebreaks after every
-C<n>th characters.
+C<n>th character.
 Intended for base64 encoded data.
-Defaults to 60 characters
+Defaults to 60 characters linewidth after indentation.
 
   my $xml = MojoX::XML->new('entry');
   my $env = $xml->add('fun:env' => { foo => 'bar' });
@@ -174,29 +172,29 @@ Defaults to 60 characters
   # </entry>
 
 
-=back
+=head2 add_extension
 
-In extension context (see L<Extensions>), a potential prefix is automatically
-prepended. To prevent prefixing in extension context, prepend a C<-> to
-the element name. See L<Extensions> for further information.
+  $xml->add_extension('Fun', 'MojoX::XML::Atom');
 
-  $self->add(Link => { foo => 'bar' });
-  $self->add(-Link => { foo => 'bar' });
-  # Both <Link foo="bar" /> in normal context
-
-
-=head2 comment
-
-  $node = $node->comment('Resource Descriptor');
-
-Prepend a comment to the current node.
+Add an array of packages as extensions to the root
+of the document. See L<Extensions> for further information.
 
 
 =head2 add_namespace
 
-  $xml->add_namespace(fun => 'http://sojolicio.us/fun');
-  $xml->add_namespace('http://sojolicio.us/fun');
+  my $xml = MojoX::XML->new('doc');
+  $xml->add_namespace('http://sojolicio.us/ns/global');
+  $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
   $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <doc xmlns="http://sojolicio.us/global"
+  #      xmlns:fun="http://sojolicio.us/fun">
+  #   <fun:test foo="bar">Works!</fun:test>
+  # </doc>
+
 
 Add namespace to the node's root.
 The first parameter gives the prefix, the second one
@@ -206,12 +204,11 @@ means, they have to be unique in the scope of the whole
 document.
 
 
-=head2 add_extension
+=head2 comment
 
-  $xml->add_extension('Fun', 'MojoX::XML::Atom');
+  $node = $node->comment('Resource Descriptor');
 
-Add an array of packages as extensions to the root
-of the document. See L<Extensions> for further information.
+Prepend a comment to the current node.
 
 
 =head2 to_pretty_xml
@@ -305,6 +302,15 @@ The defined namespace C<$NAMESPACE> is introduced with the
 prefix C<$PREFIX>. The prefix is prepended to all elements
 added by C<add>, except for element names beginning with a C<->.
 
+A potential prefix is automatically
+prepended. To prevent prefixing in extension context, prepend a C<-> to
+the element name. See L<Extensions> for further information.
+
+  $self->add(Link => { foo => 'bar' });
+  $self->add(-Link => { foo => 'bar' });
+  # Both <Link foo="bar" /> in normal context
+
+
 New extensions can always be introduced to a base class,
 whether it is derived or not.
 
@@ -373,13 +379,16 @@ class as the extension in your application.
   $xml->add_extension('Atom');
 
 
+
 =head1 DEPENDENCIES
 
 L<Mojolicious>.
 
+
 =head1 AVAILABILITY
 
   https://github.com/Akron/MojoX-XML
+
 
 =head1 COPYRIGHT AND LICENSE
 
