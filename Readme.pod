@@ -4,7 +4,10 @@
 
 MojoX::XML - Mojo::DOM based XML generator
 
+
 =head1 SYNOPSIS
+
+  use MojoX::XML;
 
   my $xml = MojoX::XML->new('entry');
 
@@ -49,7 +52,8 @@ MojoX::XML - Mojo::DOM based XML generator
 
 L<MojoX::XML> allows for the simple creation
 of serialized XML documents with multiple namespaces and
-pretty printing, while giving you the full power of L<Mojo::DOM>.
+pretty printing, while giving you the full power of L<Mojo::DOM>
+traversal.
 
 
 =head1 METHODS
@@ -109,7 +113,7 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 escape
+=head3 C<escape>
 
 XML escape the content of the node.
 
@@ -131,11 +135,11 @@ XML escape the content of the node.
   # </feed>
 
 
-=head3 raw
+=head3 C<raw>
 
 Treat children as raw data (no pretty printing).
 
-=head3 armour
+=head3 C<armour>
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -226,36 +230,55 @@ defining the start indentation (defaults to zero).
 
 =head1 EXTENSIONS
 
+  package MyAtom;
+  use MojoX::XML with => (
+    prefix    => 'atom',
+    namespace => 'http://www.w3.org/2005/Atom',
+    mime      => 'application/atom+xml'
+  );
+
+  # Add id
+  sub add_id {
+    my $self = shift;
+    my $id = shift or return;
+    my $element = $self->add('id', $id);
+    $element->parent->attrs('xml:id' => $id);
+    return $element;
+  };
+
+
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
 base class with the C<add_extension> method.
 
-For this purpose three class variables can be set:
+For this purpose three attributes can be set when using
+L<MojoX::XML>.
 
 =over 2
 
-=item C<$NAMESPACE>
+=item C<namespace>
 
 Namespace of the extension.
 
-=item C<$PREFIX>
+=item C<prefix>
 
 Preferred prefix to associate with the namespace.
 
-=item C<$DELEGATE>
+=item C<mime>
 
-Delegate extension request to a different module.
+Mime type of the base document.
 
 =back
+
 
 These class variables can be defined in a derived L<MojoX::XML> class.
 
   package Fun;
-  use Mojo::Base 'MojoX::XML';
-
-  our $NAMESPACE = 'http://sojolicio.us/ns/fun';
-  our $PREFIX = 'fun';
+  use MojoX::XML with => (
+    namespace => 'http://sojolicio.us/ns/fun',
+    prefix => 'fun'
+  );
 
   sub add_happy {
     my $self = shift;
@@ -282,12 +305,14 @@ would do with any other object class.
   #   </Cool>
   # </Fun>
 
-The defined namespace C<$NAMESPACE> is introduced as the documents
-namespaces. The prefix C<$PREFIX> is not used for any C<add>
+The defined namespace is introduced as the documents
+namespace. The prefix is not used for any C<add>
 method.
 
 Without any changes to the class, you can use this module as an
 extension as well.
+
+  use MojoX::XML;
 
   my $obj = MojoX::XML->new('object');
   $obj->add_extension('Fun');
@@ -301,86 +326,17 @@ extension as well.
   #   </Cool>
   # </object>
 
-The defined namespace C<$NAMESPACE> is introduced with the
-prefix C<$PREFIX>. The prefix is prepended to all elements
+The defined namespace of C<Fun> is introduced with the
+prefix C<fun>. The prefix is prepended to all elements
 added by C<add>, except for element names beginning with a C<->.
-
-A potential prefix is automatically
-prepended. To prevent prefixing in extension context, prepend a C<-> to
-the element name. See L</Extensions> for further information.
 
   $self->add(Link => { foo => 'bar' });
   $self->add(-Link => { foo => 'bar' });
-  # Both <Link foo="bar" /> in normal context
-
+  # Both <Link foo="bar" /> in base context,
+  # but prefixed in extension context.
 
 New extensions can always be introduced to a base class,
 whether it is derived or not.
-
-  package Atom;
-  use Mojo::Base 'MojoX::XML';
-
-  our $PREFIX = 'atom';
-  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
-
-  # Add id
-  sub add_id {
-    my $self = shift;
-    my $id   = shift;
-    return unless $id;
-    my $element = $self->add('id', $id);
-    $element->parent->attrs('xml:id' => $id);
-    return $self;
-  };
-
-  package main;
-  use Fun;
-  my $obj = Fun->new('Fun');
-  $obj->add_extension('Atom');
-  $obj->add_happy('Yeah!');
-  $obj->add_id('1138');
-  print $obj->to_pretty_xml;
-
-  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <Fun xmlns="http://sojolicio.us/ns/fun"
-  #      xmlns:atom="http://www.w3.org/2005/Atom"
-  #      xml:id="1138">
-  #   <Cool>
-  #     <Happy foo="bar">YEAH!!!! \o/ </Happy>
-  #   </Cool>
-  #   <atom:id>1138</atom:id>
-  # </Fun>
-
-With the C<add_extension> method, you define module names as extensions.
-If the extension is part of the module but in a package with a different
-name, you can define the C<$DELEGATE> variable in the module namespace
-to link to the intended package.
-
-  package Atom;
-  use Mojo::Base 'Mojolicious::Controller';
-
-  our $DELEGATE = 'Atom::Document';
-
-  # ... (Controller methods)
-
-  package Atom::Document;
-  use Mojo::Base 'MojoX::XML';
-
-  our $PREFIX = 'atom';
-  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
-
-  # ... (Document methods)
-
-Having, for example, a Mojolicious controller class
-'Atom' with an appended document package,
-you can load the controller class and use the document
-class as the extension in your application.
-
-  package main;
-  use MojoX::XML;
-  my $xml = MojoX::XML->new('feed');
-  $xml->add_extension('Atom');
-
 
 
 =head1 DEPENDENCIES

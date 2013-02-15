@@ -5,7 +5,7 @@ use warnings;
 use lib '../lib';
 use lib '../../lib';
 
-use Test::More tests => 22;
+use Test::More;
 
 use_ok('MojoX::XML');
 
@@ -44,6 +44,7 @@ $xml->add('ParaTest', { rel => "para" }, 'Para');
 is($xml->at('ParaTest')->attrs('rel'), 'para', 'Attribute');
 is($xml->at('ParaTest[rel="para"]')->text, 'Para', 'Text');
 
+# New document
 $xml = MojoX::XML->new('html');
 my $body = $xml->add('body', {color => '#ffffff' })->comment('body');
 $body->add('h1', 'Headline');
@@ -54,6 +55,8 @@ is($xml->at('h1')->text, 'Headline', 'Text');
 is($xml->at('p')->text, 'Paragraph', 'Text');
 is($xml->at('body')->all_text, 'Headline Paragraph', 'Text');
 
+
+# Add paragraph to document
 my $new_para = MojoX::XML->new('p', { foo => 'bar' }, 'Paragraph2');
 
 $xml->at('body')->add($new_para);
@@ -97,3 +100,5 @@ is($read->at('div b')->text, 'coool', 'Raw rendered');
 
 
 # Todo: Test escaping of element with children!
+
+done_testing;

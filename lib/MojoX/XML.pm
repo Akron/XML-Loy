@@ -1,95 +1,120 @@
 package MojoX::XML;
-use Mojo::Base 'Mojo::DOM';
 use Mojo::ByteStream 'b';
 use Mojo::Loader;
-use Carp qw/croak/;
+use Carp qw/carp croak/;
+use Mojo::Base 'Mojo::DOM';
+use Mojo::Util 'monkey_patch';
+
+# Todo: Support "once" attributes, that can only be set, not added.
+# Mybe necessary: *AUTOLOAD = \&MojoX::XML::AUTOLOAD;
 
 our $VERSION = '0.01';
 
-# Todo: use attributes for get and add
-#       sub title : add {};
-#       sub title : get {};
+our @CARP_NOT;
 
-# Before Perl 5.004, AUTOLOAD functions were looked up as methods (using the @ISA hierarchy), even when the function to be autoloaded was called as a plain function (e.g. Foo::bar() ), not a method (e.g. Foo->bar() or $obj->bar() ).
-# Perl 5.005 will use method lookup only for methods' AUTOLOAD s. However, there is a significant base of existing code that may be using the old behavior. So, as an interim step, Perl 5.004 issues an optional warning when a non-method uses an inherited AUTOLOAD .
-# The simple rule is: Inheritance will not work when autoloading non-methods. The simple fix for old code is: In any module that used to depend on inheriting AUTOLOAD for non-methods from a base class named BaseClass , execute *AUTOLOAD = \&BaseClass::AUTOLOAD during startup.
+# Import routine, run when calling the class properly
+sub import {
+  my $class = shift;
 
-# Todo: make monkeypatch methods called "use_namespace 'xxx';", "use_prefix 'xxx';" and "use_class 'xxx';"
+  return unless my $flag = shift;
 
-# Support "once" attributes, that can only be set, not added.
+  if ($flag =~ /^-?(?i:with|base)$/) {
 
-*AUTOLOAD = \&MojoX::XML::AUTOLOAD;
+    # Get class variables
+    my %param = @_;
 
-use constant {
-  I         => '  ',
-  SERIAL_NS => 'http://sojolicio.us/ns/xml-serial',
-  PI        => '<?xml version="1.0" encoding="UTF-8" '.
-               'standalone="yes"?>'
+    # Allow for manipulating the symbol table
+    no strict 'refs';
+    no warnings 'once';
+
+    # The caller is the calling (inheriting) class
+    my $caller = caller;
+    push @{"${caller}::ISA"}, __PACKAGE__;
+
+    # Set class variables
+    foreach (qw/namespace prefix mime/) {
+      ${ "${caller}::" . uc $_} = $param{$_} if exists $param{$_};
+    };
+  };
+
+  # Make inheriting classes strict and modern
+  strict->import;
+  warnings->import;
+  utf8->import;
+  feature->import(':5.10');
 };
 
-# Construct new serial object
+
+use constant {
+  I  => '  ',
+  NS => 'http://sojolicio.us/ns/xml-serial',
+  PI => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+};
+
+
+# Return class variables
+{
+  no strict 'refs';
+  sub _namespace { ${"${_[0]}::NAMESPACE"} || '' };
+  sub _mime      { ${"${_[0]}::MIME"}      || '' };
+  sub _prefix    { ${"${_[0]}::PREFIX"}    || '' };
+};
+
+
+# Construct new MojoX::XML object
 sub new {
   my $class = shift;
 
-  # Todo:
-  # - Is often called with class = '<...>'
-  #   - this seems to be totally wrong!!!
-
-  # Todo: Change order for speed (often 'charset' is $_[0])
   # Create from parent class
-  if ( ref($class)             ||
-       !$_[0]                  ||
-       (index($_[0],'<') >= 0) ||
-       ( (@_ % 2) == 0 && ref( $_[1] ) ne 'HASH' ) ) {
+  if ( ref $class                  # MojoX::XML object
+       || !$_[0]                   # Empty constructor
+       || (index($_[0],'<') >= 0)  # XML string
+     ) {
     return $class->SUPER::new(@_);
   }
 
-  # Create as node
+  # Create a new node
   else {
     my $name = shift;
-    my $att  = shift if (ref( $_[0] ) eq 'HASH');
-    my $text = shift;
+    my $att  = shift if ref( $_[0] ) eq 'HASH';
+    my ($text, $comment) = @_;
 
     # Node content
-    my $element = qq(<$name xmlns:serial=") . SERIAL_NS . '"';
+    my $element = qq(<$name xmlns:serial=") . NS . '"';
 
     # Text is given
-    if ($text) {
-      $element .= ">$text</$name>";
-    }
-
-    # Empty element
-    else {
-      $element .= ' />';
-    };
+    $element .= $text ? ">$text</$name>" : ' />';
 
     # Create root element by parent class
     my $root = $class->SUPER::new( PI . $element );
+
+    # Root is xml document
     $root->xml(1);
 
     # Transform special attributes
-    foreach my $special ( grep( index($_, '-') == 0, keys %$att ) ) {
-      $att->{'serial:' . substr($special,1) } =
-	lc(delete $att->{$special});
+    foreach ( grep { index($_, '-') == 0 } keys %$att ) {
+
+      # Set special attribute
+      $att->{'serial:' . substr($_, 1) } = lc(delete $att->{$_});
     };
 
     # Add attributes to node
-#   my $root_e = $root->_root_element;
-#   $root_e->[2] = $att;
-
     my $root_e = $root->at(':root');
     $root_e->attrs($att);
 
+    # Add comment
+    $root_e->comment($comment) if $comment;
+
     # The class is derived
     if ($class ne __PACKAGE__) {
+
       # Set namespace if given
-      no strict 'refs';
-      if (defined ${ $class.'::NAMESPACE' }) {
-	$root_e->attrs(xmlns => ${ $class.'::NAMESPACE' });
-#	$root_e->[2]->{xmlns} = ${ $class.'::NAMESPACE' };
+      if (my $ns = $class->_namespace) {
+	$root_e->attrs(xmlns => $ns);
       };
     };
 
+    # Return root node
     return $root;
   };
 };
@@ -97,33 +122,37 @@ sub new {
 
 # Append a new child node to the XML Node
 sub add {
-  my $self    = shift;
+  my $self = shift;
+
+  # Store tag
+  my $tag = $_[0];
+
+  # Add element
   my $element = $self->_add_clean(@_);
 
-  # Prepend no prefix
-  if (index($element->tree->[1], '-') == 0) {
-    $element->tree->[1] = substr($element->tree->[1], 1);
+  my $tree = $element->tree;
+
+  # Prepend with no prefix
+  if (index($tag, '-') == 0) {
+    $tree->[1] = substr($tag, 1);
     return $element;
   };
 
-  return $element if $element->tree->[0] ne 'tag';
+  # Element is no tag
+  return $element unless $tree->[0] eq 'tag';
 
-  # Prepend prefix if necessary.
+  # Prepend prefix if necessary
   my $caller = caller;
-  my $class  = ref($self);
+  my $class  = ref $self;
 
-  my $name = $element->tree->[1];
-
-  if ($name &&
-	($caller && $class) &&
-	  ($caller ne $class)) {
-    no strict 'refs';
-    if ((my $prefix = ${ $caller . '::PREFIX' }) &&
-	  ${ $caller . '::NAMESPACE' }) {
-      $element->tree->[1] = $prefix . ':' . $name if $prefix;
+  # Caller and class are not the same
+  if ($caller ne $class && $caller->can('_prefix')) {
+    if ((my $prefix = $caller->_prefix) && $caller->_namespace) {
+      $element->tree->[1] = "${prefix}:$tag";
     };
   };
 
+  # Return element
   return $element;
 };
 
@@ -284,15 +313,14 @@ sub add_extension {
 # Add namespace to root
 sub add_namespace {
   my $self   = shift;
-
-  # prefix namespace if existent
-  my $prefix = $_[1] ? ':' . shift : '';
+  my $ns     = pop;
+  my $prefix = shift;
 
   # Get root element
   my $root = $self->_root_element or return;
 
   # Save namespace as attribute
-  $root->[2]->{ 'xmlns' . $prefix } = shift;
+  $root->[2]->{'xmlns' . ($prefix ? ":$prefix" : '')} = $ns;
   return $prefix;
 };
 
@@ -612,7 +640,10 @@ __END__
 
 MojoX::XML - Mojo::DOM based XML generator
 
+
 =head1 SYNOPSIS
+
+  use MojoX::XML;
 
   my $xml = MojoX::XML->new('entry');
 
@@ -657,7 +688,8 @@ MojoX::XML - Mojo::DOM based XML generator
 
 L<MojoX::XML> allows for the simple creation
 of serialized XML documents with multiple namespaces and
-pretty printing, while giving you the full power of L<Mojo::DOM>.
+pretty printing, while giving you the full power of L<Mojo::DOM>
+traversal.
 
 
 =head1 METHODS
@@ -717,7 +749,7 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 escape
+=head3 C<escape>
 
 XML escape the content of the node.
 
@@ -739,11 +771,11 @@ XML escape the content of the node.
   # </feed>
 
 
-=head3 raw
+=head3 C<raw>
 
 Treat children as raw data (no pretty printing).
 
-=head3 armour
+=head3 C<armour>
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -834,36 +866,55 @@ defining the start indentation (defaults to zero).
 
 =head1 EXTENSIONS
 
+  package MyAtom;
+  use MojoX::XML with => (
+    prefix    => 'atom',
+    namespace => 'http://www.w3.org/2005/Atom',
+    mime      => 'application/atom+xml'
+  );
+
+  # Add id
+  sub add_id {
+    my $self = shift;
+    my $id = shift or return;
+    my $element = $self->add('id', $id);
+    $element->parent->attrs('xml:id' => $id);
+    return $element;
+  };
+
+
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
 base class with the C<add_extension> method.
 
-For this purpose three class variables can be set:
+For this purpose three attributes can be set when using
+L<MojoX::XML>.
 
 =over 2
 
-=item C<$NAMESPACE>
+=item C<namespace>
 
 Namespace of the extension.
 
-=item C<$PREFIX>
+=item C<prefix>
 
 Preferred prefix to associate with the namespace.
 
-=item C<$DELEGATE>
+=item C<mime>
 
-Delegate extension request to a different module.
+Mime type of the base document.
 
 =back
+
 
 These class variables can be defined in a derived L<MojoX::XML> class.
 
   package Fun;
-  use Mojo::Base 'MojoX::XML';
-
-  our $NAMESPACE = 'http://sojolicio.us/ns/fun';
-  our $PREFIX = 'fun';
+  use MojoX::XML with => (
+    namespace => 'http://sojolicio.us/ns/fun',
+    prefix => 'fun'
+  );
 
   sub add_happy {
     my $self = shift;
@@ -890,12 +941,14 @@ would do with any other object class.
   #   </Cool>
   # </Fun>
 
-The defined namespace C<$NAMESPACE> is introduced as the documents
-namespaces. The prefix C<$PREFIX> is not used for any C<add>
+The defined namespace is introduced as the documents
+namespace. The prefix is not used for any C<add>
 method.
 
 Without any changes to the class, you can use this module as an
 extension as well.
+
+  use MojoX::XML;
 
   my $obj = MojoX::XML->new('object');
   $obj->add_extension('Fun');
@@ -909,86 +962,17 @@ extension as well.
   #   </Cool>
   # </object>
 
-The defined namespace C<$NAMESPACE> is introduced with the
-prefix C<$PREFIX>. The prefix is prepended to all elements
+The defined namespace of C<Fun> is introduced with the
+prefix C<fun>. The prefix is prepended to all elements
 added by C<add>, except for element names beginning with a C<->.
-
-A potential prefix is automatically
-prepended. To prevent prefixing in extension context, prepend a C<-> to
-the element name. See L</Extensions> for further information.
 
   $self->add(Link => { foo => 'bar' });
   $self->add(-Link => { foo => 'bar' });
-  # Both <Link foo="bar" /> in normal context
-
+  # Both <Link foo="bar" /> in base context,
+  # but prefixed in extension context.
 
 New extensions can always be introduced to a base class,
 whether it is derived or not.
-
-  package Atom;
-  use Mojo::Base 'MojoX::XML';
-
-  our $PREFIX = 'atom';
-  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
-
-  # Add id
-  sub add_id {
-    my $self = shift;
-    my $id   = shift;
-    return unless $id;
-    my $element = $self->add('id', $id);
-    $element->parent->attrs('xml:id' => $id);
-    return $self;
-  };
-
-  package main;
-  use Fun;
-  my $obj = Fun->new('Fun');
-  $obj->add_extension('Atom');
-  $obj->add_happy('Yeah!');
-  $obj->add_id('1138');
-  print $obj->to_pretty_xml;
-
-  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <Fun xmlns="http://sojolicio.us/ns/fun"
-  #      xmlns:atom="http://www.w3.org/2005/Atom"
-  #      xml:id="1138">
-  #   <Cool>
-  #     <Happy foo="bar">YEAH!!!! \o/ </Happy>
-  #   </Cool>
-  #   <atom:id>1138</atom:id>
-  # </Fun>
-
-With the C<add_extension> method, you define module names as extensions.
-If the extension is part of the module but in a package with a different
-name, you can define the C<$DELEGATE> variable in the module namespace
-to link to the intended package.
-
-  package Atom;
-  use Mojo::Base 'Mojolicious::Controller';
-
-  our $DELEGATE = 'Atom::Document';
-
-  # ... (Controller methods)
-
-  package Atom::Document;
-  use Mojo::Base 'MojoX::XML';
-
-  our $PREFIX = 'atom';
-  our $NAMESPACE = 'http://www.w3.org/2005/Atom';
-
-  # ... (Document methods)
-
-Having, for example, a Mojolicious controller class
-'Atom' with an appended document package,
-you can load the controller class and use the document
-class as the extension in your application.
-
-  package main;
-  use MojoX::XML;
-  my $xml = MojoX::XML->new('feed');
-  $xml->add_extension('Atom');
-
 
 
 =head1 DEPENDENCIES
