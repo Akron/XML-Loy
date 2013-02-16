@@ -96,7 +96,7 @@ $data->comment('This is base64 data!');
 $xml->add('div' => { -type => 'raw' } => 'That\'s <b>coool</b>');
 
 my $read = MojoX::XML->new($xml->to_pretty_xml);
-is($read->at('div b')->text, 'coool', 'Raw rendered');
+ok(!$read->at('div b'), 'Raw rendered');
 
 
 # Todo: Test escaping of element with children!

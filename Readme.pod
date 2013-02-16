@@ -9,43 +9,39 @@ MojoX::XML - XML generator based on Mojo::DOM
 
   use MojoX::XML;
 
-  my $xml = MojoX::XML->new('entry');
+  my $xml = MojoX::XML->new('env');
 
   # Add elements to the document
-  my $env = $xml->add(
-    env => { foo => 'bar' }
-  );
+  my $header = $xml->add('header');
 
-  # Add namespace information for a prefix
-  $xml->add_namespace(
-    fun => 'http://sojolicio.us/ns/fun'
-  );
+  # Nest elements
+  $header->add('greetings')->add(title => 'Hello!');
 
-  # Add children to elements of the document
-  # using namespaces
-  my $letter = $env->add(
-    'fun:letter' => 'Hello World!'
-  );
+  # Append elements
+  $xml->add('body' => { date => 'today' })->add(p => 'That\'s all!');
+
+  # Use CSS3 selectors for element traversal
+  $xml->at('title')->attrs(style => 'color: red');
 
   # Attach comments to elements
-  $letter->comment('My Greeting');
+  $xml->at('greetings')->comment('My Greeting');
 
-  # Print the result with pretty indentation
+  # Print with pretty indentation
   print $xml->to_pretty_xml;
 
-  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <entry xmlns:fun="http://sojolicio.us/ns/fun">
-  #   <env foo="bar">
-  #
-  #     <!-- My Greeting -->
-  #     <fun:letter>Hello World!</fun:letter>
-  #   </env>
-  # </entry>
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <env>
+    <header>
 
-  # Use Mojo::DOM's CSS3 selectors for retrieving nodes
-  print $xml->at('env > *')->text;
-
-  # Hello World!
+      <!-- My Greeting -->
+      <greetings>
+        <title style="color: red">Hello!</title>
+      </greetings>
+    </header>
+    <body date="today">
+      <p>That&#39;s all!</p>
+    </body>
+  </env>
 
 
 =head1 DESCRIPTION
@@ -71,25 +67,24 @@ L<Mojo::DOM> and implements the following new ones.
   <entry>
   EOF
 
-  my $xml = MojoX::XML->new('Document');
+  $xml = MojoX::XML->new('Document');
   $xml = MojoX::XML->new(Document => { foo => 'bar' });
-
   my $xml_new = $xml->new(Document => {id => 'new'} => 'My Content');
 
 Construct a new L<MojoX::XML> object.
 Accepts either all parameters supported by L<Mojo::DOM> or
-all parameters supported by C<add>.
+all parameters supported by L<add|/add>.
 
 
 =head2 add
 
   my $xml = MojoX::XML->new('Document');
   $xml->add('Element');
+
   my $elem = $xml->add(Element => { type => 'text/plain' });
   $elem->add(Child => 'I\'m a child element');
 
   $xml->add(Text => { type => 'text/plain' }, 'Hello World!');
-  $xml->add(Text => 'Hello World!');
   $xml->add(Text => 'Hello World!', 'This is a comment!');
   $xml->add(EmptyElement => undef, 'This is an empty element!');
   $xml->add(Data => { -type => 'armour' }, 'PdGzjvj..');
@@ -110,7 +105,7 @@ and an optional comment on the element.
 If the comment should be introduced without text content,
 text content has to be C<undef>.
 
-For rendering element content, a special C<-type> attribute
+For rendering element content, special C<-type> attributes
 can be defined:
 
 =over 2
@@ -232,6 +227,7 @@ document.
   $node = $node->comment('Resource Descriptor');
 
 Prepend a comment to the current node.
+If a node already has a comment, comments will be merged.
 
 
 =head2 to_pretty_xml
@@ -241,7 +237,7 @@ Prepend a comment to the current node.
 
 Returns a stringified, pretty printed XML document.
 Optionally accepts a numerical parameter,
-defining the start indentation (defaults to zero).
+defining the start of indentation (defaults to 0).
 
 
 =head1 EXTENSIONS
@@ -266,10 +262,10 @@ defining the start indentation (defaults to zero).
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
-base class with the C<add_extension> method.
+base class with the L<add_extension|/add_extension> method.
 
-For this purpose three attributes can be set when using
-L<MojoX::XML>.
+For this purpose three attributes can be set when loading
+L<MojoX::XML>, followed by the keyword C<with>.
 
 =over 2
 
@@ -326,13 +322,19 @@ namespace. The prefix is not used for any C<add>
 method.
 
 Without any changes to the class, you can use this module as an
-extension as well.
+extension to another L<MojoX::XML> based document as well.
 
   use MojoX::XML;
 
   my $obj = MojoX::XML->new('object');
+
+  # Use MojoX::XML based class 'Fun'
   $obj->add_extension('Fun');
+
+  # Use methods provided by the base class or any extension
   $obj->add_happy('Yeah!');
+
+  # Print with pretty indentation
   print $obj->to_pretty_xml;
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -349,7 +351,7 @@ added by C<add>, except for element names beginning with a C<->.
   $self->add(Link => { foo => 'bar' });
   $self->add(-Link => { foo => 'bar' });
   # Both <Link foo="bar" /> in base context,
-  # but prefixed in extension context.
+  # but only the first prefixed in extension context.
 
 New extensions can always be introduced to a base class,
 whether it is derived or not.
