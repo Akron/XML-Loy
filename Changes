@@ -1,3 +1,6 @@
+0.02 2013-02-16
+        - Added XRD and HostMeta.
+
 0.01 2013-02-16
         - Initial submission to GitHub.
 	- Change class variables to use parameters.

@@ -15,7 +15,7 @@ use Mojo::Base 'Mojo::DOM';
 #   };
 
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our @CARP_NOT;
 
@@ -328,6 +328,8 @@ sub add_extension {
 
   # Try all given extension names
   while (my $ext = shift( @_ )) {
+
+    # Todo: Support default 'MojoX::XML::' prefix
 
     # Unable to load extension
     if (my $e = $loader->load($ext)) {
