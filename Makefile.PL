@@ -19,5 +19,5 @@ WriteMakefile(
       repository  => 'https://github.com/Akron/MojoX::XML'
     }
   },
-  test => {TESTS => 't/*.t' }
+  test => {TESTS => 't/*.t t/Extensions/*.t' }
 );
