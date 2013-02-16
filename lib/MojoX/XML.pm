@@ -5,8 +5,16 @@ use Carp qw/carp croak/;
 use Mojo::Base 'Mojo::DOM';
 use Mojo::Util 'monkey_patch';
 
-# Todo: Support "once" attributes, that can only be set, not added.
-# Mybe necessary: *AUTOLOAD = \&MojoX::XML::AUTOLOAD;
+# Todo:
+#   Support "once" attributes, that can only be set, not added.
+#   Maybe necessary: *AUTOLOAD = \&MojoX::XML::AUTOLOAD;
+#
+#   sub try_further { };
+#   # usage:
+#   sub get_author {
+#     return $autor or $self->try_further;
+#   };
+
 
 our $VERSION = '0.01';
 
@@ -51,7 +59,6 @@ use constant {
   PI => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 };
 
-
 # Return class variables
 {
   no strict 'refs';
@@ -92,15 +99,11 @@ sub new {
     $root->xml(1);
 
     # Transform special attributes
-    foreach ( grep { index($_, '-') == 0 } keys %$att ) {
-
-      # Set special attribute
-      $att->{'serial:' . substr($_, 1) } = lc(delete $att->{$_});
-    };
+    _special_attributes($att) if $att;
 
     # Add attributes to node
     my $root_e = $root->at(':root');
-    $root_e->attrs($att);
+    $root_e->attrs($att) if $att;
 
     # Add comment
     $root_e->comment($comment) if $comment;
@@ -157,95 +160,155 @@ sub add {
 };
 
 
-# todo:
-# sub try_further {
-# };
-#
-# usage:
-# sub get_author {
-#   return $autor or $self->try_further;
-# };
-
 # Append a new child node to the XML Node
 sub _add_clean {
   my $self = shift;
 
-  # If root use first element
-  if (!$self->parent &&
-#	$self->tree->[1]->[0] &&
-	  ($self->tree->[1]->[0] eq 'pi')) {
+  # If node is root, use first element
+  if (!$self->parent && $self->tree->[1]->[0] eq 'pi') {
     $self = $self->at('*');
   };
 
-  my ($node, $comment);
-
   # Node is a node object
-  if (ref( $_[0] )) {
-    $node    = $self->SUPER::new( shift->to_xml );
-    $comment = shift;
+  if (ref $_[0]) {
+
+    # Serialize node
+    my $node = $self->SUPER::new( shift->to_xml );
+
+    # Get root attributes
+    my $root_attr = $node->_root_element->[2];
 
     # Push namespaces to new root
-    my $root_attr =      $node->_root_element->[2];
-    foreach ( grep( index($_,'xmlns:') == 0, keys %{ $root_attr } ) ) {
-      $_ = substr($_,6);
-      $self->add_namespace( $_ => delete $root_attr->{'xmlns:'.$_} );
+    foreach ( grep( index($_, 'xmlns:') == 0, keys %$root_attr ) ) {
+
+      # Strip xmlns prefix
+      $_ = substr($_, 6);
+
+      # Add namespace
+      $self->add_namespace( $_ => delete $root_attr->{ "xmlns:$_" } );
     };
 
     # Delete namespace information, if already set
     if (exists $root_attr->{xmlns}) {
-      my $ns = $self->namespace;
-      if ($ns && $root_attr->{xmlns} eq $ns) {
-	delete $root_attr->{xmlns};
+
+      # Namespace information can be deleted
+      if (my $ns = $self->namespace) {
+	delete $root_attr->{xmlns} unless $root_attr->{xmlns} eq $ns;
       };
     };
 
-    # Push extensions to new root
-    my $root = $self->_root_element;
+    # Get root of parent node
+    my $base_root_attr = $self->_root_element->[2];
+
+    # Copy extensions
     if (exists $root_attr->{'serial:ext'}) {
-      my $ext = $root->[2]->{'serial:ext'} || '';
-      $root->[2]->{'serial:ext'} =
-	join("; ", $ext, split(/;\s/, $root_attr->{'serial:ext'}))
+      my $ext = $base_root_attr->{'serial:ext'};
+
+      $base_root_attr->{'serial:ext'} =
+	join('; ', $ext, split(/;\s/, $root_attr->{'serial:ext'}));
     };
 
+
     # Delete pi from node
-    if (ref($node->tree->[1]) eq 'ARRAY' &&
-	  $node->tree->[1]->[0] eq 'pi') {
+    my $sec = $node->tree->[1];
+    if (ref $sec eq 'ARRAY' && $sec->[0] eq 'pi') {
       splice( @{ $node->tree }, 1,1 );
     };
 
     # Append new node
     $self->append_content($node);
-    $node = $self->children->[-1];
+
+    # Return first child
+    return $self->children->[-1];
   }
 
   # Node is a string
   else {
     my $name = shift;
-    my $att  = shift if (ref( $_[0] ) eq 'HASH');
-    my $text = shift;
-    $comment = shift;
+    my $att  = shift if ref( $_[0] ) eq 'HASH';
+    my ($text, $comment) = @_;
 
-    my $string = "<$name />";
-    $string    = "<$name>$text</$name>" if defined $text;
+    # Node content with text
+    my $string = "<$name";
 
-    # Append new node
-    $self->append_content($string);
-    $node = $self->children->[-1];
+    if (defined $text) {
+      $string .= '>' . b($text)->trim->xml_escape . "</$name>";
+    }
 
-    # Transform special attributes
-    foreach my $special ( grep( index($_, '-') == 0, keys %$att ) ) {
-      $att->{'serial:' . substr($special,1) } =
-	delete $att->{$special};
+    # Empty element
+    else {
+      $string .= ' />';
     };
 
-    # Add attributes to node
-    $node->attrs($att);
+    # Append new node
+    $self->append_content( $string );
+
+    # Get first child
+    my $node = $self->children->[-1];
+
+    # Attributes were given
+    if ($att) {
+
+      # Transform special attributes
+      _special_attributes($att);
+
+      # Add attributes to node
+      $node->attrs($att);
+    };
+
+    # Add comment
+    $node->comment($comment) if $comment;
+
+    return $node;
+  };
+};
+
+
+# Transform special attributes
+sub _special_attributes {
+  my $att = shift;
+
+  foreach ( grep { index($_, '-') == 0 } keys %$att ) {
+
+    # Set special attribute
+    $att->{'serial:' . substr($_, 1) } = lc(delete $att->{$_});
+  };
+};
+
+
+# Prepend a comment to the XML node
+sub comment {
+  my $self = shift;
+
+  my $parent;
+
+  # If node is root, use first element
+  return $self unless $parent = $self->parent;
+
+  # Find previous sibling
+  my $previous;
+
+  # Find previous node
+  for my $e (@{$parent->tree}) {
+    last if $e eq $self->tree;
+    $previous = $e;
   };
 
-  # Add comment
-  $node->comment($comment) if $comment;
+  # Trim and encode comment text
+  my $comment_text = b( shift )->trim->xml_escape;
 
-  return $node;
+  # Add to previous comment
+  if ($previous && $previous->[0] eq 'comment') {
+    $previous->[1] .= '; ' . $comment_text;
+  }
+
+  # Create new comment node
+  else {
+    $self->prepend("<!--$comment_text-->");
+  };
+
+  # Return node
+  return $self;
 };
 
 
@@ -325,19 +388,10 @@ sub add_namespace {
 };
 
 
-# Prepend a comment to the XML node
-sub comment {
-  my $self = shift;
-  $self->prepend('<!--' . b( shift )->xml_escape . '-->');
-  return $self;
-};
-
-
 # Render as pretty xml
 sub to_pretty_xml {
   my $self = shift;
-  my $start = shift // 0;
-  return _render_pretty($start, $self->tree);
+  return _render_pretty( shift // 0, $self->tree);
 };
 
 
@@ -372,12 +426,8 @@ sub _render_pretty {
     for ($escaped) {
       next unless $_;
 
-      # Trim whitespace from both ends
-      s/[\s\t\n]+$//;
-      s/^[\s\t\n]+//;
-
-      # Escape
-      $_ = b($_)->xml_escape;
+      # Escape and trim whitespaces from both ends
+      $_ = b($_)->xml_escape->trim;
     };
 
     return $escaped;
@@ -385,9 +435,13 @@ sub _render_pretty {
 
   # Element is comment
   elsif ($e eq 'comment') {
-    my $comment = join("\n" . ( I x ($i + 2) ), # Todo: Why I.I ?
-		       split(/;\s/, $tree->[1]));
+
+    # Padding for every line
+    my $p = I x $i;
+    my $comment = join "\n$p     ", split(/;\s+/, $tree->[1]);
+
     return "\n" . (I x $i) . "<!-- $comment -->\n";
+
   }
 
   # Element is processing instruction
@@ -402,10 +456,7 @@ sub _render_pretty {
     my $content;
 
     # Pretty print the content
-    foreach my $child_e_i (1 .. $#$tree) {
-      $content .=
-	_render_pretty( $i, $tree->[$child_e_i] );
-    };
+    $content .= _render_pretty( $i, $tree->[ $_ ] ) for 1 .. $#$tree;
 
     return $content;
   };
@@ -415,21 +466,17 @@ sub _render_pretty {
 # Render element with pretty printing
 sub _element {
   my $i = shift;
-
-  my ($type,
-      $qname,
-      $attr,
-      $child) = @{ $_[0] };
+  my ($type, $qname, $attr, $child) = @{ shift() };
 
   # Is the qname valid?
-  croak($qname.' is no valid QName')
+  croak "$qname is no valid QName"
     unless $qname =~ /^(?:[a-zA-Z_]+:)?[^\s]+$/;
 
   # Start start tag
-  my $content = (I x $i) . '<' . $qname;
+  my $content = (I x $i) . "<$qname";
 
   # Add attributes
-  $content .= _attr((I x $i).(' ' x ( length($qname) + 2)), $attr);
+  $content .= _attr((I x $i). (' ' x ( length($qname) + 2)), $attr);
 
   # Has the element a child?
   if ($child->[0]) {
@@ -438,15 +485,13 @@ sub _element {
     $content .= '>';
 
     # There is only a textual child - no indentation
-    if (!$child->[1] &&
-	  ($child->[0] && $child->[0]->[0] eq 'text')
-	) {
+    if (!$child->[1] && ($child->[0] && $child->[0]->[0] eq 'text')) {
 
       # Special content treatment
       if (exists $attr->{'serial:type'}) {
 
 	# With base64 indentation
-	if ($attr->{'serial:type'} =~ /^armour(?::(\d+))?$/) {
+	if ($attr->{'serial:type'} =~ /^armour(?::(\d+))?$/i) {
 	  my $n = $1 || 60;
 
 	  my $string = $child->[0]->[1];
@@ -454,37 +499,42 @@ sub _element {
 	  # Delete whitespace
 	  $string =~ tr{\t-\x0d }{}d;
 
-	  $content .= "\n";
-
 	  # Introduce newlines after n characters
-	  $content .= I x ($i + 1);
-	  $content .= join( "\n" . ( I x ($i + 1) ),
-			    ( unpack '(A'.$n.')*', $string ) );
+	  $content .= "\n" . (I x ($i + 1));
+	  $content .= join  "\n" . ( I x ($i + 1) ), (unpack "(A$n)*", $string );
 	  $content .= "\n" . (I x $i);
 	}
 
-	# Escape
-	elsif ($attr->{'serial:type'} eq 'escape') {
-	  $content .= b($child->[0]->[1])->xml_escape;
-	}
-
-	# No special content treatment indentation
+	# No special treatment
 	else {
-	  $content .= $child->[0]->[1];
+
+	  # Escape
+	  $content .= b($child->[0]->[1])->trim->xml_escape;
 	};
       }
 
       # No special content treatment indentation
       else {
-	$content .= $child->[0]->[1];
+
+	# Escape
+	$content .= b($child->[0]->[1])->trim->xml_escape;
       };
     }
 
     # Treat children special
     elsif (exists $attr->{'serial:type'}) {
+
+      # Raw
       if ($attr->{'serial:type'} eq 'raw') {
-	foreach my $e_child (@$child) {
-	  $content .= __PACKAGE__->new->tree($e_child)->to_xml;
+
+	foreach (@$child) {
+
+	  # Create new dom object
+	  my $dom = __PACKAGE__->new;
+	  $dom->xml(1);
+
+	  # Print without prettifying
+	  $content .= $dom->tree($_)->to_xml;
 	};
       }
 
@@ -492,10 +542,17 @@ sub _element {
       elsif ($attr->{'serial:type'} eq 'escape') {
 	$content .= "\n";
 
-	foreach my $e_child (@$child) {
+	foreach (@$child) {
 
-	  # Todo: Need a start indentation flag for pretty_xml
-	  $content .= b(__PACKAGE__->new->tree($e_child)->to_pretty_xml($i + 1))->xml_escape;
+	  # Create new dom object
+	  my $dom = __PACKAGE__->new;
+	  $dom->xml(1);
+
+	  # Pretty print
+	  my $string = $dom->tree($_)->to_pretty_xml($i + 1);
+
+	  # Encode
+	  $content .= b($string)->xml_escape;
 	};
 
 	# Correct Indent
@@ -504,15 +561,29 @@ sub _element {
       };
     }
 
-    # There are some childs
+    # There are a couple of children
     else {
+
+      my $offset = 0;
+
+      # First element is unformatted textual
+      if (!exists $attr->{'serial:type'} &&
+	    $child->[0] &&
+	      $child->[0]->[0] eq 'text') {
+
+	# Append directly to the last tag
+	$content .= b($child->[0]->[1])->trim->xml_escape;
+	$offset = 1;
+      };
+
+      # Start on a new line
       $content .= "\n";
 
       # Loop through all child elements
-      foreach my $child_e (@$child) {
+      foreach (@{$child}[ $offset .. $#$child ]) {
 
 	# Render next element
-	$content .= _render_pretty( $i + 1, $child_e );
+	$content .= _render_pretty( $i + 1, $_ );
       };
 
       # Correct Indent
@@ -520,7 +591,7 @@ sub _element {
     };
 
     # End Tag
-    $content .= '</' . $qname . ">\n";
+    $content .= "</$qname>\n";
   }
 
   # No child - close start element as empty tag
@@ -535,30 +606,28 @@ sub _element {
 
 # Render attributes with pretty printing
 sub _attr {
-    my $indent_space = shift;
-    my %attr         = %{$_[0]};
+  my $indent_space = shift;
+  my %attr = %{$_[0]};
 
-    # Delete special attributes
-    foreach (grep(
-      $_ eq 'xmlns:serial' || index($_,'serial:') == 0,
-      keys %attr)) {
-      delete $attr{$_};
-    };
+  # Delete special and namespace attributes
+  my @special = grep {
+    $_ eq 'xmlns:serial' || index($_, 'serial:') == 0
+  } keys %attr;
 
-    # Prepare attribute values
-    foreach (values %attr) {
-	$_ = b($_)->xml_escape->quote;
-    };
+  # Delete special attributes
+  delete $attr{$_} foreach @special;
 
-    # Return indented attribute string
-    if (keys %attr) {
-      return ' ' .
-	join("\n".$indent_space,
-	     map($_ . '=' . $attr{$_}, sort keys %attr ) );
-    };
+  # Prepare attribute values
+  $_ = b($_)->xml_escape->quote foreach values %attr;
 
-    # Return nothing
-    return '';
+  # Return indented attribute string
+  if (keys %attr) {
+    return ' ' .
+      join "\n$indent_space", map { "$_=" . $attr{$_} } sort keys %attr;
+  };
+
+  # Return nothing
+  return '';
 };
 
 
@@ -575,23 +644,28 @@ sub _root_element {
   # Root is root node
   if ($root->[0] eq 'root') {
     my $i = 1;
-    while ($root->[$i] &&
-	     $root->[$i]->[0] &&
-	       $root->[$i]->[0] ne 'tag') {
-      $i++;
-    };
+
+    # Search for the first tag
+    $i++ while $root->[$i] && $root->[$i]->[0] ne 'tag';
+
+    # Tag found
     $tag = $root->[$i];
   }
 
   # Root is a tag
   else {
+
+    # Tag found
     while ($root->[0] eq 'tag') {
       $tag = $root;
+
       last unless my $parent = $root->[3];
+
       $root = $parent;
     };
   };
 
+  # Return root element
   return $tag;
 };
 
@@ -638,7 +712,7 @@ __END__
 
 =head1 NAME
 
-MojoX::XML - Mojo::DOM based XML generator
+MojoX::XML - XML generator based on Mojo::DOM
 
 
 =head1 SYNOPSIS
@@ -749,7 +823,9 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 C<escape>
+=over 2
+
+=item C<escape>
 
 XML escape the content of the node.
 
@@ -770,12 +846,28 @@ XML escape the content of the node.
   #   </html>
   # </feed>
 
-
-=head3 C<raw>
+=item C<raw>
 
 Treat children as raw data (no pretty printing).
 
-=head3 C<armour>
+  my $plain = MojoX::XML->new(<<'PLAIN');
+  <entry>There is <b>no</b> pretty printing</entry>
+  PLAIN
+
+  my $xml = MojoX::XML->new('entry');
+  my $text = $xml->add('text' => { -type => 'raw' });
+  $text->add($plain);
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <entry>
+  #   <text><entry>There is <b>no</b> pretty printing</entry>
+  # </text>
+  # </entry>
+
+
+=item C<armour:n>
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -784,13 +876,12 @@ Intended for base64 encoded data.
 Defaults to 60 characters linewidth after indentation.
 
   my $xml = MojoX::XML->new('entry');
-  my $env = $xml->add('fun:env' => { foo => 'bar' });
-  $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
-  my $data = $env->add(
-    data => {
-      type  => 'text/plain',
-      -type => 'armour:30'
-    } => <<'B64');
+  my $data =
+     $xml->add(
+       data => {
+	 type  => 'text/plain',
+	 -type => 'armour:30'
+       } => <<'B64');
     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdHJpbmcgZm
     9yIHRoZSBhcm1vdXIgdHlwZS4gSXQncyBwcmV0
     dHkgbG9uZyBmb3IgZXhhbXBsZSBpc3N1ZXMu
@@ -801,19 +892,18 @@ Defaults to 60 characters linewidth after indentation.
   print $xml->to_pretty_xml;
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <entry xmlns:fun="http://sojolicio.us/ns/fun">
-  #   <fun:env foo="bar">
+  # <entry>
   #
-  #     <!-- This is base64 data! -->
-  #     <data type="text/plain">
-  #       VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
-  #       JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
-  #       ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
-  #       IgZXhhbXBsZSBpc3N1ZXMu
-  #     </data>
-  #   </fun:env>
+  #   <!-- This is base64 data! -->
+  #   <data type="text/plain">
+  #     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
+  #     JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
+  #     ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
+  #     IgZXhhbXBsZSBpc3N1ZXMu
+  #   </data>
   # </entry>
 
+=back
 
 =head2 add_extension
 

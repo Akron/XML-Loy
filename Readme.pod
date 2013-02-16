@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-MojoX::XML - Mojo::DOM based XML generator
+MojoX::XML - XML generator based on Mojo::DOM
 
 
 =head1 SYNOPSIS
@@ -113,7 +113,9 @@ text content has to be C<undef>.
 For rendering element content, a special C<-type> attribute
 can be defined:
 
-=head3 C<escape>
+=over 2
+
+=item C<escape>
 
 XML escape the content of the node.
 
@@ -134,12 +136,28 @@ XML escape the content of the node.
   #   </html>
   # </feed>
 
-
-=head3 C<raw>
+=item C<raw>
 
 Treat children as raw data (no pretty printing).
 
-=head3 C<armour>
+  my $plain = MojoX::XML->new(<<'PLAIN');
+  <entry>There is <b>no</b> pretty printing</entry>
+  PLAIN
+
+  my $xml = MojoX::XML->new('entry');
+  my $text = $xml->add('text' => { -type => 'raw' });
+  $text->add($plain);
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <entry>
+  #   <text><entry>There is <b>no</b> pretty printing</entry>
+  # </text>
+  # </entry>
+
+
+=item C<armour:n>
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -148,13 +166,12 @@ Intended for base64 encoded data.
 Defaults to 60 characters linewidth after indentation.
 
   my $xml = MojoX::XML->new('entry');
-  my $env = $xml->add('fun:env' => { foo => 'bar' });
-  $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
-  my $data = $env->add(
-    data => {
-      type  => 'text/plain',
-      -type => 'armour:30'
-    } => <<'B64');
+  my $data =
+     $xml->add(
+       data => {
+	 type  => 'text/plain',
+	 -type => 'armour:30'
+       } => <<'B64');
     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdHJpbmcgZm
     9yIHRoZSBhcm1vdXIgdHlwZS4gSXQncyBwcmV0
     dHkgbG9uZyBmb3IgZXhhbXBsZSBpc3N1ZXMu
@@ -165,19 +182,18 @@ Defaults to 60 characters linewidth after indentation.
   print $xml->to_pretty_xml;
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <entry xmlns:fun="http://sojolicio.us/ns/fun">
-  #   <fun:env foo="bar">
+  # <entry>
   #
-  #     <!-- This is base64 data! -->
-  #     <data type="text/plain">
-  #       VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
-  #       JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
-  #       ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
-  #       IgZXhhbXBsZSBpc3N1ZXMu
-  #     </data>
-  #   </fun:env>
+  #   <!-- This is base64 data! -->
+  #   <data type="text/plain">
+  #     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
+  #     JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
+  #     ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
+  #     IgZXhhbXBsZSBpc3N1ZXMu
+  #   </data>
   # </entry>
 
+=back
 
 =head2 add_extension
 
