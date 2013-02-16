@@ -758,7 +758,7 @@ MojoX::XML - XML generator based on Mojo::DOM
 L<MojoX::XML> allows for the simple creation
 of serialized XML documents with multiple namespaces and
 pretty printing, while giving you the full power of L<Mojo::DOM>
-traversal.
+element traversal.
 
 
 =head1 METHODS
@@ -780,7 +780,7 @@ L<Mojo::DOM> and implements the following new ones.
   $xml = MojoX::XML->new(Document => { foo => 'bar' });
   my $xml_new = $xml->new(Document => {id => 'new'} => 'My Content');
 
-Construct a new L<MojoX::XML> object.
+Construct a new L<MojoX::XML> document.
 Accepts either all parameters supported by L<Mojo::DOM> or
 all parameters supported by L<add|/add>.
 
@@ -801,10 +801,10 @@ all parameters supported by L<add|/add>.
   $elem = $xml->new(Element => 'Hello World!');
   $xml->add($elem);
 
-Add a new element to a L<MojoX::XML> object, either
+Add a new element to a L<MojoX::XML> document, either
 as another L<MojoX::XML> object or newly defined.
 Returns the root node of the added L<MojoX::XML>
-object.
+document.
 
 Parameters to define elements are a tag name,
 followed by an optional hash reference
@@ -904,7 +904,7 @@ Defaults to 60 characters linewidth after indentation.
   $xml->add_extension('Fun', 'MojoX::XML::Atom');
 
 Add an array of packages as extensions to the root
-of the document. See L<Extensions> for further information.
+of the document. See L<Extensions|/Extensions> for further information.
 
 
 =head2 add_namespace
@@ -993,8 +993,6 @@ Mime type of the base document.
 =back
 
 
-These class variables can be defined in a derived L<MojoX::XML> class.
-
   package Fun;
   use MojoX::XML with => (
     namespace => 'http://sojolicio.us/ns/fun',
@@ -1026,9 +1024,8 @@ would do with any other object class.
   #   </Cool>
   # </Fun>
 
-The defined namespace is introduced as the documents
-namespace. The prefix is not used for any C<add>
-method.
+The defined namespace is introduced as the document's
+namespace. The prefix is not in use for derived classes.
 
 Without any changes to the class, you can use this module as an
 extension to another L<MojoX::XML> based document as well.
@@ -1057,10 +1054,24 @@ The defined namespace of C<Fun> is introduced with the
 prefix C<fun>. The prefix is prepended to all elements
 added by C<add>, except for element names beginning with a C<->.
 
-  $self->add(Link => { foo => 'bar' });
-  $self->add(-Link => { foo => 'bar' });
-  # Both <Link foo="bar" /> in base context,
-  # but only the first prefixed in extension context.
+  package MyModule;
+
+  # Use MojoX::XML as base class
+  use MojoX::XML with => (
+    prefix => 'my',
+    namespace => 'http://sojolicio.us/ns/my'
+  );
+
+  # Add new method
+  sub add_link {
+
+    $self->add(Link => { foo => 'bar' });
+    # <Link foo="bar" /> in derived context
+    # <my:Link foo="bar" /> when used as an extension
+
+    $self->add(-Link => { foo => 'bar' });
+    # Always <Link foo="bar" />
+  };
 
 New extensions can always be introduced to a base class,
 whether it is derived or not.
