@@ -974,7 +974,7 @@ without accepting L<MojoX::XML> objects.
 If one or more elements with the same tag name are
 already children of the requesting node,
 the old elements will be overwritten.
-Cmments will be merged.
+Comments will be merged.
 
 
 =head2 to_pretty_xml
