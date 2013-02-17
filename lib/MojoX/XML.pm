@@ -670,25 +670,26 @@ sub AUTOLOAD {
   # Choose root element
   my $root = $self->_root_element;
 
-  # Get ext string
-  my $ext_string;
-  if ($ext_string = $root->[2]->{'serial:ext'}) {
+  # Get extension array
+  my @ext = $self->extension;
+
+  {
     no strict 'refs';
 
-    foreach my $ext ( split(/;\s/, $ext_string ) ) {
+    foreach (@ext) {
+
       # Method does not exist in extension
-      next unless  defined *{ "${ext}::$method" };
+      next unless $_->can($method);
 
       # Release method
-      return *{ "${ext}::$method" }->($self, @param);
+      return *{ "${_}::$method" }->($self, @param);
     };
   };
 
-  my $errstr = qq{Can't locate object method "$method" via package "$package"};
-  $errstr .= qq{ with extensions "$ext_string"} if $ext_string;
+  my $errstr = qq{Can't locate "$method" in "$package"};
+  $errstr .= ' with ' . join(', ', @ext) . ' extensions' if @ext;
 
-  warn $errstr;
-  return;
+  carp $errstr and return;
 };
 
 
@@ -708,6 +709,7 @@ MojoX::XML - XML generator based on Mojo::DOM
 
   use MojoX::XML;
 
+  # Create new dcument with root node
   my $xml = MojoX::XML->new('env');
 
   # Add elements to the document
@@ -717,7 +719,7 @@ MojoX::XML - XML generator based on Mojo::DOM
   $header->add('greetings')->add(title => 'Hello!');
 
   # Append elements
-  $xml->add('body' => { date => 'today' })->add(p => 'That\'s all!');
+  $xml->add('body' => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
   $xml->at('title')->attrs(style => 'color: red');
@@ -728,19 +730,19 @@ MojoX::XML - XML generator based on Mojo::DOM
   # Print with pretty indentation
   print $xml->to_pretty_xml;
 
-  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  <env>
-    <header>
-
-      <!-- My Greeting -->
-      <greetings>
-        <title style="color: red">Hello!</title>
-      </greetings>
-    </header>
-    <body date="today">
-      <p>That&#39;s all!</p>
-    </body>
-  </env>
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <env>
+  #   <header>
+  #
+  #       <!-- My Greeting -->
+  #       <greetings>
+  #         <title style="color: red">Hello!</title>
+  #       </greetings>
+  #     </header>
+  #     <body date="today">
+  #       <p>That&#39;s all!</p>
+  #     </body>
+  #   </env>
 
 
 =head1 DESCRIPTION
@@ -750,50 +752,6 @@ of serialized XML documents with multiple namespaces and
 pretty printing, while giving you the full power of L<Mojo::DOM>
 element traversal.
 
-
-=head1 ATTRIBUTES
-
-=head2 extension
-
-  my $nr = $xml->extension('Fun', 'MojoX::XML::Atom');
-  my @extensions = $xml->extension;
-
-Add or get an array of extensions.
-See L<Extensions|/Extensions> for further information.
-When adding extensions,
-returns the number of successfully loaded extensions.
-When getting extensions, returns the array of associated extensions.
-
-
-=head2 namespace
-
-  my $xml = MojoX::XML->new('doc');
-  $xml->namespace('http://sojolicio.us/ns/global');
-  $xml->namespace(fun => 'http://sojolicio.us/ns/fun');
-  $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
-  print $xml->namespace;
-
-  print $xml->to_pretty_xml;
-
-  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <doc xmlns="http://sojolicio.us/global"
-  #      xmlns:fun="http://sojolicio.us/fun">
-  #   <fun:test foo="bar">Works!</fun:test>
-  # </doc>
-
-Add namespace to the node's root.
-The first parameter gives the prefix, the second one
-the namespace. The prefix parameter is optional.
-Namespaces are always added to the document's root, that
-means, they have to be unique in the scope of the whole
-document.
-
-
-=head2 mime
-
-  print $xml->mime;
-
-The mime type associated with the object class.
 
 =head1 METHODS
 
@@ -951,32 +909,77 @@ Optionally accepts a numerical parameter,
 defining the start of indentation (defaults to 0).
 
 
+=head1 ATTRIBUTES
+
+=head2 extension
+
+  my $nr = $xml->extension('Fun', 'MojoX::XML::Atom');
+  my @extensions = $xml->extension;
+
+Add or get an array of extensions.
+When adding, returns the number of successfully added extensions.
+When getting, returns the array of associated extensions.
+See L<Extensions|/Extensions> for further information.
+
+=head2 namespace
+
+  my $xml = MojoX::XML->new('doc');
+  $xml->namespace('http://sojolicio.us/ns/global');
+  $xml->namespace(fun => 'http://sojolicio.us/ns/fun');
+  $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
+  print $xml->namespace;
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <doc xmlns="http://sojolicio.us/global"
+  #      xmlns:fun="http://sojolicio.us/fun">
+  #   <fun:test foo="bar">Works!</fun:test>
+  # </doc>
+
+Get the namespace of the node or
+add namespace information to the node's root.
+On adding, the first parameter gives the prefix, the second one
+the namespace. The prefix parameter is optional.
+Namespaces are always added to the document's root,
+that means,
+they have to be unique in the scope of the whole document.
+
+
+=head2 mime
+
+  print $xml->mime;
+
+The mime type associated with the object class.
+See L<Extensions|/Extensions> for further information.
+
+
 =head1 EXTENSIONS
 
-  package MyAtom;
+  package Fun;
   use MojoX::XML with => (
-    prefix    => 'atom',
-    namespace => 'http://www.w3.org/2005/Atom',
-    mime      => 'application/atom+xml'
+    prefix => 'fun',
+    namespace => 'http://sojolicio.us/ns/fun',
+    mime => 'application/fun+xml'
   );
 
-  # Add id
-  sub add_id {
+  # Add new methods to the object
+  sub add_happy {
     my $self = shift;
-    my $id = shift or return;
-    my $element = $self->add('id', $id);
-    $element->parent->attrs('xml:id' => $id);
-    return $element;
-  };
+    my $word = shift;
 
+    my $cool = $self->add('-Cool');
+    my $cry  = uc($word) . '!!! \o/ ';
+    $cool->add(Happy => {foo => 'bar'}, $cry);
+  };
 
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
-base class with the L<extension|/extension> method.
+base class with the L<extension|/extension> attribute.
 
-For this purpose three attributes can be set when loading
-L<MojoX::XML>, followed by the keyword C<with>.
+For this purpose three attributes can be set when
+L<MojoX::XML> is used (introduced with the keyword C<with>).
 
 =over 2
 
@@ -994,23 +997,7 @@ Mime type of the base document.
 
 =back
 
-
-  package Fun;
-  use MojoX::XML with => (
-    namespace => 'http://sojolicio.us/ns/fun',
-    prefix => 'fun'
-  );
-
-  sub add_happy {
-    my $self = shift;
-    my $word = shift;
-
-    my $cool = $self->add('-Cool');
-    my $cry  = uc($word) . '!!! \o/ ';
-    $cool->add(Happy => {foo => 'bar'}, $cry);
-  };
-
-You can use this derived object in your application as you
+You can use derived objects in your application as you
 would do with any other object class.
 
   package main;
@@ -1054,29 +1041,9 @@ extension to another L<MojoX::XML> based document as well.
 
 The defined namespace of C<Fun> is introduced with the
 prefix C<fun>. The prefix is prepended to all elements
-added by C<add>, except for element names beginning with a C<->.
-
-  package MyModule;
-
-  # Use MojoX::XML as base class
-  use MojoX::XML with => (
-    prefix => 'my',
-    namespace => 'http://sojolicio.us/ns/my'
-  );
-
-  # Add new method
-  sub add_link {
-
-    $self->add(Link => { foo => 'bar' });
-    # <Link foo="bar" /> in derived context
-    # <my:Link foo="bar" /> when used as an extension
-
-    $self->add(-Link => { foo => 'bar' });
-    # Always <Link foo="bar" />
-  };
-
-New extensions can always be introduced to a base class,
-whether it is derived or not.
+added by the C<add> method in the extension class.
+To prevent this prefixing, prepend the element name with
+a C<-> (like with C<Cool>).
 
 
 =head1 DEPENDENCIES
