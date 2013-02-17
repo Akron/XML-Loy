@@ -67,7 +67,7 @@ is($xml->at('body p:nth-of-type(2)')->text, 'Paragraph2', 'Text');
 my $my_ns = 'http://example.org/ns/my-1.0';
 
 my $new_para_2 = MojoX::XML->new('p', { this => 'test'});
-$new_para_2->add_namespace('my' => $my_ns);
+$new_para_2->namespace('my' => $my_ns);
 
 $new_para_2->add('my:strong', {check => 'this'}, 'Works!' );
 
@@ -82,7 +82,7 @@ is($xml->at('*')->attrs('xmlns:my'), $my_ns, 'Namespace-Declaration');
 
 # Example from documentation
 $xml = MojoX::XML->new('entry');
-$xml->add_namespace('fun' => 'http://sojolicio.us/ns/fun');
+$xml->namespace('fun' => 'http://sojolicio.us/ns/fun');
 my $env = $xml->add('fun:env' => { foo => 'bar' });
 my $data = $env->add('data' => { type => 'base64',
 				 -type => 'armour:30'

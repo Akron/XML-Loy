@@ -15,7 +15,7 @@ use_ok('MojoX::XML::XRD');
 };
 
 ok(my $xrd = MojoX::XML::XRD->new, 'Constructor');
-ok($xrd->add_extension('MojoX::XML::HostMeta'), 'Extend with hostmeta');
+ok($xrd->extension('MojoX::XML::HostMeta'), 'Extend with hostmeta');
 
 ok($xrd->add(Subject => 'http://sojolicio.us/'), 'Add subject');
 ok($xrd->add_host('sojolicio.us'), 'Add host');

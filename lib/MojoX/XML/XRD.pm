@@ -34,7 +34,7 @@ sub new {
   };
 
   # Add XMLSchema instance namespace
-  $xrd->add_namespace(
+  $xrd->namespace(
     xsi => 'http://www.w3.org/2001/XMLSchema-instance'
   );
 

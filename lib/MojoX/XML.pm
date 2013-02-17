@@ -14,7 +14,6 @@ use Mojo::Base 'Mojo::DOM';
 #     return $autor or $self->try_further;
 #   };
 
-
 our $VERSION = '0.02';
 
 our @CARP_NOT;
@@ -61,9 +60,9 @@ use constant {
 # Return class variables
 {
   no strict 'refs';
-  sub _namespace { ${"${_[0]}::NAMESPACE"} || '' };
-  sub _mime      { ${"${_[0]}::MIME"}      || '' };
-  sub _prefix    { ${"${_[0]}::PREFIX"}    || '' };
+  sub _namespace { ${"${_[0]}::NAMESPACE"}  || '' };
+  sub _prefix    { ${"${_[0]}::PREFIX"}     || '' };
+  sub mime       { ${ref($_[0]) . '::MIME'} || 'application/xml' };
 };
 
 
@@ -184,7 +183,7 @@ sub _add_clean {
       $_ = substr($_, 6);
 
       # Add namespace
-      $self->add_namespace( $_ => delete $root_attr->{ "xmlns:$_" } );
+      $self->namespace( $_ => delete $root_attr->{ "xmlns:$_" } );
     };
 
     # Delete namespace information, if already set
@@ -312,72 +311,61 @@ sub comment {
 
 
 # Add extension to document
-sub add_extension {
+sub extension {
   my $self = shift;
 
   # Get root element
   my $root = $self->_root_element or return;
 
-  # New Loader
-  my $loader = Mojo::Loader->new;
-
   # Get ext string
   my @ext = split(/;\s/, $root->[2]->{'serial:ext'} || '');
+
+  return @ext unless $_[0];
+
+  # New Loader
+  my $loader = Mojo::Loader->new;
 
   my $loaded = 0;
 
   # Try all given extension names
   while (my $ext = shift( @_ )) {
 
+    next if $ext ~~ \@ext;
+
     # Todo: Support default 'MojoX::XML::' prefix
 
     # Unable to load extension
     if (my $e = $loader->load($ext)) {
-      warn "Exception: $e"  if ref $e;
-      warn qq{Unable to load extension "$ext"};
+      carp "Exception: $e"  if ref $e;
+      carp qq{Unable to load extension "$ext"};
       next;
     };
 
-    {
-      no strict 'refs';
+    # Add extension to extensions list
+    push(@ext, $ext);
+    $loaded++;
 
-      # Check for extension delegation
-      if (defined ${ $ext . '::DELEGATE' }) {
-	$ext = ${ $ext . '::DELEGATE' };
-
-	# No recursion for security
-	if (my $e = $loader->load($ext)) {
-	  warn "Exception: $e" if ref $e;
-	  warn qq{Unable to load delegated extension "$ext"};
-	  next;
-	};
-      };
-
-      # Add extension to extensions list
-      push(@ext, $ext);
-      $loaded++;
-
-      # Add namespace for extension
-      if (defined ${ $ext . '::NAMESPACE' } &&
-	    defined ${ $ext . '::PREFIX' }) {
-
-	$root->[2]->{ 'xmlns:' . ${ $ext . '::PREFIX' } } =
-	  ${ $ext . '::NAMESPACE' };
-      };
+    if ((my $n_ns = $ext->_namespace) &&
+	  (my $n_pref = $ext->_prefix)) {
+      $root->[2]->{"xmlns:$n_pref"} = $n_ns;
     };
   };
 
   # Save extension list as attribute
-  $root->[2]->{'serial:ext'} = join("; ", @ext);
+  $root->[2]->{'serial:ext'} = join('; ', @ext);
 
   return $loaded;
 };
 
 
-# Add namespace to root
-sub add_namespace {
-  my $self   = shift;
-  my $ns     = pop;
+# Get or add namespace to root
+sub namespace {
+  my $self = shift;
+
+  # Get namespace
+  return $self->SUPER::namespace unless $_[0];
+
+  my $ns = pop;
   my $prefix = shift;
 
   # Get root element
@@ -763,6 +751,50 @@ pretty printing, while giving you the full power of L<Mojo::DOM>
 element traversal.
 
 
+=head1 ATTRIBUTES
+
+=head2 extension
+
+  my $nr = $xml->extension('Fun', 'MojoX::XML::Atom');
+  my @extensions = $xml->extension;
+
+Add or get an array of extensions.
+See L<Extensions|/Extensions> for further information.
+When adding extensions,
+returns the number of successfully loaded extensions.
+When getting extensions, returns the array of associated extensions.
+
+
+=head2 namespace
+
+  my $xml = MojoX::XML->new('doc');
+  $xml->namespace('http://sojolicio.us/ns/global');
+  $xml->namespace(fun => 'http://sojolicio.us/ns/fun');
+  $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
+  print $xml->namespace;
+
+  print $xml->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <doc xmlns="http://sojolicio.us/global"
+  #      xmlns:fun="http://sojolicio.us/fun">
+  #   <fun:test foo="bar">Works!</fun:test>
+  # </doc>
+
+Add namespace to the node's root.
+The first parameter gives the prefix, the second one
+the namespace. The prefix parameter is optional.
+Namespaces are always added to the document's root, that
+means, they have to be unique in the scope of the whole
+document.
+
+
+=head2 mime
+
+  print $xml->mime;
+
+The mime type associated with the object class.
+
 =head1 METHODS
 
 L<MojoX::XML> inherits all methods from
@@ -901,38 +933,6 @@ Defaults to 60 characters linewidth after indentation.
 
 =back
 
-=head2 add_extension
-
-  $xml->add_extension('Fun', 'MojoX::XML::Atom');
-
-Add an array of packages as extensions to the root
-of the document. See L<Extensions|/Extensions> for further information.
-
-
-=head2 add_namespace
-
-  my $xml = MojoX::XML->new('doc');
-  $xml->add_namespace('http://sojolicio.us/ns/global');
-  $xml->add_namespace(fun => 'http://sojolicio.us/ns/fun');
-  $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
-
-  print $xml->to_pretty_xml;
-
-  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <doc xmlns="http://sojolicio.us/global"
-  #      xmlns:fun="http://sojolicio.us/fun">
-  #   <fun:test foo="bar">Works!</fun:test>
-  # </doc>
-
-
-Add namespace to the node's root.
-The first parameter gives the prefix, the second one
-the namespace. The prefix parameter is optional.
-Namespaces are always added to the document's root, that
-means, they have to be unique in the scope of the whole
-document.
-
-
 =head2 comment
 
   $node = $node->comment('Resource Descriptor');
@@ -973,7 +973,7 @@ defining the start of indentation (defaults to 0).
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
-base class with the L<add_extension|/add_extension> method.
+base class with the L<extension|/extension> method.
 
 For this purpose three attributes can be set when loading
 L<MojoX::XML>, followed by the keyword C<with>.
@@ -1037,7 +1037,7 @@ extension to another L<MojoX::XML> based document as well.
   my $obj = MojoX::XML->new('object');
 
   # Use MojoX::XML based class 'Fun'
-  $obj->add_extension('Fun');
+  $obj->extension('Fun');
 
   # Use methods provided by the base class or any extension
   $obj->add_happy('Yeah!');

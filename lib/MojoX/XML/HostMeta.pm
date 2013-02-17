@@ -40,7 +40,7 @@ MojoX::XML::Hostmeta - Extend MojoX::XML::XRD for use with HostMeta
   use MojoX::XML::XRD;
 
   my $xrd = MojoX::XML::XRD->new;
-  $xrd->add_extension('MojoX::XML::HostMeta');
+  $xrd->extension('MojoX::XML::HostMeta');
 
   $xrd->add(Subject => 'http://sojolicio.us/');
   $xrd->add_host('sojolicio.us');

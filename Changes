@@ -1,5 +1,7 @@
-0.02 2013-02-16
+0.02 2013-02-17
         - Added XRD and HostMeta.
+	- Added namespace, mime and extension attributes.
+	- Removed add_namespace and add_extension methods.
 
 0.01 2013-02-16
         - Initial submission to GitHub.
