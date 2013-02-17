@@ -17,10 +17,10 @@ use_ok('MojoX::XML::XRD');
 ok(my $xrd = MojoX::XML::XRD->new, 'Constructor');
 ok($xrd->extension('MojoX::XML::HostMeta'), 'Extend with hostmeta');
 
-ok($xrd->add(Subject => 'http://sojolicio.us/'), 'Add subject');
-ok($xrd->add_host('sojolicio.us'), 'Add host');
+ok($xrd->subject('http://sojolicio.us/'), 'Add subject');
+ok($xrd->host('sojolicio.us'), 'Add host');
 
-is($xrd->get_host, 'sojolicio.us', 'Get host');
+is($xrd->host, 'sojolicio.us', 'Get host');
 
 is($xrd->at('*')->namespace, 'http://docs.oasis-open.org/ns/xri/xrd-1.0', 'Namespace');
 

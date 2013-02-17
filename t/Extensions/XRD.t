@@ -13,13 +13,13 @@ use_ok('MojoX::XML::XRD');
 # Synopsis
 
 ok(my $xrd = MojoX::XML::XRD->new, 'Empty Constructor');
-ok($xrd->add(Subject => 'http://sojolicio.us/'), 'Add subject');
-ok($xrd->add(Alias => 'https://sojolicio.us/'), 'Add alias');
+ok($xrd->subject('http://sojolicio.us/'), 'Add subject');
+ok($xrd->alias('https://sojolicio.us/'), 'Add alias');
 
-ok($xrd->add_link('lrdd' => { template => '/.well-known/webfinger?resource={uri}'}),
+ok($xrd->link('lrdd' => { template => '/.well-known/webfinger?resource={uri}'}),
      'Add link');
-ok($xrd->add_property('describedby' => '/me.foaf'), 'Add property');
-ok($xrd->add_property('private'), 'Add property');
+ok($xrd->property('describedby' => '/me.foaf'), 'Add property');
+ok($xrd->property('private' => undef), 'Add property');
 
 is($xrd->to_pretty_xml, << 'XRD', 'Pretty Print');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -35,6 +35,21 @@ is($xrd->to_pretty_xml, << 'XRD', 'Pretty Print');
 </XRD>
 XRD
 
+is($xrd->subject, 'http://sojolicio.us/', 'Get subject');
+
+ok($xrd->subject('blabla'), 'Set subject');
+
+is($xrd->subject, 'blabla', 'Get subject');
+
+ok($xrd->subject('http://sojolicio.us/'), 'Set subject');
+
+my @array = $xrd->alias;
+is($array[0], 'https://sojolicio.us/', 'Get alias');
+
+ok($xrd->alias('http://sojolicio.us'), 'Add alias');
+@array = $xrd->alias;
+is($array[0], 'https://sojolicio.us/', 'Get alias');
+is($array[1], 'http://sojolicio.us', 'Get alias');
 
 my $json = Mojo::JSON->new;
 
@@ -42,25 +57,23 @@ my $jrd = $json->decode($xrd->to_json);
 
 is($jrd->{subject}, 'http://sojolicio.us/', 'JRD Subject');
 is($jrd->{aliases}->[0], 'https://sojolicio.us/', 'JRD Alias');
-ok(!$jrd->{aliases}->[1], 'JRD Alias');
+ok($jrd->{aliases}->[1], 'JRD Alias');
 is($jrd->{links}->[0]->{rel}, 'lrdd', 'JRD link 1');
 is($jrd->{links}->[0]->{template}, '/.well-known/webfinger?resource={uri}', 'JRD link 1');
 ok(!$jrd->{properties}->{private}, 'JRD property 1');
 is($jrd->{properties}->{describedby}, '/me.foaf', 'JRD property 2');
 
-
-
-ok(my $element = $xrd->add_property(profile => '/akron.html'), 'Add property');
+ok(my $element = $xrd->property(profile => '/akron.html'), 'Add property');
 
 is($element->text, '/akron.html', 'Return property');
 
 is($xrd->at('Property[type=profile]')->text, '/akron.html', 'Get Property');
 
-ok(!$xrd->get_property, 'Get Property without type');
+ok(!$xrd->property, 'Get Property without type');
 
-is($xrd->get_property('profile')->text, '/akron.html', 'Get Property');
+is($xrd->property('profile')->text, '/akron.html', 'Get Property');
 
-ok($element = $xrd->add_link(hcard => '/me.hcard'), 'Add link');
+ok($element = $xrd->link(hcard => '/me.hcard'), 'Add link');
 
 ok($element->attrs('href'), 'Return link');
 
@@ -68,17 +81,28 @@ ok($element->add(Title => 'My hcard'), 'Add title');
 
 is($xrd->at('Link[rel=hcard] Title')->text, 'My hcard', 'Get title');
 
-ok($element = $xrd->add_link(lrdd2 => {template => '/wf?resource={uri}'}), 'Add link');
+ok($element = $xrd->link(lrdd2 => {template => '/wf?resource={uri}'}), 'Add link');
 
 ok($element->add(Title => 'My Webfinger'), 'Add title');
 
 is($xrd->at('Link[rel=lrdd2] Title')->text, 'My Webfinger', 'Get title');
 
-is($xrd->get_link('hcard')->at('Title')->text, 'My hcard', 'Get title');
+is($xrd->link('hcard')->at('Title')->text, 'My hcard', 'Get title');
 
 is($xrd->at('Link[rel=lrdd2] Title')->text, 'My Webfinger', 'Get title');
 is($xrd->at('Link[rel=lrdd2]')->at('Title')->text, 'My Webfinger', 'Get title');
-is($xrd->get_link('lrdd2')->all_text, 'My Webfinger', 'Get title');
+is($xrd->link('lrdd2')->all_text, 'My Webfinger', 'Get title');
+
+
+ok($xrd->link('lrdd3' => '/me.json'), 'Add link');
+
+is($xrd->link('lrdd3')->attrs('href'), '/me.json', 'Get link');
+
+ok($xrd->link('lrdd3')->remove, 'Remove link');
+ok($xrd->link('lrdd'), 'Get link');
+ok($xrd->link('lrdd2'), 'Get link');
+ok(!$xrd->link('lrdd3'), 'Get link');
+
 
 
 $xrd = MojoX::XML::XRD->new(<<XRD);
@@ -95,7 +119,9 @@ $xrd = MojoX::XML::XRD->new(<<XRD);
 </XRD>
 XRD
 
-is($xrd->get_link('lrdd')->attrs('template'), '/.well-known/webfinger?resource={uri}', 'Get link');
+is($xrd->link('lrdd')->attrs('template'), '/.well-known/webfinger?resource={uri}', 'Get link');
+
+is($xrd->property('private')->attrs('xsi:nil'), 'true', 'Get property');
 
 
 $xrd = MojoX::XML::XRD->new(<<'JRD');
@@ -107,6 +133,8 @@ $xrd = MojoX::XML::XRD->new(<<'JRD');
 JRD
 
 is($xrd->at('Alias')->text, 'https://sojolicio.us/', 'Get Alias');
+
+is($xrd->property('private')->attrs('xsi:nil'), 'true', 'nil attribute');
 
 
 
@@ -150,12 +178,12 @@ XRD
 ok($xrd, 'XRD loaded');
 
 is($xrd->at('Link[rel="foo"]')->text, 'bar', "DOM access Link");
-is($xrd->get_link('foo')->text, 'bar', "DOM access Link");
+is($xrd->link('foo')->text, 'bar', "DOM access Link");
 
 $xrd->add('Property', { type => 'bar' }, 'foo');
 
 is($xrd->at('Property[type="bar"]')->text, 'foo', 'DOM access Property');
-is($xrd->get_property('bar')->text, 'foo', 'DOM access Property');
+is($xrd->property('bar')->text, 'foo', 'DOM access Property');
 
 is_deeply(
     Mojo::JSON->new->decode($xrd->to_json),

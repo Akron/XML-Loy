@@ -3,6 +3,7 @@
 	- Added namespace, mime and extension attributes.
 	- Removed add_namespace and add_extension methods.
         - Added set method.
+	- Changed add_ and get_ methods from XRD and Hostmeta.
 
 0.01 2013-02-16
         - Initial submission to GitHub.

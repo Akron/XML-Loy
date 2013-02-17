@@ -42,45 +42,82 @@ sub new {
 };
 
 
-# Add Property
-sub add_property {
+# Set subject
+sub subject {
   my $self = shift;
+
+  # Return subject
+  unless ($_[0]) {
+
+    # Subject found
+    my $sub = $self->at('Subject') or return;
+    return $sub->text;
+  };
+
+  # Set subject (only once)
+  return $self->set(Subject => @_);
+};
+
+
+# Add alias
+sub alias {
+  my $self = shift;
+
+  # Return subject
+  unless ($_[0]) {
+
+    # Subject found
+    my $sub = $self->find('Alias') or return;
+    return @{ $sub->pluck('text') };
+  };
+
+  # Add new alias
+  $self->add(Alias => $_) foreach @_;
+
+  return 1;
+};
+
+
+# Add Property
+sub property {
+  my $self = shift;
+
+  return unless $_[0];
+
   my $type = shift;
 
+  # Returns the first match
+  return $self->at( qq{Property[type="$type"]} ) unless scalar @_ == 1;
+
   # Get possible attributes
-  my %hash = (ref $_[0] && ref $_[0] eq 'HASH') ? %{ shift(@_) } : ();
+  my %hash = ($_[0] && ref $_[0] && ref $_[0] eq 'HASH') ? %{ shift(@_) } : ();
 
   # Set type
   $hash{type} = $type;
 
   # Set xsi:nil unless there is content
-  $hash{'xsi:nil'} = 'true' unless @_;
+  $hash{'xsi:nil'} = 'true' unless $_[0];
 
   # Return element
   return $self->add(Property => \%hash => @_ );
 };
 
 
-# Get Property
-sub get_property {
-  my $self = shift;
-
-  # No type given
-  return unless $_[0];
-
-  # Returns the first match
-  return $self->at( qq{Property[type="$_[0]"]} );
-};
-
-
 # Add Link
-sub add_link {
+sub link {
   my $self = shift;
-  my $rel = shift;
-  my %hash;
 
-  # No link given
+  # No rel given
   return unless $_[0];
+
+  my $rel = shift;
+
+  # Get link
+  unless ($_[0]) {
+    return $self->at( qq{Link[rel="$rel"]} );
+  };
+
+  my %hash;
 
   # Accept hash reference
   if (ref $_[0] && ref $_[0] eq 'HASH') {
@@ -98,19 +135,6 @@ sub add_link {
   # Return link object
   return $self->add(Link => \%hash);
 };
-
-
-# Get Link
-sub get_link {
-  my $self = shift;
-
-  # Get relation
-  my $rel = shift or return;
-
-  # Returns the first match
-  return $self->at( qq{Link[rel="$rel"]} );
-};
-
 
 # Get expiration date
 # sub get_expiration {
@@ -154,7 +178,7 @@ sub _to_xml {
 
       # Aliases
       when ('aliases') {
-	$xrd->add(Alias => $_) foreach (@{$jrd->{$key}});
+	$xrd->alias($_) foreach (@{$jrd->{$key}});
       }
 
       # Titles
@@ -196,7 +220,7 @@ sub _to_xml_links {
     my $properties = delete $_->{properties};
 
     # Add new link object
-    my $link = $node->add_link(delete $_->{rel}, $_);
+    my $link = $node->link(delete $_->{rel}, $_);
 
     # Add titles and properties
     _to_xml_titles($link, $titles)         if $titles;
@@ -209,7 +233,7 @@ sub _to_xml_links {
 sub _to_xml_properties {
   my ($node, $hash) = @_;
 
-  $node->add_property($_ => $hash->{$_}) foreach keys %$hash;
+  $node->property($_ => $hash->{$_}) foreach keys %$hash;
 };
 
 
@@ -319,16 +343,16 @@ MojoX::XML::XRD - Extensible Resource Descriptor
   # Create new document
   my $xrd = MojoX::XML::XRD->new;
 
-  # Set subject and alias using MojoX::XML's add method
-  $xrd->add(Subject => 'http://sojolicio.us/');
-  $xrd->add(Alias => 'https://sojolicio.us/');
+  # Set subject and alias
+  $xrd->subject('http://sojolicio.us/');
+  $xrd->alias('https://sojolicio.us/');
 
   # Add properties
-  $xrd->add_property(describedBy => '/me.foaf' );
-  $xrd->add_property('private');
+  $xrd->property(describedBy => '/me.foaf' );
+  $xrd->property(private => undef);
 
   # Add links
-  $xrd->add_link(lrdd => {
+  $xrd->link(lrdd => {
     template => '/.well-known/webfinger?resource={uri}'
   });
 
@@ -353,6 +377,7 @@ MojoX::XML::XRD - Extensible Resource Descriptor
   # "links":[{"rel":"lrdd",
   # "template":"\/.well-known\/webfinger?resource={uri}"}],
   # "properties":{"private":null,"describedby":"\/me.foaf"}}
+
 
 =head1 DESCRIPTION
 
@@ -389,7 +414,7 @@ from L<MojoX::XML> and implements the following new ones.
   </XRD>
   XRD
 
-  print $xrd->get_link('lrdd')->attrs('template');
+  print $xrd->link('lrdd')->attrs('template');
 
   # New document by JRD
   my $jrd = MojoX::XML::XRD->new(<<'JRD');
@@ -400,7 +425,7 @@ from L<MojoX::XML> and implements the following new ones.
   "properties":{"private":null,"describedby":"\/me.foaf"}}
   JRD
 
-  print $jrd->at('Alias')->text;
+  print join ', ', $jrd->alias;
 
 
 Create a new XRD document object.
@@ -408,45 +433,66 @@ Beside the accepted input of L<MojoX::XML' new|MojoX::XML/new>,
 it can also parse L<JRD|https://tools.ietf.org/html/rfc6415> input.
 
 
-=head2 add_property
+=head2 alias
 
-  my $prop = $xrd->add_property(created => 'today');
-  print prop->text;
+  $xrd->alias(
+    'https://sojolicio.us/',
+    'https://sojolicio.us'
+  );
+  my @aliases = $xrd->alias;
 
-Adds a property to the xrd document.
-Returns a L<MojoX::XML::XRD> object.
+Add multiple aliases to the xrd document
+or return an array of aliases.
 
+=head2 link
 
-=head2 get_property
+  # Add links
+  my $link = $xrd->link(profile => '/me.html');
 
-  my $prop = $xrd->get_property('created');
-  print prop->text;
-
-Returns a L<Mojox::XML::XRD> element of the first
-property element of the given type.
-
-
-=head2 add_link
-
-  my $link = $xrd->add_link(profile => '/me.html');
-
-  $xrd->add_link(hcard => {
+  $xrd->link(hcard => {
     href => '/me.hcard'
   })->add(Title => 'My hcard');
 
-Adds a link to the xrd document.
-Accepts the relation as a string and a hash reference
-for the attributes. Is a string following the relation,
+  # Get links
+  print $xrd->link('lrdd')->attrs('href');
+
+  # use Mojo::DOM remove method
+  $xrd->link('hcard')->remove;
+
+Adds links to the xrd document or retrieve them.
+Accepts the relation as a string and for adding a link
+a hash reference containing the attributes.
+Is a string following the relation,
 this is assumed to be the C<href> attribute.
 Returns a L<MojoX::XML::XRD> object.
 
 
-=head2 get_link
+=head2 property
 
-  print $xrd->get_link('lrdd')->attrs('href');
+  # Add properties
+  $xrd->property(created => 'today');
+  my $prop = $xrd->property(private => undef);
+  print prop->text;
 
-Returns a L<MojoX::XML::XRD> element of the first link
-element of the given relation.
+  # Get properties
+  my $prop = $xrd->property('created');
+  print prop->text;
+
+  # use Mojo::DOM remove method
+  $xrd->property('private')->remove;
+
+Add properties to the xrd document or retrieve them.
+To add empty propertys, you have to pass C<undef> as the value.
+Returns a L<MojoX::XML::XRD> object.
+
+
+=head2 subject
+
+  $xrd->subject('http://sojolicio.us/');
+  my $subject = $xrd->subject;
+
+Set the subject of the xrd document
+or return it.
 
 
 =head2 to_json
