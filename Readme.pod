@@ -191,12 +191,29 @@ Defaults to 60 characters linewidth after indentation.
 
 =back
 
+
 =head2 comment
 
   $node = $node->comment('Resource Descriptor');
 
 Prepend a comment to the current node.
 If a node already has a comment, comments will be merged.
+
+
+=head2 set
+
+  my $xml = MojoX::XML->new('Document');
+  $xml->set('Element' => { id => 5 });
+  $xml->set('Element' => { id => 6 });
+
+Adds a new element to the document - only once.
+Accepts all parameters as defined in L<add|/add>,
+without accepting L<MojoX::XML> objects.
+
+If one or more elements with the same tag name are
+already children of the requesting node,
+the old elements will be overwritten.
+Cmments will be merged.
 
 
 =head2 to_pretty_xml
@@ -220,6 +237,7 @@ Add or get an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 See L<Extensions|/Extensions> for further information.
+
 
 =head2 namespace
 

@@ -5,7 +5,11 @@ use Carp qw/carp croak/;
 use Mojo::Base 'Mojo::DOM';
 
 # Todo:
-#   Support "once" attributes, that can only be set, not added.
+#   Support "once" method (aka set), that can only be set, not added.
+#   - Can be done by introducing serial:once="id" (if already set)
+#
+#   All attributes are getter and setter! No more add_ things
+#
 #   Maybe necessary: *AUTOLOAD = \&MojoX::XML::AUTOLOAD;
 #
 #   sub try_further { };
@@ -56,6 +60,7 @@ use constant {
   NS => 'http://sojolicio.us/ns/xml-serial',
   PI => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 };
+
 
 # Return class variables
 {
@@ -128,6 +133,11 @@ sub add {
   # Store tag
   my $tag = $_[0];
 
+  # If node is root, use first element
+  if (!$self->parent && $self->tree->[1]->[0] eq 'pi') {
+    $self = $self->at('*');
+  };
+
   # Add element
   my $element = $self->_add_clean(@_);
 
@@ -158,14 +168,65 @@ sub add {
 };
 
 
-# Append a new child node to the XML Node
-sub _add_clean {
+# Append a child only once to the XML node.
+sub set {
   my $self = shift;
 
   # If node is root, use first element
   if (!$self->parent && $self->tree->[1]->[0] eq 'pi') {
     $self = $self->at('*');
   };
+
+  # Document objects are not allowed
+  return if ref $_[0];
+
+  # Store tag
+  my $tag = shift;
+
+  # No prefix
+  if (index($tag, '-') == 0) {
+    $tag = substr($tag, 1);
+  }
+
+  # Maybe prefix
+  else {
+    # Prepend prefix if necessary
+    my $caller = caller;
+    my $class  = ref $self;
+
+    # Caller and class are not the same
+    if ($caller ne $class && $caller->can('_prefix')) {
+      if ((my $prefix = $caller->_prefix) && $caller->_namespace) {
+	$tag = "${prefix}:$tag";
+      };
+    };
+  };
+
+  my $att = $self->tree->[2];
+
+  # Introduce attribute 'once'
+  $att->{'serial:once'} //= '';
+
+  # Check if set to once
+  if (index($att->{'serial:once'}, "($tag)") >= 0) {
+
+    # Todo: Maybe escaping - check in extensions
+    $self->children("$tag")->pluck('remove');
+  }
+
+  # Set if not already set
+  else {
+    $att->{'serial:once'} .= "($tag)";
+  };
+
+  # Add element (Maybe prefixed)
+  return $self->_add_clean($tag, @_);
+};
+
+
+# Append a new child node to the XML Node
+sub _add_clean {
+  my $self = shift;
 
   # Node is a node object
   if (ref $_[0]) {
@@ -686,7 +747,7 @@ sub AUTOLOAD {
     };
   };
 
-  my $errstr = qq{Can't locate "$method" in "$package"};
+  my $errstr = qq{Can't locate "${method}()" in "$package"};
   $errstr .= ' with ' . join(', ', @ext) . ' extensions' if @ext;
 
   carp $errstr and return;
@@ -891,12 +952,29 @@ Defaults to 60 characters linewidth after indentation.
 
 =back
 
+
 =head2 comment
 
   $node = $node->comment('Resource Descriptor');
 
 Prepend a comment to the current node.
 If a node already has a comment, comments will be merged.
+
+
+=head2 set
+
+  my $xml = MojoX::XML->new('Document');
+  $xml->set('Element' => { id => 5 });
+  $xml->set('Element' => { id => 6 });
+
+Adds a new element to the document - only once.
+Accepts all parameters as defined in L<add|/add>,
+without accepting L<MojoX::XML> objects.
+
+If one or more elements with the same tag name are
+already children of the requesting node,
+the old elements will be overwritten.
+Cmments will be merged.
 
 
 =head2 to_pretty_xml
@@ -920,6 +998,7 @@ Add or get an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 See L<Extensions|/Extensions> for further information.
+
 
 =head2 namespace
 
