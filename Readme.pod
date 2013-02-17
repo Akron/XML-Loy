@@ -226,6 +226,9 @@ If a node already has a comment, comments will be merged.
 Add or get an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
+
+With this package the following extensions are bundled:
+L<XRD|MojoX::XML::XRD> and L<HostMeta|MojoX::XML::HostMeta>.
 See L<Extensions|/Extensions> for further information.
 
 
@@ -362,12 +365,6 @@ prefix C<fun>. The prefix is prepended to all elements
 added by the C<add> method in the extension class.
 To prevent this prefixing, prepend the element name with
 a C<-> (like with C<Cool>).
-
-=head2 bundled
-
-With this package the following extensions are bundled:
-
-L<XRD|MojoX::XML::XRD> and L<HostMeta|MojoX::XML::HostMeta>.
 
 
 =head1 DEPENDENCIES
