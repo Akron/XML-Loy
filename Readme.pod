@@ -192,14 +192,6 @@ Defaults to 60 characters linewidth after indentation.
 =back
 
 
-=head2 comment
-
-  $node = $node->comment('Resource Descriptor');
-
-Prepend a comment to the current node.
-If a node already has a comment, comments will be merged.
-
-
 =head2 set
 
   my $xml = MojoX::XML->new('Document');
@@ -218,17 +210,13 @@ the old elements will be overwritten and
 comments will be merged.
 
 
-=head2 to_pretty_xml
+=head2 comment
 
-  print $xml->to_pretty_xml;
-  print $xml->to_pretty_xml(2);
+  $node = $node->comment('Resource Descriptor');
 
-Returns a stringified, pretty printed XML document.
-Optionally accepts a numerical parameter,
-defining the start of indentation (defaults to 0).
+Prepend a comment to the current node.
+If a node already has a comment, comments will be merged.
 
-
-=head1 ATTRIBUTES
 
 =head2 extension
 
@@ -238,6 +226,14 @@ defining the start of indentation (defaults to 0).
 Add or get an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
+See L<Extensions|/Extensions> for further information.
+
+
+=head2 mime
+
+  print $xml->mime;
+
+The mime type associated with the object class.
 See L<Extensions|/Extensions> for further information.
 
 
@@ -266,12 +262,14 @@ that means,
 they have to be unique in the scope of the whole document.
 
 
-=head2 mime
+=head2 to_pretty_xml
 
-  print $xml->mime;
+  print $xml->to_pretty_xml;
+  print $xml->to_pretty_xml(2);
 
-The mime type associated with the object class.
-See L<Extensions|/Extensions> for further information.
+Returns a stringified, pretty printed XML document.
+Optionally accepts a numerical parameter,
+defining the start of indentation (defaults to 0).
 
 
 =head1 EXTENSIONS
@@ -364,6 +362,12 @@ prefix C<fun>. The prefix is prepended to all elements
 added by the C<add> method in the extension class.
 To prevent this prefixing, prepend the element name with
 a C<-> (like with C<Cool>).
+
+=head2 bundled
+
+With this package the following extensions are bundled:
+
+L<XRD|MojoX::XML::XRD> and L<HostMeta|MojoX::XML::HostMeta>.
 
 
 =head1 DEPENDENCIES
