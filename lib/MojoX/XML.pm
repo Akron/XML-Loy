@@ -1142,6 +1142,17 @@ above).
 L<Mojolicious>.
 
 
+=head1 CAVEATS
+
+L<MojoX::XML> focuses on the comfortable handling of small documents of
+serialized data and the ease of extensibility.
+It is - as well as the underlying parser - written in pure perl and not really fast.
+It may not suits your needs, but there are lots of other XML libraries out there, you should try then.
+For fast parsing of huge documents, see L<XML::Twig>.
+For validation and the availability of lots of tools from the XML world,
+see L<XML::LibXML>.
+
+
 =head1 AVAILABILITY
 
   https://github.com/Akron/MojoX-XML
