@@ -124,7 +124,7 @@ a special C<-type> attribute can be defined:
 XML escape the content of the node.
 
   my $xml = MojoX::XML->new('feed');
-  my $html = $xml->add('html' => { -type => 'escape' });
+  my $html = $xml->add(html => { -type => 'escape' });
   $html->add(h1 => { style => 'color: red' } => 'I start blogging!');
   $html->add(p => 'What a great idea!')->comment('First post');
 
@@ -149,7 +149,7 @@ Treat children as raw data (no pretty printing).
   PLAIN
 
   my $xml = MojoX::XML->new('entry');
-  my $text = $xml->add('text' => { -type => 'raw' });
+  my $text = $xml->add(text => { -type => 'raw' });
   $text->add($plain);
 
   print $xml->to_pretty_xml;
@@ -170,16 +170,16 @@ Intended for base64 encoded data.
 Defaults to 60 characters linewidth after indentation.
 
   my $xml = MojoX::XML->new('entry');
-  my $data =
-     $xml->add(
-       data => {
-	 type  => 'text/plain',
-	 -type => 'armour:30'
-       } => <<'B64');
+
+  my $b64_data = <<'B64';
     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdHJpbmcgZm
     9yIHRoZSBhcm1vdXIgdHlwZS4gSXQncyBwcmV0
     dHkgbG9uZyBmb3IgZXhhbXBsZSBpc3N1ZXMu
   B64
+
+  my $data = $xml->add(
+    data => { -type => 'armour:30' } => $b64_data
+  );
 
   $data->comment('This is base64 data!');
 
@@ -189,7 +189,7 @@ Defaults to 60 characters linewidth after indentation.
   # <entry>
   #
   #   <!-- This is base64 data! -->
-  #   <data type="text/plain">
+  #   <data>
   #     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdH
   #     JpbmcgZm9yIHRoZSBhcm1vdXIgdHlw
   #     ZS4gSXQncyBwcmV0dHkgbG9uZyBmb3
@@ -385,9 +385,11 @@ L<Mojolicious>.
 
 L<MojoX::XML> focuses on the comfortable handling of small documents of
 serialized data and the ease of extensibility.
-It is - as well as the underlying parser - written in pure perl and not really fast.
-It may not suits your needs, but there are lots of other XML libraries out there, you should try then.
-For fast parsing of huge documents, see L<XML::Twig>.
+It is - as well as the underlying parser - written in pure perl and
+not intended to be the fastest thing out there.
+That said - it may not suits all your needs, but there are plenty of excellent
+other XML libraries out there, you should give them a try then.
+Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
 see L<XML::LibXML>.
 
