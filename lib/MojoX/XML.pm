@@ -1066,7 +1066,7 @@ defining the start of indentation (defaults to 0).
 L<MojoX::XML> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
-base class with the L<extension|/extension> attribute.
+base class with the L<extension|/extension> method.
 
 For this purpose three attributes can be set when
 L<MojoX::XML> is used (introduced with the keyword C<with>).
@@ -1131,9 +1131,10 @@ extension to another L<MojoX::XML> based document as well.
 
 The defined namespace of C<Fun> is introduced with the
 prefix C<fun>. The prefix is prepended to all elements
-added by the C<add> method in the extension class.
+added by the L<add|/add> method in the extension class.
 To prevent this prefixing, prepend the element name with
-a C<-> (like with C<Cool>).
+a C<-> (like with C<E<lt>-Cool /E<gt>> in the example
+above).
 
 
 =head1 DEPENDENCIES
