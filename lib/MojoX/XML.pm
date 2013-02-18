@@ -763,7 +763,7 @@ __END__
 
 =head1 NAME
 
-MojoX::XML - XML generator based on Mojo::DOM
+MojoX::XML - Read and write XML documents based on Mojo::DOM
 
 
 =head1 SYNOPSIS
@@ -779,8 +779,8 @@ MojoX::XML - XML generator based on Mojo::DOM
   # Nest elements
   $header->add('greetings')->add(title => 'Hello!');
 
-  # Append elements
-  $xml->add('body' => { date => 'today' })->add(p => "That's all!");
+  # Append elements with attributes
+  $xml->add(body => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
   $xml->at('title')->attrs(style => 'color: red');
@@ -809,9 +809,10 @@ MojoX::XML - XML generator based on Mojo::DOM
 =head1 DESCRIPTION
 
 L<MojoX::XML> allows for the simple creation
-of serialized XML documents with multiple namespaces and
-pretty printing, while giving you the full power of L<Mojo::DOM>
-element traversal.
+of small serialized XML documents with
+various namespaces.
+It focuses on simplicity and extensibility,
+while giving you the full power of L<Mojo::DOM>.
 
 
 =head1 METHODS
@@ -841,16 +842,23 @@ all parameters supported by L<add|/add>.
 =head2 add
 
   my $xml = MojoX::XML->new('Document');
+
+  # Add an empty element
   $xml->add('Element');
 
+  # Add elements with attributes
   my $elem = $xml->add(Element => { type => 'text/plain' });
-  $elem->add(Child => 'I\'m a child element');
 
-  $xml->add(Text => { type => 'text/plain' }, 'Hello World!');
-  $xml->add(Text => 'Hello World!', 'This is a comment!');
-  $xml->add(EmptyElement => undef, 'This is an empty element!');
+  # Add nested elements with textual content
+  $elem->add(Child => "I'm a child element");
+
+  # Add elements with attributes, textual content, and a comment
+  $xml->add(p => { id => 'id_4' }, 'Hello!', 'My Comment!');
+
+  # Add elements with rules for pretty printing
   $xml->add(Data => { -type => 'armour' }, 'PdGzjvj..');
 
+  # Add Mojox::XML objects
   $elem = $xml->new(Element => 'Hello World!');
   $xml->add($elem);
 
@@ -862,13 +870,13 @@ document.
 Parameters to define elements are a tag name,
 followed by an optional hash reference
 including all attributes of the XML element,
-an optional text content,
-and an optional comment on the element.
-If the comment should be introduced without text content,
-text content has to be C<undef>.
+an optional textual content,
+and an optional comment on the element
+(if the comment should be introduced without text content,
+text content has to be C<undef>).
 
-For rendering element content, special C<-type> attributes
-can be defined:
+For rendering element content with L<pretty printing|/to_pretty_xml>,
+a special C<-type> attribute can be defined:
 
 =over 2
 
@@ -956,12 +964,12 @@ Defaults to 60 characters linewidth after indentation.
 =head2 set
 
   my $xml = MojoX::XML->new('Document');
-  $xml->set('Element' => { id => 5 });
+  $xml->set(Element => { id => 5 });
 
   # Overwrite
-  $xml->set('Element' => { id => 6 });
+  $xml->set(Element => { id => 6 });
 
-Adds a new element as a child to the node - only once.
+Add a new element as a child to the node - only once.
 Accepts all parameters as defined in L<add|/add>,
 without accepting L<MojoX::XML> objects.
 
