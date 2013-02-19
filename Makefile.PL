@@ -16,7 +16,7 @@ WriteMakefile(
     requires  => {perl => '5.010001'},
     resources => {
       license     => 'http://www.opensource.org/licenses/artistic-license-2.0',
-      repository  => 'https://github.com/Akron/MojoX::XML'
+      repository  => 'https://github.com/Akron/MojoX-XML'
     }
   },
   test => {TESTS => 't/*.t t/Extensions/*.t' }
