@@ -21,7 +21,10 @@ use Mojo::Base 'Mojo::DOM';
 #  ALERT! Do not allow for namespace islands
 #         Search $obj->find('* *[xmlns]') and change prefixing
 #         After ->SUPER::new;
-#         Or have a method ->prefix('http:...') returning a valid prefix
+#         Or:
+#         Do allow for namespace islands and check for the
+#         namespace to add instead of the package name before
+#         prefixing.
 
 
 our $VERSION = '0.02';
