@@ -17,6 +17,12 @@ use Mojo::Base 'Mojo::DOM';
 #   sub get_author {
 #     return $autor or $self->try_further;
 #   };
+#
+#  ALERT! Do not allow for namespace islands
+#         Search $obj->find('* *[xmlns]') and change prefixing
+#         After ->SUPER::new;
+#         Or have a method ->prefix('http:...') returning a valid prefix
+
 
 our $VERSION = '0.02';
 
@@ -76,11 +82,14 @@ sub new {
   my $class = shift;
 
   # Create from parent class
-  if ( ref $class                  # MojoX::XML object
-       || !$_[0]                   # Empty constructor
-       || (index($_[0],'<') >= 0)  # XML string
+  if ( ref $class                            # MojoX::XML object
+       || !$_[0]                             # Empty constructor
+       || (my $s = (index($_[0],'<') >= 0))  # XML string
      ) {
-    return $class->SUPER::new(@_);
+
+    my $obj = $class->SUPER::new(@_);
+    return $obj unless $s;
+    return _prefix_islands($obj);
   }
 
   # Create a new node
@@ -719,6 +728,11 @@ sub _root_element {
   return $tag;
 };
 
+
+# Make all islands prefixed
+sub _prefix_islands {
+  shift;
+};
 
 # Autoload for extensions
 sub AUTOLOAD {
