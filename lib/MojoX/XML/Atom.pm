@@ -1,9 +1,12 @@
 package MojoX::XML::Atom;
+use MojoX::XML::Date::RFC3339;
+
 use MojoX::XML with => (
   mime => 'application/atom+xml',
   prefix => 'atom',
   namespace => 'http://www.w3.org/2005/Atom'
 );
+
 #use Mojo::Date::RFC3339;
 use Mojo::ByteStream 'b';
 
@@ -18,56 +21,10 @@ use constant XHTML_NS => 'http://www.w3.org/1999/xhtml';
 sub new_person {
   my $self = shift;
   my $person = ref($self)->SUPER::new('person');
+
   my %hash = @_;
-  foreach (keys %hash) {
-    $person->add($_, $hash{$_})
-  };
+  $person->add($_ => $hash{$_}) foreach keys %hash;
   return $person;
-};
-
-
-# Add person information
-sub _add_person {
-  my $self = shift;
-  my $type = shift;
-
-  # Person is a defined node
-  if (ref($_[0])) {
-    my $person = shift;
-    $person->root->at('*')->tree->[1] = $type;
-    return $self->add($person);
-  }
-
-  # Person is a hash
-  else {
-    my $person = $self->add($type);
-    my %data = @_;
-
-    foreach (keys %data) {
-      $person->add($_ => $data{$_} ) if $data{$_};
-    };
-    return $person;
-  };
-};
-
-
-# New date construct
-sub new_date {
-  my $self = shift;
-  my $time = shift || time;  # now
-  return Mojo::Date::RFC3339->new($time);
-};
-
-
-# Add date construct
-sub _add_date {
-  my ($self, $type, $date) = @_;
-
-  unless (ref($date)) {
-    $date = $self->new_date($date);
-  };
-
-  return $self->add($type, $date->to_string);
 };
 
 
@@ -79,22 +36,25 @@ sub new_text {
 
   my $class = ref($self);
 
+  # Expect empty html
   unless (defined $_[1]) {
     return $class->SUPER::new(
       text => {
-	type => 'text',
+	type  => 'text',
 	-type => 'escape'
       } => shift);
   };
 
   my ($type, $content, %hash);
 
+  # Only textual content
   if (!defined $_[2]) {
     $type = shift;
     $content = shift;
   }
 
-  else {
+  # Hash definition
+  elsif ((@_ % 2) == 0) {
     %hash = @_;
 
     $type = delete $hash{type} || 'text';
@@ -113,17 +73,20 @@ sub new_text {
   # xhtml
   if ($type eq 'xhtml') {
 
+    # Create new by hash
     $c_node = $class->SUPER::new(
       text => {
 	type => $type,
 	%hash
       });
 
+    # Content is raw and thus nonindented
+    # But also escaped
     $c_node->add(
       -div => {
 	xmlns => XHTML_NS,
 	-type => 'raw'
-      } => $content);
+      })->append_content($content);
   }
 
   # html or text
@@ -164,13 +127,64 @@ sub new_text {
 };
 
 
-# Add text information
-sub _add_text {
+# Add person information
+sub _add_person {
   my $self = shift;
   my $type = shift;
 
-  # Text is a defined node
+  # Person is a defined node
   if (ref($_[0])) {
+    my $person = shift;
+    $person->root->at('*')->tree->[1] = $type;
+    return $self->add($person);
+  }
+
+  # Person is a hash
+  else {
+    my $person = $self->add($type);
+    my %data = @_;
+
+    foreach (keys %data) {
+      $person->add($_ => $data{$_} ) if $data{$_};
+    };
+    return $person;
+  };
+};
+
+
+# New date construct
+sub new_date {
+  my $self = shift;
+  my $time = shift || time;  # now
+  return MojoX::XML::Date::RFC3339->new($time);
+};
+
+
+# Add date construct
+sub _add_date {
+  my ($self, $type, $date) = @_;
+
+  unless (ref($date)) {
+    $date = $self->new_date($date);
+  };
+
+  return $self->add($type, $date->to_string);
+};
+
+
+
+
+# Add text information
+sub __text {
+  my $self   = shift;
+  my $action = shift;
+
+  return unless $action ~~ [qw/add set/];
+
+  my $type   = shift;
+
+  # Text is a defined node
+  if (ref $_[0]) {
 
     my $text = shift;
 
@@ -180,11 +194,16 @@ sub _add_text {
     $root_elem->tree->[1] = $type;
     my $root_att = $root_elem->attrs;
 
+    # Delete type
     if (exists $root_att->{type} && $root_att->{type} eq 'text') {
       delete $root_elem->attrs->{'type'};
     };
+
     $text->root->at('*')->tree->[1] = $type;
-    return $self->add($text);
+
+    # warn $text->to_pretty_xml;
+
+    return $self->$action($text);
   };
 
   my $text;
@@ -199,18 +218,37 @@ sub _add_text {
     $text = $self->new_text(@_);
   };
 
-  return $self->_add_text($type, $text) if ref $text;
+  # Todo: Optimize!
+  return $self->__text($action, $type, $text) if ref $text;
 
   return;
 };
 
 
 # Add entry
-sub add_entry {
+sub entry {
   my $self = shift;
 
-  if (ref($_[0])) {
+  # Is object
+  if (ref $_[0]) {
     return $self->add(@_);
+  }
+
+  # Get entry
+  elsif ($_[0] && !$_[1]) {
+
+    my $id = shift;
+
+    # Get based on xml:id
+    my $entry = $self->at(qq{entry[xml\:id="$id"]});
+    return $entry if $entry;
+
+    # Get based on <entry><id>id</id></entry>
+    my $idc = $self->find('entry > id')->grep(sub { $_->text eq $id });
+
+    return unless $idc && $idc->[0];
+
+    return $idc->[0]->parent;
   };
 
   my %hash = @_;
@@ -237,14 +275,14 @@ sub add_entry {
 
 
 # Add content information
-sub add_content {
-  shift->_add_text( content => @_);
+sub content {
+  shift->__text(set => content => @_);
 };
 
 
 # Add author information
-sub add_author {
-  shift->_add_person( author => @_);
+sub author {
+  shift->_person(add => author => @_);
 };
 
 
@@ -327,7 +365,7 @@ sub add_published {
 
 # Add rights information
 sub add_rights {
-  shift->_add_text(rights => @_);
+  shift->__text(rights => @_);
 };
 
 
@@ -339,19 +377,19 @@ sub add_source {
 
 # Add subtitle
 sub add_subtitle {
-  shift->_add_text(subtitle => @_);
+  shift->__text(subtitle => @_);
 };
 
 
 # Add summary
 sub add_summary {
-  shift->_add_text(summary => @_);
+  shift->__text(summary => @_);
 };
 
 
 # Add title
 sub add_title {
-  shift->_add_text('title', @_);
+  shift->__text('title', @_);
 };
 
 
@@ -463,28 +501,35 @@ Returns a new person construction.
   my $date = $atom->new_date(1312311456);
   my $date = $atom->new_date('1996-12-19T16:39:57-08:00');
 
-Returns a L<Mojo::Date::RFC3339> object.
+Returns a L<MojoX::XML::Date::RFC3339> object.
 It accepts all parameters of L<Mojo::Date::RFC3339::parse>.
 If no parameter is given, the current server time is returned.
 
-=head2 C<add_entry>
+=head2 C<entry>
 
-  my $entry = $atom->add_entry(id => '#Entry1');
+  # Add entry as a hash of attributes
+  my $entry = $atom->entry(
+    id      => '#Entry1',
+    summary => 'My first entry'
+  );
 
-Adds an entry to the Atom object.
+  # Get entry by id
+  my $entry = $atom->entry('#Entry1');
+
+Add an entry to the Atom feed or get one.
 Accepts a hash of simple entry information.
 
-=head2 C<add_content>
+=head2 C<content>
 
   my $text = $atom->new_text(
     type => 'xhtml',
     content => '<p>This is a <strong>test</strong>!</p>'
   );
 
-  $atom->add_content($text);
-  $atom->add_content('This is a test!');
+  $atom->content($text);
+  $atom->content('This is a test!');
 
-Adds content information to the Atom object.
+Add content information to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
@@ -635,9 +680,8 @@ establishes the following mime-types:
 
 =head1 DEPENDENCIES
 
-L<Mojolicious>,
-L<MojoX::XML>,
-L<Mojo::Date::RFC3339>.
+L<Mojolicious>.
+
 
 =head1 AVAILABILITY
 

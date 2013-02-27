@@ -1,7 +1,8 @@
 package MojoX::XML;
 use Mojo::ByteStream 'b';
 use Mojo::Loader;
-use Carp qw/carp croak/;
+use Carp qw/croak carp/;
+use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
 # Todo:
@@ -172,32 +173,39 @@ sub add {
 sub set {
   my $self = shift;
 
+  my $tag;
+
   # If node is root, use first element
   if (!$self->parent && $self->tree->[1]->[0] eq 'pi') {
     $self = $self->at('*');
   };
 
   # Document objects are not allowed
-  return if ref $_[0];
-
-  # Store tag
-  my $tag = shift;
-
-  # No prefix
-  if (index($tag, '-') == 0) {
-    $tag = substr($tag, 1);
+  if (ref $_[0]) {
+    $tag = $_[0]->at('*')->type;
   }
 
-  # Maybe prefix
   else {
-    # Prepend prefix if necessary
-    my $caller = caller;
-    my $class  = ref $self;
 
-    # Caller and class are not the same
-    if ($caller ne $class && $caller->can('_prefix')) {
-      if ((my $prefix = $caller->_prefix) && $caller->_namespace) {
-	$tag = "${prefix}:$tag";
+    # Store tag
+    $tag = shift;
+
+    # No prefix
+    if (index($tag, '-') == 0) {
+      $tag = substr($tag, 1);
+    }
+
+    # Maybe prefix
+    else {
+      # Prepend prefix if necessary
+      my $caller = caller;
+      my $class  = ref $self;
+
+      # Caller and class are not the same
+      if ($caller ne $class && $caller->can('_prefix')) {
+	if ((my $prefix = $caller->_prefix) && $caller->_namespace) {
+	  $tag = "${prefix}:$tag";
+	};
       };
     };
   };
@@ -219,8 +227,11 @@ sub set {
     $att->{'serial:once'} .= "($tag)";
   };
 
+  # Add a ref, not the tag
+  unshift(@_, $tag) unless blessed $_[0];
+
   # Add element (Maybe prefixed)
-  return $self->_add_clean($tag, @_);
+  return $self->_add_clean(@_);
 };
 
 
@@ -970,8 +981,7 @@ Defaults to 60 characters linewidth after indentation.
   $xml->set(Element => { id => 6 });
 
 Add a new element as a child to the node - only once.
-Accepts all parameters as defined in L<add|/add>,
-without accepting L<MojoX::XML> objects.
+Accepts all parameters as defined in L<add|/add>.
 
 If one or more elements with the same tag name are
 already children of the requesting node,
@@ -1147,7 +1157,8 @@ L<Mojolicious>.
 L<MojoX::XML> focuses on the comfortable handling of small documents of
 serialized data and the ease of extensibility.
 It is - as well as the underlying parser - written in pure perl and
-not intended to be the fastest thing out there.
+not intended to be the fastest thing out there
+(although I believe there's plenty of space for optimization).
 That said - it may not suits all your needs, but there are plenty of excellent
 other XML libraries out there, you should give them a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.

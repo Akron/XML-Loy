@@ -10,7 +10,7 @@ use Mojo::ByteStream 'b';
 use Test::Mojo;
 use Mojolicious::Lite;
 
-use Test::More tests => 89;
+use Test::More;
 
 my $poco_ns  = 'http://www.w3.org/TR/2011/WD-contacts-api-20110616/';
 my $xhtml_ns = 'http://www.w3.org/1999/xhtml';
@@ -34,6 +34,7 @@ is($text->at('text')->text, 'Hello World!', 'Text: text3');
 # xhtml
 $text = $atom->new_text(type => 'xhtml',
 			content => 'Hello World!');
+
 is($text->at('text')->text, '', 'Text: xhtml1');
 is($text->at('text')->all_text, 'Hello World!', 'Text: xhtml2');
 is($text->at('div')->namespace, $xhtml_ns, 'Text: xhtml3');
@@ -57,7 +58,6 @@ is($text->at('text')->text,
    'Text: html2'
     );
 
-
 # New Person
 my $person = $atom->new_person(name => 'Bender',
 			       uri => 'http://sojolicio.us/bender');
@@ -72,30 +72,42 @@ $date = $atom->new_date(1312043400);
 is($date, '2011-07-30T16:30:00Z', 'Date3');
 is($date->epoch, 1312043400, 'Date4');
 
-
 # Add entry
-my $entry = $atom->add_entry(id => '#Test1');
+ok(my $entry = $atom->entry(id => '#Test1'), 'Add entry with hash');
 is($atom->at('entry > id')->text, '#Test1', 'Add entry 1');
-$entry = $atom->add_entry(id => '#Test2');
+$entry = $atom->entry(id => '#Test2');
 is($atom->find('entry > id')->[0]->text, '#Test1', 'Add entry 2');
 is($atom->find('entry > id')->[1]->text, '#Test2', 'Add entry 3');
 is($atom->find('entry')->[0]->attrs('xml:id'), '#Test1', 'Add entry 4');
 is($atom->find('entry')->[1]->attrs('xml:id'), '#Test2', 'Add entry 5');
 
+# Add entry without id
+ok($entry = $atom->entry(summary => 'Just fun'), 'Add entry without id');
+ok($entry->add(id => '#Test3'), 'Add new entry');
+
+is($atom->entry('#Test1')->at('id')->text, '#Test1', 'Get entry');
+is($atom->entry('#Test2')->at('id')->text, '#Test2', 'Get entry');
+is($atom->entry('#Test3')->at('id')->text, '#Test3', 'Get entry');
+is($atom->entry('#Test3')->at('summary')->text, 'Just fun', 'Get entry');
+
 # Add content
 $entry = $atom->at('entry');
-$entry->add_content('Test content');
+
+# diag $atom->to_pretty_xml;
+
+ok($entry->content('Test content'), 'Add content');
+
 is($atom->at('entry content')->text,
    'Test content',
    'Add content 1');
 
-$entry->add_content('html' => '<p>Test content');
+ok($entry->content('html' => '<p>Test content'), 'New content add');
 
 is($atom->at('entry content[type=html]')->text,
    '<p>Test content',
    'Add content 2');
 
-$entry->add_content('xhtml' => '<p>Test content</p>');
+ok($entry->content('xhtml' => '<p>Test content</p>'), 'New content add');
 is($atom->at('entry content[type="xhtml"]')->text,
    '',
    'Add content 3');
@@ -105,6 +117,15 @@ is($atom->at('entry content[type="xhtml"]')->all_text,
 is($atom->at('entry content[type="xhtml"] div')->namespace,
    'http://www.w3.org/1999/xhtml',
    'Add content 5');
+
+done_testing;
+exit;
+
+
+
+
+
+
 
 $atom->find('entry')
     ->[1]->add_content(type    => 'movie',

@@ -209,8 +209,7 @@ Defaults to 60 characters linewidth after indentation.
   $xml->set(Element => { id => 6 });
 
 Add a new element as a child to the node - only once.
-Accepts all parameters as defined in L<add|/add>,
-without accepting L<MojoX::XML> objects.
+Accepts all parameters as defined in L<add|/add>.
 
 If one or more elements with the same tag name are
 already children of the requesting node,
@@ -386,7 +385,8 @@ L<Mojolicious>.
 L<MojoX::XML> focuses on the comfortable handling of small documents of
 serialized data and the ease of extensibility.
 It is - as well as the underlying parser - written in pure perl and
-not intended to be the fastest thing out there.
+not intended to be the fastest thing out there
+(although I believe there's plenty of space for optimization).
 That said - it may not suits all your needs, but there are plenty of excellent
 other XML libraries out there, you should give them a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
