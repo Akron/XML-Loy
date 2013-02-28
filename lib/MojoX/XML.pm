@@ -908,7 +908,9 @@ a special C<-type> attribute can be defined:
 
 =over 2
 
-=item C<escape>
+=item
+
+C<escape>
 
 XML escape the content of the node.
 
@@ -929,7 +931,9 @@ XML escape the content of the node.
   #   </html>
   # </feed>
 
-=item C<raw>
+=item
+
+C<raw>
 
 Treat children as raw data (no pretty printing).
 
@@ -950,7 +954,9 @@ Treat children as raw data (no pretty printing).
   # </entry>
 
 
-=item C<armour:n>
+=item
+
+C<armour:n>
 
 Indent the content and automatically
 introduce linebreaks after every
@@ -1100,17 +1106,17 @@ L<MojoX::XML> is used (introduced with the keyword C<with>).
 
 =over 2
 
-=item C<namespace>
+=item
 
-Namespace of the extension.
+C<namespace> - Namespace of the extension.
 
-=item C<prefix>
+=item
 
-Preferred prefix to associate with the namespace.
+C<prefix> - Preferred prefix to associate with the namespace.
 
-=item C<mime>
+=item
 
-Mime type of the base document.
+C<mime> - Mime type of the base document.
 
 =back
 
