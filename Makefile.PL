@@ -5,8 +5,8 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  VERSION_FROM => 'lib/MojoX/XML.pm',
-  NAME         => 'MojoX::XML',
+  VERSION_FROM => 'lib/XML/Loy.pm',
+  NAME         => 'XML::Loy',
   AUTHOR       => 'Nils Diewald',
   PREREQ_PM => {
     'Mojolicious' => 3.43
@@ -16,7 +16,7 @@ WriteMakefile(
     requires  => {perl => '5.010001'},
     resources => {
       license     => 'http://www.opensource.org/licenses/artistic-license-2.0',
-      repository  => 'https://github.com/Akron/MojoX-XML'
+      repository  => 'https://github.com/Akron/XML-Loy'
     }
   },
   test => {TESTS => 't/*.t t/Extensions/*.t' }

@@ -6,16 +6,16 @@ use lib '../../lib';
 
 use Test::More;
 
-use_ok('MojoX::XML::HostMeta');
-use_ok('MojoX::XML::XRD');
+use_ok('XML::Loy::HostMeta');
+use_ok('XML::Loy::XRD');
 
 {
   local $SIG{'__WARN__'} = sub {};
-  ok( !MojoX::XML::HostMeta->new, 'Only extension');
+  ok( !XML::Loy::HostMeta->new, 'Only extension');
 };
 
-ok(my $xrd = MojoX::XML::XRD->new, 'Constructor');
-ok($xrd->extension('MojoX::XML::HostMeta'), 'Extend with hostmeta');
+ok(my $xrd = XML::Loy::XRD->new, 'Constructor');
+ok($xrd->extension('XML::Loy::HostMeta'), 'Extend with hostmeta');
 
 ok($xrd->subject('http://sojolicio.us/'), 'Add subject');
 ok($xrd->host('sojolicio.us'), 'Add host');

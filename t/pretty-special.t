@@ -9,11 +9,11 @@ use Test::More;
 
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 
-use_ok('MojoX::XML');
+use_ok('XML::Loy');
 
 my $i = 1;
 
-ok(my $xml = MojoX::XML->new('test'), 'Constructor String');
+ok(my $xml = XML::Loy->new('test'), 'Constructor String');
 
 is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -21,7 +21,7 @@ is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
 PP
 
 
-ok($xml = MojoX::XML->new('feed'), 'New constructor');
+ok($xml = XML::Loy->new('feed'), 'New constructor');
 
 ok(my $html = $xml->add('html' => { -type => 'escape' }), 'Encoded html');
 ok($html->add(h1 => { style => 'color: red' } => 'I start blogging!'), 'Add html');
@@ -39,7 +39,7 @@ is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
 </feed>
 PP
 
-ok($xml = MojoX::XML->new('entry'), 'New constructor');
+ok($xml = XML::Loy->new('entry'), 'New constructor');
 ok($xml->add('text' => '><><'), 'Encoded html');
 ok($xml->add('text' => { -type => 'escape' } => '><><'), 'Encoded html');
 
@@ -55,11 +55,11 @@ is("$string\n", <<'PP', 'Pretty Print');
 <?xmlversion="1.0"encoding="UTF-8"standalone="yes"?><entry><text>&gt;&lt;&gt;&lt;</text><text>&gt;&lt;&gt;&lt;</text><text>&amp;gt;&amp;lt;&amp;gt;&amp;lt;&lt;Inner/&gt;</text></entry>
 PP
 
-ok(my $plain = MojoX::XML->new(<<'PLAIN'), 'Plain');
+ok(my $plain = XML::Loy->new(<<'PLAIN'), 'Plain');
 <entry>There is <b>no</b> pretty printing</entry>
 PLAIN
 
-ok($xml = MojoX::XML->new('entry'), 'Constructor');
+ok($xml = XML::Loy->new('entry'), 'Constructor');
 ok(my $text = $xml->add('text' => { -type => 'raw' }), 'Add raw');
 ok($text->add($plain), 'Add Plain');
 
@@ -71,7 +71,7 @@ is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
 </entry>
 PP
 
-ok($xml = MojoX::XML->new('entry'), 'Constructor');
+ok($xml = XML::Loy->new('entry'), 'Constructor');
 ok(my $data =
      $xml->add(
        data => {

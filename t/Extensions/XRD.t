@@ -8,11 +8,11 @@ use Test::More;
 
 use Mojo::JSON;
 
-use_ok('MojoX::XML::XRD');
+use_ok('XML::Loy::XRD');
 
 # Synopsis
 
-ok(my $xrd = MojoX::XML::XRD->new, 'Empty Constructor');
+ok(my $xrd = XML::Loy::XRD->new, 'Empty Constructor');
 ok($xrd->subject('http://sojolicio.us/'), 'Add subject');
 ok($xrd->alias('https://sojolicio.us/'), 'Add alias');
 
@@ -105,7 +105,7 @@ ok(!$xrd->link('lrdd3'), 'Get link');
 
 
 
-$xrd = MojoX::XML::XRD->new(<<XRD);
+$xrd = XML::Loy::XRD->new(<<XRD);
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -124,7 +124,7 @@ is($xrd->link('lrdd')->attrs('template'), '/.well-known/webfinger?resource={uri}
 is($xrd->property('private')->attrs('xsi:nil'), 'true', 'Get property');
 
 
-$xrd = MojoX::XML::XRD->new(<<'JRD');
+$xrd = XML::Loy::XRD->new(<<'JRD');
   {"subject":"http:\/\/sojolicio.us\/",
 "aliases":["https:\/\/sojolicio.us\/"],
 "links":[{"rel":"lrdd",
@@ -141,7 +141,7 @@ is($xrd->property('private')->attrs('xsi:nil'), 'true', 'nil attribute');
 ##################################
 # Old tests
 
-ok($xrd = MojoX::XML::XRD->new, 'Constructor');
+ok($xrd = XML::Loy::XRD->new, 'Constructor');
 
 my $xrd_string = $xrd->to_pretty_xml;
 $xrd_string =~ s/\s//g;
@@ -156,7 +156,7 @@ is ($xrd_string, '<?xmlversion="1.0"encoding="UTF-8"'.
 
 my $subnode_1 = $xrd->add('Link',{ rel => 'foo' }, 'bar');
 
-is(ref($subnode_1), 'MojoX::XML::XRD',
+is(ref($subnode_1), 'XML::Loy::XRD',
    'Subnode added');
 
 is($xrd->at('Link')->attrs('rel'), 'foo', 'Attribute');
@@ -166,7 +166,7 @@ my $subnode_2 = $subnode_1->comment("Foobar Link!");
 
 is($subnode_1, $subnode_2, "Comment added");
 
-$xrd = MojoX::XML::XRD->new(<<'XRD');
+$xrd = XML::Loy::XRD->new(<<'XRD');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -260,14 +260,14 @@ my $xrd_doc = <<'XRD';
 </XRD>
 XRD
 
-$xrd = MojoX::XML::XRD->new($xrd_doc);
+$xrd = XML::Loy::XRD->new($xrd_doc);
 
 is_deeply(
   $json->decode($xrd->to_json),
   $json->decode($jrd_doc), 'JRD'
 );
 
-$xrd = MojoX::XML::XRD->new($jrd_doc);
+$xrd = XML::Loy::XRD->new($jrd_doc);
 
 is_deeply(
   $json->decode($xrd->to_json),

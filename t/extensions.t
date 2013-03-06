@@ -4,7 +4,7 @@ $|++;
 package Atom;
 use lib '../lib';
 
-use MojoX::XML with => (
+use XML::Loy with => (
   prefix => 'atom',
   namespace => 'http://www.w3.org/2005/Atom',
   mime => 'application/atom+xml'
@@ -23,7 +23,7 @@ sub add_id {
 package Fun;
 use lib '../lib';
 
-use MojoX::XML with => (
+use XML::Loy with => (
   namespace => 'http://sojolicio.us/ns/fun',
   prefix => 'fun'
 );
@@ -62,7 +62,7 @@ ok(my $yeah = $node->add_happy('Yeah!'), 'Add yeah');
 is($yeah->namespace, $fun_ns, 'Namespace');
 is($node->at('Cool')->namespace, $fun_ns, 'Namespace');
 
-ok($node = MojoX::XML->new('object'), 'Constructor');
+ok($node = XML::Loy->new('object'), 'Constructor');
 
 ok(!$node->at(':root')->namespace, 'Namespace');
 
@@ -108,7 +108,7 @@ is($id->text, '1138', 'Content');
 
 
 # New test
-ok(my $xml = MojoX::XML->new('entry'), 'Constructor');
+ok(my $xml = XML::Loy->new('entry'), 'Constructor');
 is($xml->extension('Fun', 'Atom'), 2, 'Add 2 extensions');
 is($xml->extension('Fun', 'Atom'), 0, 'Add  extensions');
 
@@ -123,7 +123,7 @@ done_testing;
 __END__
 
 # Delegate:
-$node = MojoX::XML->new('object');
+$node = XML::Loy->new('object');
 $node->extension('Stupid', 'Atom');
 
 $yeah = $node->add_happy('Yeah!');

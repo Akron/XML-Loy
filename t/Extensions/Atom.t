@@ -15,11 +15,11 @@ use Test::More;
 my $poco_ns  = 'http://www.w3.org/TR/2011/WD-contacts-api-20110616/';
 my $xhtml_ns = 'http://www.w3.org/1999/xhtml';
 
-use_ok('MojoX::XML::Atom');
+use_ok('XML::Loy::Atom');
 
 # new
-my $atom = MojoX::XML::Atom->new('feed');
-is(ref($atom), 'MojoX::XML::Atom', 'new 1');
+my $atom = XML::Loy::Atom->new('feed');
+is(ref($atom), 'XML::Loy::Atom', 'new 1');
 
 # New Text
 # text
@@ -364,7 +364,7 @@ is($atom->at('entry updated')->text,
 
 
 # Examples
-$atom = MojoX::XML::Atom->new('entry');
+$atom = XML::Loy::Atom->new('entry');
 $entry = $atom->add_entry(id => '#467r57');
 $entry->add_author(name   => 'Bender');
 $entry->add_content(text  => "I am Bender!");
@@ -380,7 +380,7 @@ is($atom->at('content[type="xhtml"] div')->text,  'I am!', 'Text');
 is($atom->at('content[type="xhtml"] div')->all_text,  'I am Bender!', 'Text');
 is($atom->at('content[type="movie"]')->text, 'SSBhbSBCZW5kZXIh', 'Text');
 
-$atom = MojoX::XML::Atom->new(<<'ATOM');
+$atom = XML::Loy::Atom->new(<<'ATOM');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry>

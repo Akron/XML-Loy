@@ -9,11 +9,11 @@ use Test::More;
 
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 
-use_ok('MojoX::XML');
+use_ok('XML::Loy');
 
 my $i = 1;
 
-ok(my $xml = MojoX::XML->new('root'), 'Constructor String');
+ok(my $xml = XML::Loy->new('root'), 'Constructor String');
 ok(my $child = $xml->add('test'), 'Add child');
 ok(my $string = $xml->to_pretty_xml, 'Pretty Print');
 like($string, qr{<test />}, 'Check ' . $i++);
@@ -44,8 +44,8 @@ $string =~ s/\s//g;
 like($string, qr{<!--MyNewCommentMyNewComment2--><testfoo}, 'Check ' . $i++);
 
 
-ok($xml = MojoX::XML->new('entry'), 'New document');
-ok($obj = MojoX::XML->new('child'), 'Add child');
+ok($xml = XML::Loy->new('entry'), 'New document');
+ok($obj = XML::Loy->new('child'), 'Add child');
 
 ok($obj = $xml->add($obj), 'Add child');
 

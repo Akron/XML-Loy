@@ -22,11 +22,11 @@ use Test::More;
 
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 
-use_ok('MojoX::XML');
+use_ok('XML::Loy');
 
 my $i = 1;
 
-ok(my $xml = MojoX::XML->new('test'), 'Constructor String');
+ok(my $xml = XML::Loy->new('test'), 'Constructor String');
 
 is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

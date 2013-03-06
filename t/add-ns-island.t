@@ -7,11 +7,11 @@ use lib '../../lib';
 
 use Test::More;
 
-use_ok('MojoX::XML');
+use_ok('XML::Loy');
 
 my $i = 1;
 
-my $x = MojoX::XML->new;
+my $x = XML::Loy->new;
 
 ok($x->namespace('html' => 'urn:w3-org-ns:HTML'), 'Add prefix for namespace');
 

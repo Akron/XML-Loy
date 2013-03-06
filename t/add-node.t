@@ -9,16 +9,16 @@ use Test::More;
 
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 
-use_ok('MojoX::XML');
+use_ok('XML::Loy');
 
 my $i = 1;
 
-ok(my $xml = MojoX::XML->new('test'), 'Constructor String');
+ok(my $xml = XML::Loy->new('test'), 'Constructor String');
 ok(my $string = $xml->to_pretty_xml, 'Pretty Print');
 like($string, qr{<test />}, 'Check ' . $i++);
 like($string, qr{\Q$pi\E}, 'Check ' . $i++);
 
-ok(my $child = MojoX::XML->new('child'), 'Constructor String');
+ok(my $child = XML::Loy->new('child'), 'Constructor String');
 ok($string = $child->to_pretty_xml, 'Pretty Print');
 like($string, qr{<child />}, 'Check ' . $i++);
 like($string, qr{\Q$pi\E}, 'Check ' . $i++);

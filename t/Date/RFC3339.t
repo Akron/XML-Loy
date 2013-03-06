@@ -6,39 +6,39 @@ use lib '../../lib';
 
 use Test::More tests => 33;
 
-use_ok('MojoX::XML::Date::RFC3339');
+use_ok('XML::Loy::Date::RFC3339');
 
-my $date = MojoX::XML::Date::RFC3339->new(784111777);
+my $date = XML::Loy::Date::RFC3339->new(784111777);
 is $date->to_string, '1994-11-06T08:49:37Z', 'right date';
 
-$date = MojoX::XML::Date::RFC3339->new('2011-07-30T16:30:00Z');
+$date = XML::Loy::Date::RFC3339->new('2011-07-30T16:30:00Z');
 is($date, '2011-07-30T16:30:00Z', 'Date1');
 is($date->epoch, 1312043400, 'Date2');
 
-$date = MojoX::XML::Date::RFC3339->new(1312043400);
+$date = XML::Loy::Date::RFC3339->new(1312043400);
 is($date, '2011-07-30T16:30:00Z', 'Date3');
 is($date->epoch, 1312043400, 'Date4');
 
 # Offset
-$date = MojoX::XML::Date::RFC3339->new('1993-01-01t18:50:00-04:00');
+$date = XML::Loy::Date::RFC3339->new('1993-01-01t18:50:00-04:00');
 is $date->to_string, '1993-01-01T22:50:00Z', 'right date';
 
 # Offset
-$date = MojoX::XML::Date::RFC3339->new('1993-01-01t22:50:00-04:00');
+$date = XML::Loy::Date::RFC3339->new('1993-01-01t22:50:00-04:00');
 is $date->to_string, '1993-01-02T02:50:00Z', 'right date';
 is $date->epoch, '725943000', 'right epoch';
 
 # Relaxed
-$date = MojoX::XML::Date::RFC3339->new('1993-1-1t18:50:0-4');
+$date = XML::Loy::Date::RFC3339->new('1993-1-1t18:50:0-4');
 is $date->to_string, '1993-01-01T22:50:00Z', 'right date';
 
 # Negative epoch value
-$date = MojoX::XML::Date::RFC3339->new;
+$date = XML::Loy::Date::RFC3339->new;
 ok $date->parse('1900-01-01T00:00:00Z'), 'right format';
 is $date->epoch, undef, 'no epoch value';
 
 # Granularity 4
-$date = MojoX::XML::Date::RFC3339->new;
+$date = XML::Loy::Date::RFC3339->new;
 ok $date->parse('1993'), 'right format';
 is $date->to_string, 1993, 'correct date value';
 is $date->granularity, 4, 'correct granularity';
