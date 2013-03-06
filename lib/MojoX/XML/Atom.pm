@@ -2,8 +2,8 @@ package MojoX::XML::Atom;
 use MojoX::XML::Date::RFC3339;
 
 use MojoX::XML with => (
-  mime => 'application/atom+xml',
-  prefix => 'atom',
+  mime      => 'application/atom+xml',
+  prefix    => 'atom',
   namespace => 'http://www.w3.org/2005/Atom'
 );
 
@@ -154,9 +154,8 @@ sub _add_person {
 
 # New date construct
 sub new_date {
-  my $self = shift;
-  my $time = shift || time;  # now
-  return MojoX::XML::Date::RFC3339->new($time);
+  shift; # self
+  return MojoX::XML::Date::RFC3339->new( shift || time );
 };
 
 
@@ -256,8 +255,9 @@ sub entry {
 
   # Set id additionally as xml:id
   if (exists $hash{id}) {
-    $entry = $self->add('entry',
-			{'xml:id' => $hash{id}});
+    $entry = $self->add(
+      entry => {'xml:id' => $hash{id}}
+    );
   }
 
   # No id given
@@ -409,6 +409,7 @@ __END__
 
 MojoX::XML::Atom - Atom Syndication Format
 
+
 =head1 SYNOPSIS
 
   # Mojolicious
@@ -444,6 +445,7 @@ MojoX::XML::Atom - Atom Syndication Format
   $feed->add_entry($entry);
   $self->render_xml($feed);
 
+
 =head1 DESCRIPTION
 
 L<MojoX::XML::Atom> is a base class or extension
@@ -457,7 +459,8 @@ L<Mojolicious::Plugin::XML::Atom> inherits all methods
 from L<MojoX::XML> and implements the
 following new ones.
 
-=head2 C<new_text>
+
+=head2 new_text
 
   my $text = $atom->new_text('This is a test');
   my $text = $atom->new_text(xhtml => 'This is a <strong>test</strong>!');
@@ -474,20 +477,27 @@ C<type> values:
 
 =over 2
 
-=item C<text> for textual data
+=item
 
-=item C<html> for HTML data
+C<text> for textual data
 
-=item C<xhtml> for XHTML data
+=item
+
+C<html> for HTML data
+
+=item
+
+C<xhtml> for XHTML data
 
 =back
 
 C<xhtml> data is automatically wrapped in a
-namespaced C<div> element, see
+namespaced C<div> element (see
 L<RFC4287, Section 3.1|http://tools.ietf.org/html/rfc4287.htm#section-3.1>
-for further details.
+for further details).
 
-=head2 C<new_person>
+
+=head2 new_person
 
   my $person = $atom->new_person(
     name => 'Bender',
@@ -496,7 +506,8 @@ for further details.
 
 Returns a new person construction.
 
-=head2 C<new_date>
+
+=head2 new_date
 
   my $date = $atom->new_date(1312311456);
   my $date = $atom->new_date('1996-12-19T16:39:57-08:00');
@@ -505,7 +516,10 @@ Returns a L<MojoX::XML::Date::RFC3339> object.
 It accepts all parameters of L<Mojo::Date::RFC3339::parse>.
 If no parameter is given, the current server time is returned.
 
-=head2 C<entry>
+B<This method is EXPERIMENTAL and may change without warning.>
+
+
+=head2 entry
 
   # Add entry as a hash of attributes
   my $entry = $atom->entry(
@@ -519,10 +533,11 @@ If no parameter is given, the current server time is returned.
 Add an entry to the Atom feed or get one.
 Accepts a hash of simple entry information.
 
-=head2 C<content>
+
+=head2 content
 
   my $text = $atom->new_text(
-    type => 'xhtml',
+    type    => 'xhtml',
     content => '<p>This is a <strong>test</strong>!</p>'
   );
 
@@ -533,17 +548,21 @@ Add content information to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
-=head2 C<add_author>
 
-  my $person = $atom->new_person( name => 'Bender',
-                                  uri  => 'acct:bender@example.org');
+=head2 add_author
+
+  my $person = $atom->new_person(
+    name => 'Bender',
+    uri  => 'acct:bender@example.org'
+  );
   my $author = $atom->add_author($person);
 
 Adds author information to the Atom object.
 Accepts a person construct (see L<new_person>) or the
 parameters accepted by L<new_person>.
 
-=head2 C<add_category>
+
+=head2 add_category
 
   $atom->add_category('world');
 
@@ -551,7 +570,8 @@ Adds category information to the Atom object.
 Accepts either a hash for attributes (with, e.g., term and label)
 or one string representing the categories term.
 
-=head2 C<add_contributor>
+
+=head2 add_contributor
 
   my $person = $atom->new_person( name => 'Bender',
                                   uri  => 'acct:bender@example.org');
@@ -561,13 +581,15 @@ Adds contributor information to the Atom object.
 Accepts a person construct (see L<new_person>) or the
 parameters accepted by L<new_person>.
 
-=head2 C<add_generator>
 
-  $atom->add_generator('Sojolicious-Atom-Plugin');
+=head2 add_generator
+
+  $atom->add_generator('XML-Loy-Atom');
 
 Adds generator information to the Atom object.
 
-=head2 C<add_icon>
+
+=head2 add_icon
 
   $atom->add_icon('http://sojolicio.us/favicon.ico');
 
@@ -575,13 +597,15 @@ Adds a URI to an icon associated with the Atom object.
 The image should be suitable for small representation size
 and have an aspect ratio of 1:1.
 
-=head2 C<add_id>
+
+=head2 add_id
 
   $atom->add_id('http://sojolicio.us/#12345');
 
 Adds a unique identifier to the Atom object.
 
-=head2 C<add_link>
+
+=head2 add_link
 
   $atom->add_link('http://sojolicio.us/#12345');
   $atom->add_link(related => 'http://sojolicio.us/#12345');
@@ -594,14 +618,16 @@ Accepts either one scalar as a reference of a related link,
 a pair of scalars for the relational type and the reference
 or multiple hashes for the attributes of the link.
 
-=head2 C<add_logo>
+
+=head2 add_logo
 
   $atom->add_logo('http://sojolicio.us/sojolicious.png');
 
 Adds a URI to a logo associated with the Atom object.
 The image should have an aspect ratio of 2:1.
 
-=head2 C<add_published>
+
+=head2 add_published
 
   my $date = $atom->new_date(1312311456);
   $atom->add_published($date);
@@ -610,7 +636,8 @@ Adds a publishing timestamp to the Atom object.
 Accepts a date construct (see L<new_date>) or the
 parameter accepted by L<new_date>.
 
-=head2 C<add_rights>
+
+=head2 add_rights
 
   $atom->add_rights('Public Domain');
 
@@ -618,7 +645,7 @@ Adds legal information to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
-=head2 C<add_source>
+=head2 add_source
 
   my $source = $atom->add_source('xml:base' =>
     'http://source.sojolicio.us/');
@@ -626,7 +653,8 @@ parameters accepted by L<new_text>.
 
 Adds source information of the Atom object.
 
-=head2 C<add_subtitle>
+
+=head2 add_subtitle
 
   my $text = $atom->new_text(type => 'text',
                              content => 'This is a subtitle!');
@@ -638,7 +666,8 @@ Adds subtitle information to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
-=head2 C<add_summary>
+
+=head2 add_summary
 
   my $text = $atom->new_text(type => 'text',
                              content => 'Test entry');
@@ -650,7 +679,8 @@ Adds a summary of the content to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
-=head2 C<add_title>
+
+=head2 add_title
 
   my $text = $atom->new_text(type => 'text',
                              content => 'First Test entry');
@@ -662,7 +692,8 @@ Adds a title to the Atom object.
 Accepts a text construct (see L<new_text>) or the
 parameters accepted by L<new_text>.
 
-=head2 C<add_updated>
+
+=head2 add_updated
 
   my $date = $atom->new_date(1312311456);
   $atom->add_updated($date);
@@ -670,6 +701,7 @@ parameters accepted by L<new_text>.
 Adds a last update timestamp to the Atom object.
 Accepts a date construct (see L<new_date>) or the
 parameter accepted by L<new_date>.
+
 
 =head1 MIME-TYPES
 
@@ -685,11 +717,12 @@ L<Mojolicious>.
 
 =head1 AVAILABILITY
 
-  https://github.com/Akron/Sojolicious
+  https://github.com/Akron/MojoX-XML
+
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2012, Nils Diewald.
+Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
