@@ -1,21 +1,41 @@
 #!/usr/bin/perl
+package MyTestXML;
 use strict;
 use warnings;
-
 use lib '../lib';
 use lib '../../lib';
 
+use XML::Loy with => {
+  namespace => 'http://test',
+  prefix => 'test'
+};
+
+package main;
+use strict;
+use warnings;
+
 use Test::More;
+use Test::Warn;
 
-use_ok('XML::Loy');
+my $x = MyTestXML->new;
 
-my $i = 1;
 
-my $x = XML::Loy->new;
+use Data::Dumper;
 
-ok($x->namespace('html' => 'urn:w3-org-ns:HTML'), 'Add prefix for namespace');
+diag Dumper $x;
 
-ok($x->parse(<<'XML'), 'New MojoX::XML doc');
+__END__
+
+warning_is {
+  $x->namespace(html => 'urn:w3-org-ns:HTML')
+} 'Unable to set namespace without root element', 'Unable to set namespace';
+
+warning_is {
+  $x->extension('Peter')
+} 'Unable to set namespace without root element', 'Unable to set namespace';
+
+
+ok($x->parse(<<'XML'), 'New XML::Loy doc');
 <?xml version="1.0"?>
 <!-- initially, the default namespace is "books" -->
 <book xmlns='urn:loc.gov:books' xmlns:isbn='urn:ISBN:0-395-36341-6'>
@@ -27,6 +47,10 @@ ok($x->parse(<<'XML'), 'New MojoX::XML doc');
   </notes>
 </book>
 XML
+
+ok($x->namespace(html => 'urn:w3-org-ns:HTML'), 'Set namespace');
+
+
 
 my $target = <<'TARGET';
 <?xml version="1.0"?>

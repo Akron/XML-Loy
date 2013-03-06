@@ -6,11 +6,6 @@ use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
 # Todo:
-#   Support "once" method (aka set), that can only be set, not added.
-#   - Can be done by introducing serial:once="id" (if already set)
-#
-#   All attributes are getter and setter! No more add_ things
-#
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
 #
 #   sub try_further { };
@@ -26,7 +21,8 @@ use Mojo::Base 'Mojo::DOM';
 #         Do allow for namespace islands and check for the
 #         namespace to add instead of the package name before
 #         prefixing.
-
+#
+# Delete use of "constant"!
 
 our $VERSION = '0.03';
 
@@ -453,7 +449,12 @@ sub namespace {
   my $prefix = shift;
 
   # Get root element
-  my $root = $self->_root_element or return;
+  my $root = $self->_root_element;
+
+  unless ($root) {
+    carp 'Unable to set namespace without root element';
+    return;
+  };
 
   # Save namespace as attribute
   $root->[2]->{'xmlns' . ($prefix ? ":$prefix" : '')} = $ns;
@@ -791,7 +792,7 @@ __END__
 
 =head1 NAME
 
-XML::Loy - Read and write XML documents based on Mojo::DOM
+XML::Loy - Extensible XML Reader and Writer
 
 
 =head1 SYNOPSIS
@@ -1169,10 +1170,13 @@ To prevent this prefixing, prepend the element name with
 a C<-> (like with C<E<lt>-Cool /E<gt>> in the example
 above).
 
+Derived classes are always strict and utf8, use warnings
+and import all features of Perl 5.10.
+
 
 =head1 DEPENDENCIES
 
-L<Mojolicious>.
+L<Mojolicious>, L<Test::Warn> (for testing).
 
 
 =head1 CAVEATS
@@ -1183,7 +1187,7 @@ It is - as well as the underlying parser - written in pure perl and
 not intended to be the fastest thing out there
 (although I believe there's plenty of space for optimization).
 That said - it may not suits all your needs, but there are plenty of excellent
-other XML libraries out there, you should give them a try then.
+other XML libraries out there, you should give a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
 see L<XML::LibXML>.

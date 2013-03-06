@@ -1,6 +1,6 @@
-lib/MojoX/XML.pm
-lib/MojoX/XML/XRD.pm
-lib/MojoX/XML/HostMeta.pm
+lib/XML/Loy.pm
+lib/XML/Loy/XRD.pm
+lib/XML/Loy/HostMeta.pm
 t/add.t
 t/add-node.t
 t/comment.t

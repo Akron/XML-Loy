@@ -5,11 +5,16 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  VERSION_FROM => 'lib/XML/Loy.pm',
   NAME         => 'XML::Loy',
   AUTHOR       => 'Nils Diewald',
+  ABSTRACT     => 'Extensible XML Reader and Writer',
+  VERSION_FROM => 'lib/XML/Loy.pm',
+  BUILD_REQUIRES => {
+    'Test::More' => 0,
+    'Test::Warn' => '0.24'
+  },
   PREREQ_PM => {
-    'Mojolicious' => 3.43
+    'Mojolicious' => '3.89'
   },
   LICENSE      => 'perl',
   META_MERGE   => {

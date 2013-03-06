@@ -15,6 +15,10 @@ use_ok('XML::Loy::XRD');
 };
 
 ok(my $xrd = XML::Loy::XRD->new, 'Constructor');
+
+
+__END__
+
 ok($xrd->extension('XML::Loy::HostMeta'), 'Extend with hostmeta');
 
 ok($xrd->subject('http://sojolicio.us/'), 'Add subject');
