@@ -1,5 +1,9 @@
 package XML::Loy::Atom;
+use Carp qw/carp/;
+use Mojo::ByteStream 'b';
 use XML::Loy::Date::RFC3339;
+
+our @CARP_NOT;
 
 use XML::Loy with => (
   mime      => 'application/atom+xml',
@@ -7,15 +11,19 @@ use XML::Loy with => (
   namespace => 'http://www.w3.org/2005/Atom'
 );
 
-#use Mojo::Date::RFC3339;
-use Mojo::ByteStream 'b';
-
 
 # Namespace declaration
 use constant XHTML_NS => 'http://www.w3.org/1999/xhtml';
 
 # Todo:
 #  - see http://search.cpan.org/dist/XML-Atom-SimpleFeed
+#  - Do not use constant
+
+# New date construct
+sub new_date {
+  return XML::Loy::Date::RFC3339->new( $_[1] || time );
+};
+
 
 # New person construct
 sub new_person {
@@ -23,7 +31,7 @@ sub new_person {
   my $person = ref($self)->SUPER::new('person');
 
   my %hash = @_;
-  $person->add($_ => $hash{$_}) foreach keys %hash;
+  $person->set($_ => $hash{$_}) foreach keys %hash;
   return $person;
 };
 
@@ -41,7 +49,7 @@ sub new_text {
     return $class->SUPER::new(
       text => {
 	type  => 'text',
-	-type => 'escape'
+	-type => 'raw'
       } => shift);
   };
 
@@ -95,10 +103,10 @@ sub new_text {
     $c_node = $class->new(
       text => {
 	'type'  => $type,
-	'-type' => 'escape',
+	'-type' => 'raw',
 	'xml:space' => 'preserve',
 	%hash
-      } => b($content)->xml_escape . ''
+      } => $content . ''
     );
   }
 
@@ -127,6 +135,232 @@ sub new_text {
 };
 
 
+# Add author information
+sub author {
+  my $self = shift;
+
+  # Add author
+  return $self->_add_person(author => @_) if $_[0];
+
+  # Get author information
+  return $self->_get_information_array('author');
+};
+
+
+# Add category information
+sub category {
+  my $self = shift;
+
+  # Set category
+  if ($_[0]) {
+    if (!defined $_[1]) {
+      return $self->add(category => { term => shift });
+    };
+
+    return $self->add(category => { @_ } );
+  };
+
+  # Get category
+  my $coll = $self->_get_information_array('category')
+    or return;
+
+  if ($coll->[0]) {
+    $coll->map( sub { $_ = $_->{term} });
+  };
+};
+
+# Add contributor information
+sub contributor {
+  my $self = shift;
+
+  # Add contributor
+  return $self->_add_person(contributor => @_) if $_[0];
+
+  # Get contributor information
+  return $self->_get_information_array('contributor');
+};
+
+
+# Add content information
+sub content {
+  my $self = shift;
+
+  # Set content
+  return $self->__text(set => content => @_) if $_[0];
+
+  # Return content
+  return $self->_get_information_single('content');
+};
+
+
+# Set or get entry
+sub entry {
+  my $self = shift;
+
+  # Is object
+  if (ref $_[0]) {
+    return $self->add(@_);
+  }
+
+  # Get entry
+  elsif ($_[0] && !$_[1]) {
+
+    my $id = shift;
+
+    # Get based on xml:id
+    my $entry = $self->at(qq{entry[xml\:id="$id"]});
+    return $entry if $entry;
+
+    # Get based on <entry><id>id</id></entry>
+    my $idc = $self->find('entry > id')->grep(sub { $_->text eq $id });
+
+    return unless $idc && $idc->[0];
+
+    return $idc->[0]->parent;
+  };
+
+  my %hash = @_;
+  my $entry;
+
+  # Set id additionally as xml:id
+  if (exists $hash{id}) {
+    $entry = $self->add(
+      entry => {'xml:id' => $hash{id}}
+    );
+  }
+
+  # No id given
+  else {
+    $entry = $self->add('entry');
+  };
+
+  # Add information
+  foreach (keys %hash) {
+    $entry->add($_, $hash{$_});
+  };
+
+  return $entry;
+};
+
+
+# Set or get generator information
+sub generator {
+  shift->_simple_feed_info(generator =>  @_);
+};
+
+
+# Set or get icon information
+sub icon {
+  shift->_simple_feed_info(icon =>  @_);
+};
+
+
+# Add id
+sub id {
+  my $self = shift;
+
+  # Get id
+  unless ($_[0]) {
+    my $id_obj = $self->_get_information_single('id');
+    return $id_obj->text if $id_obj;
+    return;
+  };
+
+  my $id = shift;
+  my $element = $self->set(id => $id);
+  return unless $element;
+
+  # Add xml:id also
+  $element->parent->attrs('xml:id' => $id);
+  return $self;
+};
+
+
+# Add link information
+sub link {
+  my $self = shift;
+
+  if ($_[1]) {
+
+    # rel => href
+    if (@_ == 2) {
+      return $self->add(link => {
+	rel  => shift,
+	href => shift
+      });
+    };
+
+    # Parameter
+    my %values = @_;
+    # href, rel, type, hreflang, title, length
+    my $rel = delete $values{rel} || 'related';
+    return $self->add(link => {
+      rel => $rel,
+      %values
+    });
+  };
+
+  my $rel = shift;
+  return $self->find(qq{link[rel="$rel"]});
+};
+
+
+# Add logo
+sub logo {
+  shift->_simple_feed_info(logo =>  @_);
+};
+
+
+# Add publish time information
+sub published {
+  shift->_date(published => @_);
+};
+
+
+
+# Add content information
+sub rights {
+  my $self = shift;
+
+  # Set content
+  return $self->__text(set => rights => @_) if $_[0];
+
+  # Return content
+  return $self->_get_information_single('rights');
+};
+
+
+
+# Add source information
+sub add_source {
+  shift->add(source => { @_ });
+};
+
+
+# Add subtitle
+sub add_subtitle {
+  shift->__text(subtitle => @_);
+};
+
+
+# Add summary
+sub add_summary {
+  shift->__text(summary => @_);
+};
+
+
+# Add title
+sub add_title {
+  shift->__text('title', @_);
+};
+
+
+# Add update time information
+sub add_updated {
+  shift->_date(updated => @_);
+};
+
+
 # Add person information
 sub _add_person {
   my $self = shift;
@@ -152,25 +386,31 @@ sub _add_person {
 };
 
 
-# New date construct
-sub new_date {
-  shift; # self
-  return XML::Loy::Date::RFC3339->new( shift || time );
-};
-
-
 # Add date construct
-sub _add_date {
-  my ($self, $type, $date) = @_;
+sub _date {
+  my $self = shift;
+  my $type = shift;
 
-  unless (ref($date)) {
-    $date = $self->new_date($date);
+  # Set date
+  if ($_[0]) {
+    my $date = shift;
+
+    unless (ref($date)) {
+      $date = $self->new_date($date);
+    };
+
+    return $self->set($type, $date->to_string);
   };
 
-  return $self->add($type, $date->to_string);
+  # Get published information
+  my $date = $self->_get_information_single($type);
+
+  # Parse date
+  return XML::Loy::Date::RFC3339->new($date->text) if $date;
+
+  # No publish information found
+  return;
 };
-
-
 
 
 # Add text information
@@ -224,182 +464,61 @@ sub __text {
 };
 
 
-# Add entry
-sub entry {
+# Return information of entries or the feed
+sub _get_information_array {
   my $self = shift;
+  my $type = shift;
 
-  # Is object
-  if (ref $_[0]) {
-    return $self->add(@_);
-  }
+  # Get author objects
+  my $children = $self->children($type);
 
-  # Get entry
-  elsif ($_[0] && !$_[1]) {
+  # Return information of object
+  return $children if $children->[0];
 
-    my $id = shift;
-
-    # Get based on xml:id
-    my $entry = $self->at(qq{entry[xml\:id="$id"]});
-    return $entry if $entry;
-
-    # Get based on <entry><id>id</id></entry>
-    my $idc = $self->find('entry > id')->grep(sub { $_->text eq $id });
-
-    return unless $idc && $idc->[0];
-
-    return $idc->[0]->parent;
-  };
-
-  my %hash = @_;
-  my $entry;
-
-  # Set id additionally as xml:id
-  if (exists $hash{id}) {
-    $entry = $self->add(
-      entry => {'xml:id' => $hash{id}}
-    );
-  }
-
-  # No id given
-  else {
-    $entry = $self->add('entry');
-  };
-
-  # Add information
-  foreach (keys %hash) {
-    $entry->add($_, $hash{$_});
-  };
-
-  return $entry;
+  # Return feed information
+  return $self->find('feed > ' . $type);
 };
 
 
-# Add content information
-sub content {
-  shift->__text(set => content => @_);
-};
-
-
-# Add author information
-sub author {
-  shift->_person(add => author => @_);
-};
-
-
-# Add category information
-sub add_category {
+# Return information of entries or the feed
+sub _get_information_single {
   my $self = shift;
+  my $type = shift;
 
-  return unless $_[0];
+  # Get author objects
+  my $children = $self->children($type);
 
-  if (!defined $_[1]) {
-    return $self->SUPER::add(category => { term => shift });
+  # Return information of object
+  return $children->[0] if $children->[0];
+
+  # Return feed information
+  return $self->at('feed > ' . $type);
+};
+
+
+# Get or set simple feed information
+# like generator or icon
+sub _simple_feed_info {
+  my $self = shift;
+  my $type = shift;
+
+  my $feed = $self->root->at('feed');
+  return unless $feed;
+
+  # Set
+  if ($_[0]) {
+    return $feed->set($type => @_);
   };
 
-  return $self->SUPER::add(category => { @_ } );
-};
-
-
-# Add contributor information
-sub add_contributor {
-  shift->_add_person(contributor => @_);
-};
-
-
-# Add generator information
-sub add_generator {
-  shift->add(generator => @_);
-};
-
-
-# Add icon
-sub add_icon { # only one
-  shift->add(icon => shift);
-};
-
-
-# Add id
-sub add_id { # must one
-  my $self = shift;
-  my $id = shift;
-  return unless $id;
-  my $element = $self->add(id => $id);
-  $element->parent->attrs('xml:id' => $id);
-  return $self;
-};
-
-
-# Add link information
-sub add_link {
-  my $self = shift;
-  unless (defined $_[1]) {
-    return $self->add(link  => {
-      rel  => 'related',
-      href => shift
-    });
-  } elsif (@_ == 2) {
-    return $self->add(link => {
-      rel  => shift,
-      href => shift
-    });
-  };
-
-  my %values = @_;
-  # href, rel, type, hreflang, title, length
-  my $rel = delete $values{rel} || 'related';
-  return $self->add( link => { rel => $rel, %values });
-};
-
-
-# Add logo
-sub add_logo {
-  shift->add(logo => shift);
-};
-
-
-# Add publish time information
-sub add_published {
-  shift->_add_date(published => @_);
-};
-
-
-# Add rights information
-sub add_rights {
-  shift->__text(rights => @_);
-};
-
-
-# Add source information
-sub add_source {
-  shift->add(source => { @_ });
-};
-
-
-# Add subtitle
-sub add_subtitle {
-  shift->__text(subtitle => @_);
-};
-
-
-# Add summary
-sub add_summary {
-  shift->__text(summary => @_);
-};
-
-
-# Add title
-sub add_title {
-  shift->__text('title', @_);
-};
-
-
-# Add update time information
-sub add_updated {
-  shift->_add_date(updated => @_);
+  # Get generator information
+  my $gen = $feed->at($type);
+  return $gen->all_text if $gen;
+  return;
 };
 
 
 1;
+
 
 __END__
 
@@ -407,7 +526,7 @@ __END__
 
 =head1 NAME
 
-XML::Loy::Atom - Atom Syndication Format
+XML::Loy::Atom - Atom Syndication Format Extension
 
 
 =head1 SYNOPSIS
@@ -460,12 +579,35 @@ from L<XML::Loy> and implements the
 following new ones.
 
 
+=head2 new_date
+
+  my $date = $atom->new_date(1312311456);
+  my $date = $atom->new_date('1996-12-19T16:39:57-08:00');
+
+Returns an L<XML::Loy::Date::RFC3339> object.
+It accepts all parameters of
+L<XML::Loy::Date::RFC3339::parse|XML::Loy::Date::RFC3339/parse>.
+If no parameter is given, the current server time is returned.
+
+B<This method is EXPERIMENTAL and may change without warning.>
+
+
+=head2 new_person
+
+  my $person = $atom->new_person(
+    name => 'Bender',
+    uri  => 'acct:bender@example.org'
+  );
+
+Returns a new person construction.
+
+
 =head2 new_text
 
   my $text = $atom->new_text('This is a test');
-  my $text = $atom->new_text(xhtml => 'This is a <strong>test</strong>!');
+  my $text = $atom->new_text( xhtml => 'This is a <strong>test</strong>!');
   my $text = $atom->new_text(
-    type => 'xhtml',
+    type    => 'xhtml',
     content => 'This is a <strong>test</strong>!'
   );
 
@@ -497,41 +639,35 @@ L<RFC4287, Section 3.1|http://tools.ietf.org/html/rfc4287.htm#section-3.1>
 for further details).
 
 
-=head2 new_person
+=head2 author
 
   my $person = $atom->new_person(
     name => 'Bender',
     uri  => 'acct:bender@example.org'
   );
+  my $author = $atom->author($person);
 
-Returns a new person construction.
+  print $atom->author->[0]->at('name')->text;
 
+Add author information to the Atom object or get it.
+Accepts a person construct (see L<new_person|/new_person>)
+or the parameters accepted by L<new_person|/new_person>.
 
-=head2 new_date
-
-  my $date = $atom->new_date(1312311456);
-  my $date = $atom->new_date('1996-12-19T16:39:57-08:00');
-
-Returns a L<XML::Loy::Date::RFC3339> object.
-It accepts all parameters of L<Mojo::Date::RFC3339::parse>.
-If no parameter is given, the current server time is returned.
-
-B<This method is EXPERIMENTAL and may change without warning.>
+Returns a collection of author nodes.
 
 
-=head2 entry
+=head2 category
 
-  # Add entry as a hash of attributes
-  my $entry = $atom->entry(
-    id      => '#Entry1',
-    summary => 'My first entry'
-  );
+  $atom->category('world');
 
-  # Get entry by id
-  my $entry = $atom->entry('#Entry1');
+  print $atom->category->[0];
 
-Add an entry to the Atom feed or get one.
-Accepts a hash of simple entry information.
+Adds category information to the Atom object or get it.
+Accepts either a hash for attributes
+(with, e.g., term and label)
+or one string representing the category's term.
+
+Returns a collection of category terms.
 
 
 =head2 content
@@ -541,76 +677,93 @@ Accepts a hash of simple entry information.
     content => '<p>This is a <strong>test</strong>!</p>'
   );
 
-  $atom->content($text);
-  $atom->content('This is a test!');
+  my $entry = $atom->entry(id => 'entry_1');
 
-Add content information to the Atom object.
-Accepts a text construct (see L<new_text>) or the
-parameters accepted by L<new_text>.
+  $entry->content($text);
+  $entry->content('This is a test!');
+
+  print $atom->content->all_text;
+
+Set content information to the Atom object or get it.
+Accepts a text construct (see L<new_text|/new_text>) or the
+parameters accepted by L<new_text|/new_text>.
 
 
-=head2 add_author
+=head2 contributor
 
   my $person = $atom->new_person(
     name => 'Bender',
     uri  => 'acct:bender@example.org'
   );
-  my $author = $atom->add_author($person);
+  my $contributor = $atom->contributor($person);
 
-Adds author information to the Atom object.
-Accepts a person construct (see L<new_person>) or the
-parameters accepted by L<new_person>.
+  print $atom->contributor->[0]->at('name')->text;
 
+Add contributor information to the Atom object or get it.
+Accepts a person construct (see L<new_person|/new_person>)
+or the parameters accepted by L<new_person|/new_person>.
 
-=head2 add_category
+Returns a collection of contributor nodes.
 
-  $atom->add_category('world');
+=head2 entry
 
-Adds category information to the Atom object.
-Accepts either a hash for attributes (with, e.g., term and label)
-or one string representing the categories term.
+  # Add entry as a hash of attributes
+  my $entry = $atom->entry(
+    id      => 'entry_id_1',
+    summary => 'My first entry'
+  );
 
+  # Get entry by id
+  my $entry = $atom->entry('entry_id_1');
 
-=head2 add_contributor
-
-  my $person = $atom->new_person( name => 'Bender',
-                                  uri  => 'acct:bender@example.org');
-  my $contributor = $atom->add_contributor($person);
-
-Adds contributor information to the Atom object.
-Accepts a person construct (see L<new_person>) or the
-parameters accepted by L<new_person>.
-
-
-=head2 add_generator
-
-  $atom->add_generator('XML-Loy-Atom');
-
-Adds generator information to the Atom object.
+Add an entry to the Atom feed or get one.
+Accepts a hash of simple entry information
+for adding or an id for retrieval.
 
 
-=head2 add_icon
+=head2 generator
 
-  $atom->add_icon('http://sojolicio.us/favicon.ico');
+  $atom->generator('XML-Loy-Atom');
 
-Adds a URI to an icon associated with the Atom object.
+  print $atom->generator;
+
+Set generator information of the feed or returns it
+as a text string.
+
+
+=head2 icon
+
+  $atom->generator('http://sojolicio.us/favicon.ico');
+
+  print $atom->icon;
+
+Set icon url of the feed or return it
+as a text string.
+
 The image should be suitable for small representation size
 and have an aspect ratio of 1:1.
 
 
-=head2 add_id
+=head2 id
 
-  $atom->add_id('http://sojolicio.us/#12345');
+  $atom->id('http://sojolicio.us/#12345');
 
-Adds a unique identifier to the Atom object.
+  print $atom->id;
+
+Set or return the unique identifier of the Atom object.
 
 
-=head2 add_link
+=head2 link
 
-  $atom->add_link('http://sojolicio.us/#12345');
-  $atom->add_link(related => 'http://sojolicio.us/#12345');
-  $atom->add_link(rel => 'self',
-                  href => 'http://sojolicio.us/#12345');
+  $atom->link(related => 'http://sojolicio.us/#12345');
+  $atom->link(
+    rel => 'self',
+    href => 'http://sojolicio.us/#12345'
+  );
+
+  # Get link elements
+  $atom->link('related');
+
 
 Adds link information to the Atom object. If no relation
 attribute is given, the default relation is 'related'.

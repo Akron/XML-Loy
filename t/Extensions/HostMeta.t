@@ -2,22 +2,23 @@
 use strict;
 use warnings;
 
+$|++;
+
 use lib '../../lib';
 
 use Test::More;
+use Test::Warn;
+use Mojo::DOM;
+
 
 use_ok('XML::Loy::HostMeta');
 use_ok('XML::Loy::XRD');
 
-{
-  local $SIG{'__WARN__'} = sub {};
-  ok( !XML::Loy::HostMeta->new, 'Only extension');
-};
+warning_is {
+  XML::Loy::HostMeta->new;
+} 'Only use XML::Loy::HostMeta as an extension to XRD', 'Only extension';
 
 ok(my $xrd = XML::Loy::XRD->new, 'Constructor');
-
-
-__END__
 
 ok($xrd->extension('XML::Loy::HostMeta'), 'Extend with hostmeta');
 

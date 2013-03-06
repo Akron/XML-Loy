@@ -64,7 +64,7 @@ sub import {
 use constant {
   I  => '  ',
   NS => 'http://sojolicio.us/ns/xml-serial',
-  PI => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+  PI => 'xml version="1.0" encoding="UTF-8" standalone="yes"'
 };
 
 
@@ -88,44 +88,51 @@ sub new {
      ) {
 
     my $obj = $class->SUPER::new(@_);
-    return $obj unless $s;
-    return _prefix_islands($obj);
+    return $obj; #  unless $s;
+    # return _prefix_islands($obj);
   }
 
   # Create a new node
   else {
     my $name = shift;
-    my $att  = shift if ref( $_[0] ) eq 'HASH';
+    my $att  = ref( $_[0] ) eq 'HASH' ? shift : +{};
     my ($text, $comment) = @_;
 
-    # Node content
-    my $element = qq(<$name xmlns:serial=") . NS . '"';
-
-    # Text is given
-    $element .= $text ? ">$text</$name>" : ' />';
-
-    # Create root element by parent class
-    my $root = $class->SUPER::new( PI . $element );
-
-    # Root is xml document
-    $root->xml(1);
+    $att->{'xmlns:serial'} = NS;
 
     # Transform special attributes
     _special_attributes($att) if $att;
 
-    # Add attributes to node
-    my $root_e = $root->at(':root');
-    $root_e->attrs($att) if $att;
+    # Create root
+    my $tree = ['root', [pi => PI]];
 
-    # Add comment
-    $root_e->comment($comment) if $comment;
+    # Add comment if given
+    push(@$tree, [comment => $comment]) if $comment;
+
+    # Create Tag element
+    my $element = ['tag', $name, $att, $tree];
+
+    # Add element
+    push(@$tree, $element);
+
+    # Add text if given
+    push(@$element, [text => $text]) if $text;
+
+    # Create root element by parent class
+    my $root = $class->SUPER::new;
+
+    # Set object to xml strict
+    $root->xml(1);
+
+    # Add newly created tree
+    $root->tree($tree);
 
     # The class is derived
     if ($class ne __PACKAGE__) {
 
       # Set namespace if given
       if (my $ns = $class->_namespace) {
-	$root_e->attrs(xmlns => $ns);
+	$att->{xmlns} = $ns;
       };
     };
 
@@ -452,7 +459,7 @@ sub namespace {
   my $root = $self->_root_element;
 
   unless ($root) {
-    carp 'Unable to set namespace without root element';
+#    carp 'Unable to set namespace without root element';
     return;
   };
 
@@ -745,9 +752,9 @@ sub _root_element {
 
 
 # Make all islands prefixed
-sub _prefix_islands {
-  shift;
-};
+# sub _prefix_islands {
+#   shift;
+# };
 
 # Autoload for extensions
 sub AUTOLOAD {

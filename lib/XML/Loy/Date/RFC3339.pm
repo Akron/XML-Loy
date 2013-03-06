@@ -223,8 +223,8 @@ L<W3C date and time formats|http://www.w3.org/TR/NOTE-datetime>.
 This module is meant to be compatible with the L<Mojo::Date>-API
 but has no Mojo dependencies.
 
-B<This module is EXPERIMENTAL and may change or be renamed
-withut warnings.>
+B<This module is EXPERIMENTAL and may be changed, replaced or
+renamed without warnings.>
 
 =head1 ATTRIBUTES
 

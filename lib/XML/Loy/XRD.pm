@@ -1,7 +1,7 @@
 package XML::Loy::XRD;
 use Mojo::JSON;
 use Carp qw/carp/;
-# use Mojo::Date::RFC3339;
+use XML::Loy::Date::RFC3339;
 
 use XML::Loy with => (
   mime      => 'application/xrd+xml',
@@ -9,6 +9,7 @@ use XML::Loy with => (
   prefix    => 'xrd'
 );
 
+our @CARP_NOT;
 
 # Constructor
 sub new {
@@ -18,7 +19,7 @@ sub new {
 
   # Empty
   unless ($_[0]) {
-    unshift(@_, 'XRD') ;
+    unshift(@_, 'XRD');
     $xrd = $class->SUPER::new(@_);
   }
 
@@ -136,27 +137,57 @@ sub link {
   return $self->add(Link => \%hash);
 };
 
-# Get expiration date
-# sub get_expiration {
-#   my $self = shift;
-#   my $exp = $self->at('Expires');
-#
-#   return 0 unless $exp;
-#
-#   return Mojo::Date::RFC3339->new($exp->text)->epoch;
-# };
+
+# Set or get expiration date
+sub expires {
+  my $self = shift;
+
+  # Return subject
+  unless ($_[0]) {
+
+    # Subject found
+    my $exp = $self->at('Expires');
+
+    return 0 unless $exp;
+
+    return XML::Loy::Date::RFC3339->new($exp->text);
+  };
+
+  my $new_time = XML::Loy::Date::RFC3339->new($_[0])->to_string(0);
+
+  return $self->set(Expires => $new_time) if $new_time;
+};
 
 
+# Check for expiration
+sub expired {
+  my $self = shift;
+
+  # No expiration date given
+  my $exp = $self->expires or return;
+
+  # Document is expired
+  return 1 if $exp->epoch < time;
+
+  # Document is still current
+  return;
+};
+
+
+# Convert to xml
 sub _to_xml {
   my $xrd = shift;
 
-
+  # Create new json object
   my $json = Mojo::JSON->new;
 
+  # Parse json document
   my $jrd = $json->decode($_[0]);
 
+  # There is a parsing error
   carp $json->error unless $jrd;
 
+  # Itterate over all XRD elements
   foreach my $key (keys %$jrd) {
 
     given ($key = lc($key)) {
@@ -173,7 +204,7 @@ sub _to_xml {
 
       # Subject or Expires
       when (['subject','expires']) {
-	$xrd->add(ucfirst($key), $jrd->{$key});
+	$xrd->set(ucfirst($key), $jrd->{$key});
       }
 
       # Aliases
@@ -333,7 +364,7 @@ __END__
 
 =head1 NAME
 
-XML::Loy::XRD - Extensible Resource Descriptor
+XML::Loy::XRD - Extensible Resource Descriptor Extension
 
 
 =head1 SYNOPSIS
@@ -443,6 +474,33 @@ it can also parse L<JRD|https://tools.ietf.org/html/rfc6415> input.
 
 Add multiple aliases to the xrd document
 or return an array of aliases.
+
+
+=head2 expired
+
+  if ($xrd->expired) {
+    print "Don't use this document anymore!"
+  };
+
+Returns a C<true> value, if the document has expired
+based on the value of C<E<lt>Expires /E<gt>>,
+otherwise returns C<false>.
+
+
+=head2 expires
+
+  $xrd->expires('1264843800');
+  # or
+  $xrd->expires('2010-01-30T09:30:00Z');
+
+  print $xrd->expires->to_string;
+
+Set an expiration date or get the expiration date
+as a L<XML::Loy::Date::RFC3339> object.
+
+B<This method is experimental and may return another
+object with a different API!>
+
 
 =head2 link
 

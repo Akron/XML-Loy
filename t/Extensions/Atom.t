@@ -39,7 +39,6 @@ is($text->at('text')->text, '', 'Text: xhtml1');
 is($text->at('text')->all_text, 'Hello World!', 'Text: xhtml2');
 is($text->at('div')->namespace, $xhtml_ns, 'Text: xhtml3');
 
-
 $text = $atom->new_text('xhtml' => 'Hello <strong>World</strong>!');
 is($text->at('text')->text, '', 'Text: xhtml4');
 is($text->at('text')->all_text, 'Hello World!', 'Text: xhtml5');
@@ -93,8 +92,6 @@ is($atom->entry('#Test3')->at('summary')->text, 'Just fun', 'Get entry');
 # Add content
 $entry = $atom->at('entry');
 
-# diag $atom->to_pretty_xml;
-
 ok($entry->content('Test content'), 'Add content');
 
 is($atom->at('entry content')->text,
@@ -118,29 +115,26 @@ is($atom->at('entry content[type="xhtml"] div')->namespace,
    'http://www.w3.org/1999/xhtml',
    'Add content 5');
 
-done_testing;
-exit;
+is($entry->content->all_text, 'Test content', 'Content');
 
+ok($entry->content('html' => '<p>Test content 2'), 'New content add');
 
-
-
-
-
+is($entry->content->all_text, '<p>Test content 2', 'Content');
 
 $atom->find('entry')
-    ->[1]->add_content(type    => 'movie',
-		       content => b('Test')->b64_encode);
+    ->[1]->content(type    => 'movie',
+		   content => b('Test')->b64_encode);
 is($atom->at('entry content[type="movie"]')->text,
     'VGVzdA==',
     'Add content 6');
 
 # Add author
-$atom->add_author(name => 'Fry');
+$atom->author(name => 'Fry');
 is($atom->at('feed > author > name')->text,
    'Fry',
    'Add author 1');
 $entry = $atom->at('entry');
-$entry->add_author($person);
+$entry->author($person);
 is($atom->at('feed > entry > author > name')->text,
    'Bender',
     'Add author 2');
@@ -148,23 +142,33 @@ is($atom->at('feed > entry > author > uri')->text,
    'http://sojolicio.us/bender',
     'Add author 3');
 
+ok($atom->author(name => 'Leela'), 'Add another author');
+is($atom->author->[0]->at('name')->text, 'Fry', 'Get first author');
+is($atom->author->[1]->at('name')->text, 'Leela', 'Get second author');
+is($entry->author->[0]->at('name')->text, 'Bender', 'Get first author');
 
 # Add category
-$entry->add_category('world');
+$entry->category('world');
 is($entry->at('category')->attrs('term'),
    'world',
    'Add category 1');
 ok($entry->at('category[term]'),
    'Add category 2');
 
+ok($entry->category(label => 'yeah', term => 'people'),
+   'Add another category');
+
+is($entry->category->[0], 'world', 'Get first category');
+is($entry->category->[1], 'people', 'Get second category');
+ok(!$entry->category->[2], 'No third category');
 
 # Add contributor
-$atom->add_contributor(name => 'Leela');
+$atom->contributor(name => 'Leela');
 is($atom->at('feed > contributor > name')->text,
    'Leela',
    'Add contributor 1');
 $entry = $atom->find('entry')->[1];
-$entry->add_contributor($person);
+$entry->contributor($person);
 is($atom->at('feed > entry > contributor > name')->text,
    'Bender',
     'Add contributor 2');
@@ -172,71 +176,110 @@ is($atom->at('feed > entry > contributor > uri')->text,
    'http://sojolicio.us/bender',
     'Add contributor 3');
 
+ok($atom->contributor(name => 'Fry'), 'Add another author');
+is($atom->contributor->[0]->at('name')->text, 'Leela', 'Get first contributor');
+is($atom->contributor->[1]->at('name')->text, 'Fry', 'Get second contributor');
+is($entry->contributor->[0]->at('name')->text, 'Bender', 'Get first contributor');
 
-
-# Add generator
-$atom->add_generator('Sojolicious');
+# Set generator
+ok($atom->generator('Sojolicious'), 'Set Generator');
 is($atom->at('generator')->text, 'Sojolicious', 'Add generator');
+ok($atom->generator('Sojolicious 2'), 'Set Generator');
+is($atom->at('generator')->text, 'Sojolicious 2', 'Add generator');
+is($atom->generator, 'Sojolicious 2', 'Get generator');
 
+ok(my $c = $atom->new_text('Fun'), 'New text');
+ok(!$c->generator('Sojolicious'), 'New Generator fails');
 
-# Add icon
-$entry->add_icon('http://sojolicio.us/favicon.ico');
+# Set icon
+$entry->icon('http://sojolicio.us/favicon.ico');
 is($atom->at('icon')->text, 'http://sojolicio.us/favicon.ico',
    'Add icon');
+$entry->icon('http://sojolicio.us/favicon2.ico');
+is($atom->at('icon')->text, 'http://sojolicio.us/favicon2.ico',
+   'Add icon');
+ok(!$c->icon('http://sojolicio.us/favicon3.ico'), 'New Icon fails');
 
 
 # Add id
-$entry = $atom->add_entry;
-$entry->add_id('#Test3');
+ok($entry = $atom->entry, 'New entry');
+ok($entry->id('Test2'), 'Set entry id');
+ok($atom->id('Test3'), 'Set entry id');
 
-is($atom->find('entry')->[2]->attrs('xml:id'), '#Test3', 'Add id 1');
-is($atom->find('entry > id')->[2]->text, '#Test3', 'Add id 2');
+is($entry->id, 'Test2', 'Get id');
+is($atom->id, 'Test3', 'Get id');
 
 
 # Add link
-$entry->add_link('http://sojolicio.us/alternative');
+$entry->link(related => 'http://sojolicio.us/alternative');
 is($entry->at('link')->text, '', 'Add link 1');
-is($entry->at('link')->attrs('href'), 
+is($entry->at('link')->attrs('href'),
    'http://sojolicio.us/alternative',
    'Add link 2');
+
 is($entry->at('link')->attrs('rel'), 'related', 'Add link 3');
-$entry->add_link(rel => 'self',
-		 href => 'http://sojolicio.us/entry',
-		 title => 'Self-Link');
+$entry->link(
+  rel => 'self',
+  href => 'http://sojolicio.us/entry',
+  title => 'Self-Link'
+);
+
 is($entry->at('link[title]')->attrs('title'),
    'Self-Link',
-   'Add link 4');
+   'Add link 4'
+ );
+
+is($entry->link('related')->[0]->attrs('href'),
+   'http://sojolicio.us/alternative',
+   'related link'
+ );
 
 
 # Add logo
-$entry->add_logo('http://sojolicio.us/logo.png');
+$entry->logo('http://sojolicio.us/logo.png');
 is($atom->at('logo')->text, 'http://sojolicio.us/logo.png',
    'Add logo');
+$entry->logo('http://sojolicio.us/logo2.png');
+is($atom->at('logo')->text, 'http://sojolicio.us/logo2.png',
+   'Add logo');
+ok(!$c->logo('http://sojolicio.us/favicon3.png'), 'New logo fails');
 
 
 # Add published
-$entry->add_published($date);
+ok($entry->published($date), 'Set publish date 1');
 is($entry->at('published')->text,
    '2011-07-30T16:30:00Z',
    'Add published 1');
-$atom->at('entry')->add_published(1314721000);
+ok($atom->at('entry')->published(1314721000), 'Set published date 2');
 is($atom->at('entry published')->text,
    '2011-08-30T16:16:40Z',
    'Add published 2');
+ok($atom->published(1314721000), 'Set published date 3');
+is($entry->published->to_string,
+   '2011-07-30T16:30:00Z',
+   'Get publish date 1');
+is($atom->published->to_string,
+   '2011-08-30T16:16:40Z',
+   'Get publish date 2');
 
 
 # Add rights
-$atom->add_rights('Creative Commons');
+$atom->rights('Creative Commons');
 is($atom->at('rights')->text,
    'Creative Commons',
    'Add rights 1');
-$entry->add_rights('xhtml' => '<p>Creative Commons</p>');
+$entry->rights('xhtml' => '<p>Creative Commons</p>');
 is($entry->at('rights')->text,
    '',
    'Add rights 2');
 is($entry->at('rights')->all_text,
    'Creative Commons',
    'Add rights 3');
+
+
+diag $atom->to_pretty_xml;
+done_testing;
+exit;
 
 
 # Add source

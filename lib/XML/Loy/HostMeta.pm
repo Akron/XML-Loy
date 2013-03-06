@@ -35,7 +35,7 @@ __END__
 
 =head1 NAME
 
-XML::Loy::Hostmeta - Extend XML::Loy::XRD for use with HostMeta
+XML::Loy::Hostmeta - HostMeta Extension for XRD
 
 
 =head1 SYNOPSIS

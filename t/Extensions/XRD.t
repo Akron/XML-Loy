@@ -103,7 +103,14 @@ ok($xrd->link('lrdd'), 'Get link');
 ok($xrd->link('lrdd2'), 'Get link');
 ok(!$xrd->link('lrdd3'), 'Get link');
 
+ok($xrd->expires('1264843800'), 'Set expiration');
+is ($xrd->expires, '2010-01-30T09:30:00Z', 'Expiration date');
+is ($xrd->expires->epoch, '1264843800', 'Expiration date');
 
+ok($xrd->expired, 'Document has expired');
+
+ok($xrd->expires(time + 100), 'Set expiration');
+ok(!$xrd->expired, 'Document has expired');
 
 $xrd = XML::Loy::XRD->new(<<XRD);
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -273,6 +280,11 @@ is_deeply(
   $json->decode($xrd->to_json),
   $json->decode($jrd_doc), 'JRD'
 );
+
+
+# Expires:
+is ($xrd->expires, '2010-01-30T09:30:00Z', 'Expiration date');
+is ($xrd->expires->epoch, '1264843800', 'Expiration date');
 
 done_testing;
 
