@@ -276,19 +276,19 @@ is($entry->at('rights')->all_text,
    'Creative Commons',
    'Add rights 3');
 
-
-diag $atom->to_pretty_xml;
-done_testing;
-exit;
-
+is($entry->rights->all_text, 'Creative Commons', 'Get rights');
 
 # Add source
-my $source = $entry->add_source('xml:base' =>
-				'http://source.sojolicio.us/');
-$source->add_author(name => 'Zoidberg');
+my $source = $entry->source(
+  'xml:base' => 'http://source.sojolicio.us/');
+$source->author(name => 'Zoidberg');
 is($atom->at('source > author > name')->text,
    'Zoidberg',
    'Add source');
+
+# diag $atom->to_pretty_xml;
+done_testing;
+exit;
 
 
 # Add subtitle

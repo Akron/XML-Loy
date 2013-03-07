@@ -316,24 +316,32 @@ sub published {
   shift->_date(published => @_);
 };
 
+# Todo: content, rights, source are equal.
 
-
-# Add content information
+# Add rights information
 sub rights {
   my $self = shift;
 
-  # Set content
+  # Set rights
   return $self->__text(set => rights => @_) if $_[0];
 
-  # Return content
+  # Return rights
   return $self->_get_information_single('rights');
 };
 
 
-
 # Add source information
-sub add_source {
-  shift->add(source => { @_ });
+# Todo: Not in feed
+sub source {
+  my $self = shift;
+
+  return if $self->parent->type ne 'entry';
+
+  # Set source
+  return $self->__text(set => source => @_) if $_[0];
+
+  # Return source
+  return $self->_get_information_single('source');
 };
 
 
