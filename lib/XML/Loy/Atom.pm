@@ -19,11 +19,6 @@ use constant XHTML_NS => 'http://www.w3.org/1999/xhtml';
 #  - see http://search.cpan.org/dist/XML-Atom-SimpleFeed
 #  - Do not use constant
 
-# New date construct
-sub new_date {
-  return XML::Loy::Date::RFC3339->new( $_[1] || time );
-};
-
 
 # New person construct
 sub new_person {
@@ -56,7 +51,7 @@ sub new_text {
   my ($type, $content, %hash);
 
   # Only textual content
-  if (!defined $_[2]) {
+  if (!defined $_[2] && $_[0] ~~ [qw/text xhtml html/]) {
     $type = shift;
     $content = shift;
   }
@@ -92,8 +87,7 @@ sub new_text {
     # But also escaped
     $c_node->add(
       -div => {
-	xmlns => XHTML_NS,
-	-type => 'raw'
+	xmlns => XHTML_NS
       })->append_content($content);
   }
 
@@ -186,7 +180,7 @@ sub content {
   my $self = shift;
 
   # Set content
-  return $self->__text(set => content => @_) if $_[0];
+  return $self->_addset_text(set => content => @_) if $_[0];
 
   # Return content
   return $self->_get_information_single('content');
@@ -316,29 +310,28 @@ sub published {
   shift->_date(published => @_);
 };
 
-# Todo: content, rights, source are equal.
 
 # Add rights information
 sub rights {
   my $self = shift;
 
   # Set rights
-  return $self->__text(set => rights => @_) if $_[0];
+  return $self->_addset_text(set => rights => @_) if $_[0];
 
   # Return rights
   return $self->_get_information_single('rights');
 };
 
 
-# Add source information
-# Todo: Not in feed
+# Add source information to entry
 sub source {
   my $self = shift;
 
-  return if $self->parent->type ne 'entry';
+  # Only valid in entry
+  return if $self->type ne 'entry';
 
   # Set source
-  return $self->__text(set => source => @_) if $_[0];
+  return $self->set(source => @_) if $_[0];
 
   # Return source
   return $self->_get_information_single('source');
@@ -346,25 +339,49 @@ sub source {
 
 
 # Add subtitle
-sub add_subtitle {
-  shift->__text(subtitle => @_);
+sub subtitle {
+  my $self = shift;
+
+  # Only valid in feed or source or something
+  return if $self->type eq 'entry';
+
+  # Set subtitle
+  return $self->_addset_text(set => subtitle => @_) if $_[0];
+
+  # Return subtitle
+  return $self->_get_information_single('subtitle');
 };
 
 
 # Add summary
-sub add_summary {
-  shift->__text(summary => @_);
+sub summary {
+  my $self = shift;
+
+  # Only valid in entry
+  return if $self->type ne 'entry';
+
+  # Set summary
+  return $self->_addset_text(set => summary => @_) if $_[0];
+
+  # Return summary
+  return $self->_get_information_single('summary');
 };
 
 
 # Add title
-sub add_title {
-  shift->__text('title', @_);
+sub title {
+  my $self = shift;
+
+  # Set title
+  return $self->_addset_text(set => title => @_) if $_[0];
+
+  # Return title
+  return $self->_get_information_single('title');
 };
 
 
 # Add update time information
-sub add_updated {
+sub updated {
   shift->_date(updated => @_);
 };
 
@@ -404,7 +421,7 @@ sub _date {
     my $date = shift;
 
     unless (ref($date)) {
-      $date = $self->new_date($date);
+      $date = XML::Loy::Date::RFC3339->new($date);
     };
 
     return $self->set($type, $date->to_string);
@@ -422,13 +439,15 @@ sub _date {
 
 
 # Add text information
-sub __text {
+sub _addset_text {
   my $self   = shift;
   my $action = shift;
 
-  return unless $action ~~ [qw/add set/];
+  unless ($action ~~ [qw/add set/]) {
+    warn 'Action has to be set or add' and return;
+  };
 
-  my $type   = shift;
+  my $type = shift;
 
   # Text is a defined node
   if (ref $_[0]) {
@@ -442,22 +461,29 @@ sub __text {
     my $root_att = $root_elem->attrs;
 
     # Delete type
-    if (exists $root_att->{type} && $root_att->{type} eq 'text') {
+    my $c_type = $root_att->{type} || '';
+    if ($c_type eq 'text') {
       delete $root_elem->attrs->{'type'};
     };
 
     $text->root->at('*')->tree->[1] = $type;
 
-    # warn $text->to_pretty_xml;
+    my $element = $self->$action($text);
 
-    return $self->$action($text);
+    # Return wrapped div
+    return $element->at('div') if $c_type eq 'xhtml';
+
+    # Return node
+    return $element;
   };
 
   my $text;
   # Text is no hash
   unless (defined $_[1]) {
-    $text = $self->new_text(type => 'text',
-			    content => shift );
+    $text = $self->new_text(
+      type => 'text',
+      content => shift
+    );
   }
 
   # Text is a hash
@@ -466,8 +492,7 @@ sub __text {
   };
 
   # Todo: Optimize!
-  return $self->__text($action, $type, $text) if ref $text;
-
+  return $self->_addset_text($action, $type, $text) if ref $text;
   return;
 };
 
@@ -539,39 +564,65 @@ XML::Loy::Atom - Atom Syndication Format Extension
 
 =head1 SYNOPSIS
 
-  # Mojolicious
-  $app->plugin(XML => {
-    new_atom => ['Atom']
-  });
+  # Create new Atom feed
+  my $feed = XML::Loy::Atom->new('feed');
 
-  # Mojolicious::Lite
-  plugin XML => {
-    new_atom => ['Atom']
-  };
+  # Add new author
+  $feed->author(
+    name => 'Sheldon Cooper',
+    uri => 'https://en.wikipedia.org/wiki/Sheldon_Cooper'
+  );
 
-  # In Controllers
-  my $feed = $self->new_atom( 'feed' );
+  # Set title
+  $feed->title('Bazinga!');
 
-  my $author = $feed->new_person( name => 'Fry' );
-  $feed->add_author($author);
-  $feed->add_title('This is a test feed.');
-  my $entry = $self->new_atom('entry');
+  # Set current time for publishing
+  $feed->published(time);
+
+  # Add new entry
+  my $entry = $feed->entry(id => 'first');
 
   for ($entry) {
-    $_->add_title('First Test entry');
-    $_->add_subtitle('This is a subtitle');
-    my $content = $_->add_content(
-	type    => 'xhtml',
-	content => '<p id="para">' .
-	           'This is a Test!' .
-	           '</p>');
-    $content->at('#para')
-	->replace_content('This is a <strong>Test</strong>!');
+    $_->title('Welcome');
+    $_->summary('My first post');
+
+    # Add content
+    my $content = $_->content(
+      xhtml => '<p>First para</p>'
+    );
+
+    # Use XML::Loy methods
+    $content->add(p => 'Second para')
+            ->comment('My second paragraph');
   };
 
-  $feed->add_entry($entry);
-  $self->render_xml($feed);
+  # Get summary of first entry
+  print $feed->entry('first')->summary->all_text;
+  # My first post
 
+  # Pretty print
+  print $feed->to_pretty_xml;
+
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <feed xmlns="http://www.w3.org/2005/Atom">
+  #   <author>
+  #     <name>Sheldon Cooper</name>
+  #     <uri>https://en.wikipedia.org/wiki/Sheldon_Cooper</uri>
+  #   </author>
+  #   <title xml:space="preserve">Bazinga!</title>
+  #   <published>2013-03-07T17:51:25Z</published>
+  #   <entry xml:id="first">
+  #     <id>first</id>
+  #     <title xml:space="preserve">Welcome</title>
+  #     <summary xml:space="preserve">My first post</summary>
+  #     <div xmlns="http://www.w3.org/1999/xhtml">
+  #       <p>First para</p>
+  #
+  #       <!-- My second paragraph -->
+  #       <p>Second para</p>
+  #     </div>
+  #   </entry>
+  # </feed>
 
 =head1 DESCRIPTION
 
@@ -585,19 +636,6 @@ L<RFC4287|http://tools.ietf.org/html/rfc4287>.
 L<Mojolicious::Plugin::XML::Atom> inherits all methods
 from L<XML::Loy> and implements the
 following new ones.
-
-
-=head2 new_date
-
-  my $date = $atom->new_date(1312311456);
-  my $date = $atom->new_date('1996-12-19T16:39:57-08:00');
-
-Returns an L<XML::Loy::Date::RFC3339> object.
-It accepts all parameters of
-L<XML::Loy::Date::RFC3339::parse|XML::Loy::Date::RFC3339/parse>.
-If no parameter is given, the current server time is returned.
-
-B<This method is EXPERIMENTAL and may change without warning.>
 
 
 =head2 new_person
@@ -619,9 +657,10 @@ Returns a new person construction.
     content => 'This is a <strong>test</strong>!'
   );
 
-Returns a new text construct. Accepts either a simple string
-(of type 'text'), a tupel with the first argument being the media type and
-the second argument being the content, or a hash with the parameters C<type>,
+Create a new text construct. Accepts either a simple string
+(of type C<text>), a tupel with the first argument being the
+media type and the second argument being the content,
+or a hash with the parameters C<type>,
 C<content> or C<src> (and others). There are three predefined
 C<type> values:
 
@@ -695,6 +734,9 @@ Returns a collection of category terms.
 Set content information to the Atom object or get it.
 Accepts a text construct (see L<new_text|/new_text>) or the
 parameters accepted by L<new_text|/new_text>.
+Returns the content node or,
+on construction of an C<xhtml> object,
+the wrapped div node.
 
 
 =head2 contributor
@@ -741,14 +783,13 @@ as a text string.
 
 =head2 icon
 
-  $atom->generator('http://sojolicio.us/favicon.ico');
+  $atom->icon('http://sojolicio.us/favicon.ico');
 
   print $atom->icon;
 
 Set icon url of the feed or return it
 as a text string.
-
-The image should be suitable for small representation size
+The image should be suitable for a small representation size
 and have an aspect ratio of 1:1.
 
 
@@ -780,96 +821,153 @@ a pair of scalars for the relational type and the reference
 or multiple hashes for the attributes of the link.
 
 
-=head2 add_logo
+=head2 logo
 
-  $atom->add_logo('http://sojolicio.us/sojolicious.png');
+  $atom->logo('http://sojolicio.us/sojolicious.png');
 
-Adds a URI to a logo associated with the Atom object.
+  print $atom->logo;
+
+Set logo url of the feed or return it as a text string.
 The image should have an aspect ratio of 2:1.
 
 
-=head2 add_published
+=head2 published
 
-  my $date = $atom->new_date(1312311456);
-  $atom->add_published($date);
+  $atom->published('1312311456');
+  $atom->published('2011-08-30T16:16:40Z');
 
-Adds a publishing timestamp to the Atom object.
-Accepts a date construct (see L<new_date>) or the
-parameter accepted by L<new_date>.
+  # Set current time
+  $atom->published(time);
 
+  print $atom->published->to_string;
 
-=head2 add_rights
+Set the publishing date of the Atom object
+or get the publishing date as a
+L<XML::Loy::Date::RFC3339> object.
+Accepts all valid parameters of
+L<XML::Loy::Date::RFC3339::new|XML::Loy::Date::RFC3339/new>.
 
-  $atom->add_rights('Public Domain');
-
-Adds legal information to the Atom object.
-Accepts a text construct (see L<new_text>) or the
-parameters accepted by L<new_text>.
-
-=head2 add_source
-
-  my $source = $atom->add_source('xml:base' =>
-    'http://source.sojolicio.us/');
-  $source->add_author(name => 'Zoidberg');
-
-Adds source information of the Atom object.
+B<This method is experimental and may return another
+object with a different API!>
 
 
-=head2 add_subtitle
+=head2 rights
 
-  my $text = $atom->new_text(type => 'text',
-                             content => 'This is a subtitle!');
+  $atom->rights('Public Domain');
 
-  $atom->add_subtitle($text);
-  $atom->add_subtitle('This is a subtitle!');
+  print $atom->rights->all_text;
 
-Adds subtitle information to the Atom object.
-Accepts a text construct (see L<new_text>) or the
-parameters accepted by L<new_text>.
-
-
-=head2 add_summary
-
-  my $text = $atom->new_text(type => 'text',
-                             content => 'Test entry');
-
-  $atom->add_summary($text);
-  $atom->add_summary('Test entry');
-
-Adds a summary of the content to the Atom object.
-Accepts a text construct (see L<new_text>) or the
-parameters accepted by L<new_text>.
+Set legal information of the Atom object.
+Accepts a text construct (see L<new_text|/new_text>)
+or the parameters accepted by L<new_text|/new_text>.
+Returns the rights node or,
+on construction of an C<xhtml> object,
+the wrapped div node.
 
 
-=head2 add_title
+=head2 source
 
-  my $text = $atom->new_text(type => 'text',
-                             content => 'First Test entry');
+  my $source = $atom->entry('my_id')->source({
+    'xml:base' => 'http://source.sojolicio.us/'
+  });
+  $source->author(name => 'Zoidberg');
 
-  $atom->add_title($text);
-  $atom->add_title('First Test entry');
+  print $atom->entry('my_id')
+        ->source
+        ->author->[0]->at('name')->all_text;
 
-Adds a title to the Atom object.
-Accepts a text construct (see L<new_text>) or the
-parameters accepted by L<new_text>.
+Set or get source information of an atom entry.
+Expects for setting a hash reference (at least empty)
+of the attributes of the source.
+Returns the source node.
 
 
-=head2 add_updated
+=head2 subtitle
 
-  my $date = $atom->new_date(1312311456);
-  $atom->add_updated($date);
+  my $text = $atom->new_text(
+    type => 'text',
+    content => 'This is a subtitle!'
+  );
 
-Adds a last update timestamp to the Atom object.
-Accepts a date construct (see L<new_date>) or the
-parameter accepted by L<new_date>.
+  $atom->subtitle($text);
+  $atom->subtitle('This is a subtitle!');
+
+  print $atom->subtitle->all_text;
+
+Set subtitle information to the Atom feed.
+Accepts a text construct (see L<new_text|/new_text>)
+or the parameters accepted by L<new_text|/new_text>.
+Returns the subtitle node or,
+on construction of an C<xhtml> object,
+the wrapped div node.
+
+
+=head2 summary
+
+  my $text = $atom->new_text(
+    type => 'text',
+    content => 'This is a summary!'
+  );
+
+  $atom->summary($text);
+  $atom->summary('This is a summary!');
+
+  print $atom->summary->all_text;
+
+Set summary information to the Atom entry.
+Accepts a text construct (see L<new_text|/new_text>)
+or the parameters accepted by L<new_text|/new_text>.
+Returns the summary node or,
+on construction of an C<xhtml> object,
+the wrapped div node.
+
+
+=head2 title
+
+  my $text = $atom->new_text(
+    type => 'text',
+    content => 'This is a title!'
+  );
+
+  $atom->title($text);
+  $atom->title('This is a title!');
+
+  print $atom->subtitle->all_text;
+
+Set title information to the Atom object.
+Accepts a text construct (see L<new_text|/new_text>)
+or the parameters accepted by L<new_text|/new_text>.
+Returns the title node or,
+on construction of an C<xhtml> object,
+the wrapped div node.
+
+
+=head2 updated
+
+  $atom->updated('1312311456');
+  $atom->updated('2011-08-30T16:16:40Z');
+
+  # Set current time
+  $atom->updated(time);
+
+  print $atom->updated->to_string;
+
+Set the date of the last update of the Atom object
+or get the date as a
+L<XML::Loy::Date::RFC3339> object.
+Accepts all valid parameters of
+L<XML::Loy::Date::RFC3339::new|XML::Loy::Date::RFC3339/new>.
+
+B<This method is experimental and may return another
+object with a different API!>
 
 
 =head1 MIME-TYPES
 
 When loaded as a base class, L<XML::Loy::Atom>
-establishes the following mime-types:
+makes the mime-type C<application/atom+xml>
+available.
 
-  'atom': 'application/atom+xml'
 
 =head1 DEPENDENCIES
 

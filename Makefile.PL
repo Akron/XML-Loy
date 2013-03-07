@@ -24,5 +24,5 @@ WriteMakefile(
       repository  => 'https://github.com/Akron/XML-Loy'
     }
   },
-  test => {TESTS => 't/*.t t/Extensions/*.t' }
+  test => {TESTS => 't/*.t t/Extensions/*.t t/Date/*.t' }
 );

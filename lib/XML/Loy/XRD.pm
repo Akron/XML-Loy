@@ -561,6 +561,13 @@ Returns a JSON string representing a
 L<JRD|https://tools.ietf.org/html/rfc6415> document.
 
 
+=head1 MIME-TYPES
+
+When loaded as a base class, L<XML::Loy::XRD>
+makes the mime-type C<application/xrd+xml>
+available.
+
+
 =head1 DEPENDENCIES
 
 L<Mojolicious>.

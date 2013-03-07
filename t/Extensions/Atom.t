@@ -35,8 +35,9 @@ is($text->at('text')->text, 'Hello World!', 'Text: text3');
 $text = $atom->new_text(type => 'xhtml',
 			content => 'Hello World!');
 
-is($text->at('text')->text, '', 'Text: xhtml1');
-is($text->at('text')->all_text, 'Hello World!', 'Text: xhtml2');
+is($text->text, '', 'Text: xhtml1');
+is($text->all_text, 'Hello World!', 'Text: xhtml2');
+
 is($text->at('div')->namespace, $xhtml_ns, 'Text: xhtml3');
 
 $text = $atom->new_text('xhtml' => 'Hello <strong>World</strong>!');
@@ -62,14 +63,6 @@ my $person = $atom->new_person(name => 'Bender',
 			       uri => 'http://sojolicio.us/bender');
 is($person->at('name')->text, 'Bender', 'Person1');
 is($person->at('uri')->text, 'http://sojolicio.us/bender', 'Person2');
-
-# New Date
-my $date = $atom->new_date('2011-07-30T16:30:00Z');
-is($date, '2011-07-30T16:30:00Z', 'Date1');
-is($date->epoch, 1312043400, 'Date2');
-$date = $atom->new_date(1312043400);
-is($date, '2011-07-30T16:30:00Z', 'Date3');
-is($date->epoch, 1312043400, 'Date4');
 
 # Add entry
 ok(my $entry = $atom->entry(id => '#Test1'), 'Add entry with hash');
@@ -244,9 +237,11 @@ is($atom->at('logo')->text, 'http://sojolicio.us/logo2.png',
    'Add logo');
 ok(!$c->logo('http://sojolicio.us/favicon3.png'), 'New logo fails');
 
+my $date = '2011-07-30T16:30:00Z';
 
 # Add published
-ok($entry->published($date), 'Set publish date 1');
+ok($entry->published('2011-07-30T16:30:00Z'),
+   'Set publish date 1');
 is($entry->at('published')->text,
    '2011-07-30T16:30:00Z',
    'Add published 1');
@@ -264,7 +259,7 @@ is($atom->published->to_string,
 
 
 # Add rights
-$atom->rights('Creative Commons');
+ok($atom->rights('Creative Commons'), 'Set rights in feed');
 is($atom->at('rights')->text,
    'Creative Commons',
    'Add rights 1');
@@ -278,66 +273,81 @@ is($entry->at('rights')->all_text,
 
 is($entry->rights->all_text, 'Creative Commons', 'Get rights');
 
+
 # Add source
-my $source = $entry->source(
-  'xml:base' => 'http://source.sojolicio.us/');
-$source->author(name => 'Zoidberg');
+ok(my $source = $entry->source(
+  {'xml:base' => 'http://source.sojolicio.us/'}
+), 'Add source');
+
+ok($source->author(name => 'Zoidberg'), 'Add author');
+is($source->attrs('xml:base'), 'http://source.sojolicio.us/',
+   'Check Source');
+
 is($atom->at('source > author > name')->text,
    'Zoidberg',
    'Add source');
 
-# diag $atom->to_pretty_xml;
-done_testing;
-exit;
+is($entry->source->author->[0]->at('name')->all_text,
+   'Zoidberg',
+   'Name');
+
+is($entry->source->attrs('xml:base'),
+   'http://source.sojolicio.us/',
+   'Check Source');
 
 
 # Add subtitle
-$entry = $atom->at('entry');
-$entry->add_subtitle('Test subtitle');
-is($atom->at('entry subtitle')->text,
-   'Test subtitle',
-   'Add subtitle 1');
+ok($entry = $atom->at('entry'), 'Entry');
+ok(!$entry->subtitle('Test subtitle'), 'No subtitle in entry');
+ok($atom->subtitle('Test subtitle'), 'Subtitle in feed');
 
-$entry->add_subtitle('html' => '<p>Test subtitle');
-is($atom->at('entry subtitle[type="html"]')->text,
+is($atom->at('subtitle')->text,
+   'Test subtitle',
+   'Set subtitle 1');
+is($atom->subtitle->all_text, 'Test subtitle', 'Set subtitle 2');
+ok($atom->subtitle('Test new subtitle'), 'Set subtitle 3');
+is($atom->subtitle->all_text, 'Test new subtitle', 'Set subtitle 4');
+
+ok($atom->subtitle('html' => '<p>Test subtitle'), 'Set subtitle');
+is($atom->at('subtitle[type="html"]')->text,
    '<p>Test subtitle',
    'Add subtitle 2');
-
-$entry->add_subtitle('xhtml' => '<p>Test subtitle</p>');
-is($atom->at('entry subtitle[type="xhtml"]')->text,
+ok($atom->subtitle('xhtml' => '<p>Test subtitle</p>'), 'Set subtitle 2 1/2');
+is($atom->at('subtitle[type="xhtml"]')->text,
    '',
    'Add subtitle 3');
-is($atom->at('entry subtitle[type="xhtml"]')->all_text,
+is($atom->at('subtitle[type="xhtml"]')->all_text,
    'Test subtitle',
    'Add subtitle 4');
-is($atom->at('entry subtitle[type="xhtml"] div')->namespace,
+is($atom->at('subtitle[type="xhtml"] div')->namespace,
    'http://www.w3.org/1999/xhtml',
    'Add subtitle 5');
+ok($atom->subtitle(
+  type => 'movie',
+  content => b('Test')->b64_encode
+), 'Set subtitle 5 1/2');
+is($atom->at('subtitle[type="movie"]')->text,
+   'VGVzdA==',
+   'Add subtitle 6');
+ok(my $subtitle = $atom->new_text('Test subtitle 2'), 'New test subtitle 2');
+ok($atom->subtitle($subtitle), 'Add subtitle 7');
 
-$atom->find('entry')
-    ->[1]->add_subtitle(type    => 'movie',
-			content => b('Test')->b64_encode);
-is($atom->at('entry subtitle[type="movie"]')->text,
-    'VGVzdA==',
-    'Add subtitle 6');
-
-my $subtitle = $atom->new_text('Test subtitle 2');
-ok($atom->add_subtitle($source), 'Add subtitle 7');
+is($atom->subtitle->all_text, 'Test subtitle 2', 'Subtitle test 7');
 
 
 # Add summary
-$entry = $atom->at('entry');
-$entry->add_summary('Test summary');
+ok($entry = $atom->at('entry'), 'Get entry');
+ok($entry->summary('Test summary'), 'Set Summary 1');;
 is($atom->at('entry summary')->text,
    'Test summary',
    'Add summary 1');
-
-$entry->add_summary('html' => '<p>Test summary');
+ok($entry->summary('html' => '<p>Test summary'), 'Set summary 2');
+is($entry->summary->all_text, '<p>Test summary', 'Get summary html 1');
 is($atom->at('entry summary[type="html"]')->text,
    '<p>Test summary',
    'Add summary 2');
-
-$entry->add_summary('xhtml' => '<p>Test summary</p>');
+ok($entry->summary('xhtml' => '<p>Test summary</p>'), 'Set summary 3');;
+is($entry->summary->all_text, 'Test summary', 'Get summary xhtml 2');
 is($atom->at('entry summary[type="xhtml"]')->text,
    '',
    'Add summary 3');
@@ -347,31 +357,35 @@ is($atom->at('entry summary[type="xhtml"]')->all_text,
 is($atom->at('entry summary[type="xhtml"] div')->namespace,
    'http://www.w3.org/1999/xhtml',
    'Add summary 5');
-
-$atom->find('entry')
-    ->[1]->add_summary(type    => 'movie',
-			content => b('Test')->b64_encode);
+ok($atom->find('entry')
+     ->[1]->summary(
+       type => 'movie',
+       content => b('Test')->b64_encode
+     ), 'Set summary 6');
 is($atom->at('entry summary[type="movie"]')->text,
     'VGVzdA==',
     'Add summary 6');
+my $encode = b('Test')->b64_encode->trim;
+like($atom->find('entry')->[1]->summary->all_text,
+   qr/$encode/, 'Get summary movie 3');
+ok(my $summary = $atom->new_text('Test summary 2'), 'New text');
+ok(!$atom->summary($summary), 'Add summary to feed fails');
 
-my $summary = $atom->new_text('Test summary 2');
-ok($atom->add_summary($source), 'Add summary 7');
 
 
 # Add title
-$entry = $atom->at('entry');
-$entry->add_title('Test title');
+ok($entry = $atom->at('entry'), 'Get first entry');
+ok($entry->title('Test title'), 'Set title 1');
 is($atom->at('entry title')->text,
    'Test title',
    'Add title 1');
-
-$entry->add_title('html' => '<p>Test title');
+is($entry->title->all_text, 'Test title', 'Get title 1');
+ok($entry->title('html' => '<p>Test title'), 'Set html title');
 is($atom->at('entry title[type="html"]')->text,
    '<p>Test title',
    'Add title 2');
-
-$entry->add_title('xhtml' => '<p>Test title</p>');
+is($entry->title->all_text, '<p>Test title', 'Get title 2');
+ok($entry->title('xhtml' => '<p>Test title</p>'), 'Set xhtml title');
 is($atom->at('entry title[type="xhtml"]')->text,
    '',
    'Add title 3');
@@ -381,46 +395,58 @@ is($atom->at('entry title[type="xhtml"]')->all_text,
 is($atom->at('entry title[type="xhtml"] div')->namespace,
    'http://www.w3.org/1999/xhtml',
    'Add title 5');
-
-$atom->find('entry')
-    ->[1]->add_title(type    => 'movie',
-			content => b('Test')->b64_encode);
+ok($atom->find('entry')
+    ->[1]->title(
+      type => 'movie',
+      content => $encode
+    ), 'Set title 5 1/2');
+is($atom->find('entry')->[1]->title->all_text, $encode,
+   'Check movie');
 is($atom->at('entry title[type="movie"]')->text,
-    'VGVzdA==',
-    'Add title 6');
-
-my $title = $atom->new_text('Test title 2');
-ok($atom->add_title($source), 'Add title 7');
+   'VGVzdA==',
+   'Add title 6');
+ok(my $title = $atom->new_text('Test title 2'), 'Set title');
+ok($atom->title($title), 'Add title 7');
+is($atom->title->text, 'Test title 2', 'New test title');
 
 
 # Add updated
-$entry = $atom->find('entry')->[1];
-$entry->add_updated($date);
+ok($entry = $atom->find('entry')->[1], 'Get second entry');
+ok($entry->updated($date), 'Set updated to entry');
 is($entry->at('updated')->text,
    '2011-07-30T16:30:00Z',
    'Add updated 1');
-$atom->at('entry')->add_updated(1314721000);
+ok($atom->at('entry')->updated(1314721000),
+   'Set updated to first entry');
 is($atom->at('entry updated')->text,
    '2011-08-30T16:16:40Z',
    'Add updated 2');
+is($entry->updated->epoch, '1312043400', 'Get updated epoch');
+ok($atom->updated('1312043800'), 'Set updated epoch');
+is($entry->updated->epoch, '1312043400', 'Get updated epoch');
+is($atom->updated->epoch, '1312043800', 'Get updated epoch');
 
 
 
 # Examples
 $atom = XML::Loy::Atom->new('entry');
-$entry = $atom->add_entry(id => '#467r57');
-$entry->add_author(name   => 'Bender');
-$entry->add_content(text  => "I am Bender!");
-$entry->add_content(html  => "I am <strong>Bender</strong>!");
-$entry->add_content(xhtml => "I am <strong>Bender</strong>!");
-$entry->add_content(movie => b("I am Bender!")->b64_encode);
+$entry = $atom->entry(id => '#467r57');
+ok($entry->author(name   => 'Bender'), 'Set Author');
+ok($entry->content(text  => "I am Bender!"), 'Set text content');
+ok($entry->content(html  => "I am <strong>Bender</strong>!"), 'Set html text');
+ok($entry->content(xhtml => "I am <strong>Bender</strong>!"), 'Set xhtml content');
+ok(!$entry->content(movie => b("I am Bender!")->b64_encode), 'Set Content');
+ok($entry->content(text  => "I am Bender!"), 'Set text content');
 
 is($atom->at('entry > author > name')->text, 'Bender', 'Text');
 is($atom->at('content[type]')->text,  'I am Bender!', 'Text');
+$entry->content(html  => "I am <strong>Bender</strong>!");
 is($atom->at('content[type="html"]')->text,  'I am <strong>Bender</strong>!', 'Text');
+$entry->content(xhtml => "I am <strong>Bender</strong>!");
 is($atom->at('content[type="xhtml"]')->text,  '', 'Text');
 is($atom->at('content[type="xhtml"] div')->text,  'I am!', 'Text');
 is($atom->at('content[type="xhtml"] div')->all_text,  'I am Bender!', 'Text');
+$atom->content(type => 'movie', content => b("I am Bender!")->b64_encode);
 is($atom->at('content[type="movie"]')->text, 'SSBhbSBCZW5kZXIh', 'Text');
 
 $atom = XML::Loy::Atom->new(<<'ATOM');
@@ -441,7 +467,7 @@ $poco_ns = 'http://www.w3.org/TR/2011/WD-contacts-api-20110616/';
 
 # Person constructs
 $person = $atom->new_person('name' => 'Fry');
-$person->add_namespace('poco' => $poco_ns);
+$person->namespace('poco' => $poco_ns);
 $person->add('uri', 'http://sojolicio.us/fry');
 $person->add('poco:birthday' => '1/1/1970');
 
@@ -451,7 +477,7 @@ is($person->at('person birthday')->text, '1/1/1970', 'Person-Poco-Birthday');
 is($person->at('person birthday')->namespace, $poco_ns, 'Person-Poco-NS');
 
 # Date consructs
-$date = $atom->new_date(1313131313);
-$atom->add_updated($date);
+$atom->updated(1313131313);
 is($atom->at('updated')->text, '2011-08-12T06:41:53Z', 'Updated');
 
+done_testing;

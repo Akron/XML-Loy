@@ -82,13 +82,17 @@ sub new {
   my $class = shift;
 
   # Create from parent class
-  if ( ref $class                            # XML::Loy object
-       || !$_[0]                             # Empty constructor
-       || (my $s = (index($_[0],'<') >= 0))  # XML string
-     ) {
+  unless ($_[0]) {                 # Empty constructor
+    return $class->SUPER::new;
+  }
 
-    my $obj = $class->SUPER::new(@_);
-    return $obj; #  unless $s;
+  elsif (ref $_[0]) {              # XML::Loy object
+    return $class->SUPER::new(@_);
+  }
+
+  elsif (index($_[0],'<') >= 0) {  # XML string
+    return $class->SUPER::new(@_);
+
     # return _prefix_islands($obj);
   }
 
@@ -278,7 +282,7 @@ sub _add_clean {
 
       # Namespace information can be deleted
       if (my $ns = $self->namespace) {
-	delete $root_attr->{xmlns} unless $root_attr->{xmlns} eq $ns;
+	delete $root_attr->{xmlns} if $root_attr->{xmlns} eq $ns;
       };
     };
 
