@@ -4,6 +4,8 @@ use warnings;
 
 use overload '""' => sub { shift->to_string }, fallback => 1;
 
+our $VERSION = '0.01';
+
 require Time::Local;
 
 # rfc3339 timestamp

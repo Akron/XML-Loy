@@ -1,3 +1,6 @@
+0.06 2013-03-08
+        - Fix indexing error on CPAN.
+
 0.05 2013-03-08
         - Fix documentation bugs.
         - Fix small bug in Atom::category.

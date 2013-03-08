@@ -5,6 +5,8 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
+our $VERSION = '0.06';
+
 # Todo:
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
 #
@@ -23,8 +25,6 @@ use Mojo::Base 'Mojo::DOM';
 #         prefixing.
 #
 # Delete use of "constant"!
-
-our $VERSION = '0.05';
 
 our @CARP_NOT;
 
