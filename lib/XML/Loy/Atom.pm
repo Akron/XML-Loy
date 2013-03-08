@@ -163,6 +163,8 @@ sub category {
   if ($coll->[0]) {
     $coll->map( sub { $_ = $_->{term} });
   };
+
+  return $coll;
 };
 
 
@@ -631,8 +633,8 @@ XML::Loy::Atom - Atom Syndication Format Extension
 
 L<XML::Loy::Atom> is a base class or extension
 for L<XML::Loy> and provides several functions
-for the work with the Atom Syndication Format as described in
-L<RFC4287|http://tools.ietf.org/html/rfc4287>.
+for the work with the
+L<Atom Syndication Format|http://tools.ietf.org/html/rfc4287>.
 
 This code may help you to create your own L<XML::Loy> extensions.
 
@@ -652,7 +654,7 @@ following new ones.
     uri  => 'acct:bender@example.org'
   );
 
-Returns a new person construction.
+Creates a new person construction.
 Accepts a hash with element descriptions.
 
 
@@ -718,8 +720,8 @@ Returns a collection of author nodes.
   print $atom->category->[0];
 
 Adds category information to the Atom object or returns it.
-Accepts either a hash for attributes
-(with, e.g., term and label)
+Accepts either a hash of attributes
+(with, e.g., C<term> and C<label>)
 or one string representing the category's term.
 
 Returns a collection of category terms.
@@ -737,11 +739,12 @@ Returns a collection of category terms.
   $entry->content($text);
   $entry->content('This is a test!');
 
-  print $atom->content->all_text;
+  print $entry->content->all_text;
 
 Sets content information to the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>) or the
 parameters accepted by L<new_text|/new_text>.
+
 Returns the content node or,
 on construction of an C<xhtml> object,
 the wrapped div node.
@@ -777,6 +780,8 @@ Returns a collection of contributor nodes.
 Adds an entry to the Atom feed or returns one.
 Accepts a hash of simple entry information
 for adding or an id for retrieval.
+
+Returns the entry node.
 
 
 =head2 generator
@@ -815,14 +820,18 @@ Sets or returns the unique identifier of the Atom object.
   );
 
   # Get link elements
-  $atom->link('related');
+  print $atom->link('related')->[0]->attrs('href');
 
 
-Adds link information to the Atom object.
-Accepts either one scalar as a reference of a related link,
-a pair of scalars for the relational type and the reference,
-or multiple hashes for the attributes of the link.
-If no relation attribute is given, the default relation is 'related'.
+Adds link information to the Atom object or returns it.
+Accepts for retrieval the relation type and for setting
+the relation type followed by the reference,
+or multiple pairs as attributes of the link.
+If no relation attribute is given, the default relation
+is C<related>.
+
+Returns the link element on adding and
+a collection of matching link elements on retrieval.
 
 
 =head2 logo
@@ -862,6 +871,7 @@ object with a different API!>
 Sets legal information of the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
+
 Returns the rights node or,
 on construction of an C<xhtml> object,
 the wrapped div node.
@@ -881,6 +891,7 @@ the wrapped div node.
 Sets or returns the source information of an atom entry.
 Expects for setting a hash reference (at least empty)
 of the attributes of the source.
+
 Returns the source node.
 
 
@@ -899,6 +910,7 @@ Returns the source node.
 Sets subtitle information to the Atom feed or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
+
 Returns the subtitle node or,
 on construction of an C<xhtml> object,
 the wrapped div node.
@@ -919,6 +931,7 @@ the wrapped div node.
 Sets summary information to the Atom entry or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
+
 Returns the summary node or,
 on construction of an C<xhtml> object,
 the wrapped div node.
@@ -939,6 +952,7 @@ the wrapped div node.
 Sets title information to the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
+
 Returns the title node or,
 on construction of an C<xhtml> object,
 the wrapped div node.

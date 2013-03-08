@@ -59,8 +59,7 @@ sub verb {
 
   # Set verb
   if ($_[0]) {
-    my $verb = shift;
-    return $self->add('verb', _check_prefix($verb));
+    return $self->add(verb => _check_prefix($_[0]));
   }
 
   # Get verb
@@ -137,6 +136,8 @@ sub _target_object {
 };
 
 
+# Prefix relative object types and verbs with
+# ActivityStreams namespace
 sub _check_prefix {
   if (index($_[0], '/') == -1) {
     return $NS . lc $_[0];
@@ -144,7 +145,9 @@ sub _check_prefix {
   return $_[0];
 };
 
+
 1;
+
 
 __END__
 
@@ -152,7 +155,8 @@ __END__
 
 =head1 NAME
 
-Mojolicious::Plugin::XML::ActivityStreams - ActivityStreams (Atom) Plugin
+XML::Loy::ActivityStreams - ActivityStreams Extension for Atom
+
 
 =head1 SYNOPSIS
 
@@ -188,8 +192,8 @@ Mojolicious::Plugin::XML::ActivityStreams - ActivityStreams (Atom) Plugin
   # Retrive verb
   print $entry->verb;
 
-  # Print activity stream as XML
-  print $xml->to_pretty_xml;
+  # Print ActivityStream as XML
+  print $atom->to_pretty_xml;
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   # <feed xmlns="http://www.w3.org/2005/Atom"
@@ -253,7 +257,7 @@ L<new_person|XML::Loy::Atom/new_person>.
   $atom->verb('follow');
   print $atom->verb;
 
-Set the verb of the ActivityStreams object or returns it.
+Sets the verb of the ActivityStreams object or returns it.
 Accepts a verb string.
 Relative verbs will be prefixed with the ActivityStreams
 namespace.
@@ -272,9 +276,11 @@ or returns it.
 Accepts a hash with various parameters
 depending on the object's type. The object's type is
 given by the C<object-type> parameter.
+Relative object types will be prefixed with the ActivityStreams
+namespace.
 
 
-=head2 C<target>
+=head2 target
 
   $atom->target(
     'object-type' => 'robot',
@@ -287,6 +293,8 @@ or returns it.
 Accepts a hash with various parameters
 depending on the target's type. The target's type is
 given by the C<object-type> parameter.
+Relative object types will be prefixed with the ActivityStreams
+namespace.
 
 
 =head1 DEPENDENCIES

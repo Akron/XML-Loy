@@ -24,7 +24,7 @@ use Mojo::Base 'Mojo::DOM';
 #
 # Delete use of "constant"!
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 our @CARP_NOT;
 
@@ -843,7 +843,7 @@ XML::Loy - Extensible XML Reader and Writer
 
   use XML::Loy;
 
-  # Create new dcument with root node
+  # Create new document with root node
   my $xml = XML::Loy->new('env');
 
   # Add elements to the document
@@ -909,7 +909,7 @@ L<Mojo::DOM> and implements the following new ones.
   $xml = XML::Loy->new(Document => { foo => 'bar' });
   my $xml_new = $xml->new(Document => {id => 'new'} => 'My Content');
 
-Construct a new L<XML::Loy> document.
+Constructs a new L<XML::Loy> document.
 Accepts either all parameters supported by L<Mojo::DOM> or
 all parameters supported by L<add|/add>.
 
@@ -937,7 +937,7 @@ all parameters supported by L<add|/add>.
   $elem = $xml->new(Element => 'Hello World!');
   $xml->add($elem);
 
-Add a new element to a L<XML::Loy> document, either
+Adds a new element to a L<XML::Loy> document, either
 as another L<XML::Loy> object or newly defined.
 Returns the root node of the added L<XML::Loy>
 document.
@@ -947,11 +947,11 @@ followed by an optional hash reference
 including all attributes of the XML element,
 an optional textual content,
 and an optional comment on the element
-(if the comment should be introduced without text content,
+(if the comment should be introduced to an empty element,
 text content has to be C<undef>).
 
 For rendering element content with L<pretty printing|/to_pretty_xml>,
-a special C<-type> attribute can be defined:
+a special C<-type> attribute has to be defined:
 
 =over 2
 
@@ -1050,20 +1050,20 @@ Defaults to 60 characters linewidth after indentation.
   # Overwrite
   $xml->set(Element => { id => 6 });
 
-Add a new element as a child to the node - only once.
+Adds a new element as a child to the node only once.
 Accepts all parameters as defined in L<add|/add>.
 
 If one or more elements with the same tag name are
 already children of the requesting node,
-the old elements will be overwritten and
-comments will be merged.
+the old elements will be deleted and
+comments will be merged if possible.
 
 
 =head2 comment
 
   $node = $node->comment('Resource Descriptor');
 
-Prepend a comment to the current node.
+Prepends a comment to the current node.
 If a node already has a comment, comments will be merged.
 
 
@@ -1072,7 +1072,7 @@ If a node already has a comment, comments will be merged.
   my $nr = $xml->extension('Fun', 'XML::Loy::Atom');
   my @extensions = $xml->extension;
 
-Add or get an array of extensions.
+Adds or returns an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 
@@ -1106,9 +1106,9 @@ See L<Extensions|/Extensions> for further information.
   #   <fun:test foo="bar">Works!</fun:test>
   # </doc>
 
-Get the namespace of the node or
-add namespace information to the node's root.
-On adding, the first parameter gives the prefix, the second one
+Returns the namespace of the node or
+adds namespace information to the node's root.
+When adding, the first parameter gives the prefix, the second one
 the namespace. The prefix parameter is optional.
 Namespaces are always added to the document's root,
 that means,
@@ -1122,7 +1122,7 @@ they have to be unique in the scope of the whole document.
 
 Returns a stringified, pretty printed XML document.
 Optionally accepts a numerical parameter,
-defining the start of indentation (defaults to 0).
+defining the start of indentation (defaults to C<0>).
 
 
 =head1 EXTENSIONS
@@ -1221,8 +1221,8 @@ To prevent this prefixing, prepend the element name with
 a C<-> (like with C<E<lt>-Cool /E<gt>> in the example
 above).
 
-Derived classes are always strict and utf8, use warnings
-and import all features of Perl 5.10.
+Derived classes are always C<strict> and C<utf8>, use C<warnings>
+and import all C<features> of Perl 5.10.
 
 
 =head1 DEPENDENCIES
@@ -1237,8 +1237,8 @@ serialized data and the ease of extensibility.
 It is - as well as the underlying parser - written in pure perl and
 not intended to be the fastest thing out there
 (although I believe there's plenty of space for optimization).
-That said - it may not suits all your needs, but there are plenty of excellent
-other XML libraries out there, you should give a try then.
+That said - it may not suits all your needs, but there are loads of excellent
+XML libraries out there, you can give a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
 see L<XML::LibXML>.

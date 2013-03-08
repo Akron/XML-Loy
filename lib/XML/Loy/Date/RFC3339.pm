@@ -6,8 +6,6 @@ use overload '""' => sub { shift->to_string }, fallback => 1;
 
 require Time::Local;
 
-our $VERSION = '0.01';
-
 # rfc3339 timestamp
 my $RFC3339_RE = qr/^(\d{4})          # year
                      (?:-(\d?\d)      # year and month
@@ -212,11 +210,12 @@ XML::Loy::Date::RFC3339 - Date strings according to RFC3339
   $date->parse('1993-01-01t18:50:00-04:00');
   my $epoch = $date->epoch;
 
+
 =head1 DESCRIPTION
 
 L<XML::Loy::Date::RFC3339> implements date and time functions
 according to L<RFC3339|http://tools.ietf.org/html/rfc3339>.
-In addition it supports granularity as described in
+In addition to that it supports granularity as described in
 L<W3C date and time formats|http://www.w3.org/TR/NOTE-datetime>.
 
 This module is meant to be compatible with the L<Mojo::Date>-API
@@ -246,15 +245,25 @@ Level of granularity.
 
 =over 2
 
-=item 0: Complete date plus hours, minutes and seconds
+=item
 
-=item 1: Complete date plus hours and minutes
+0: Complete date plus hours, minutes and seconds
 
-=item 2: Complete date
+=item
 
-=item 3: Year and month
+1: Complete date plus hours and minutes
 
-=item 4: Year
+=item
+
+2: Complete date
+
+=item
+
+3: Year and month
+
+=item
+
+4: Year
 
 =back
 
@@ -269,7 +278,7 @@ L<XML::Loy::Date::RFC3339> implements the following methods.
   my $date = XML::Loy::Date::RFC3339->new;
   my $date = XML::Loy::Date::RFC3339->new($string);
 
-Construct a new L<XML::Loy::Date::RFC3339> object.
+Constructs a new L<XML::Loy::Date::RFC3339> object.
 Accepts a date string to be parsed.
 
 =head2 parse
@@ -278,7 +287,8 @@ Accepts a date string to be parsed.
   $date = $date->parse('1993-01-01');
   $date = $date->parse(1312043400);
 
-Parse RFC3339 and granularity compliant date strings.
+Parses L<RFC3339|http://tools.ietf.org/html/rfc3339>
+and granularity compliant date strings.
 Also accepts epoch seconds.
 
 
@@ -287,7 +297,9 @@ Also accepts epoch seconds.
   my $string = $date->to_string;
   my $string = $date->to_string(3);
 
-Render date suitable to RFC3339 without offset information.
+Renders date suitable to
+L<RFC3339|http://tools.ietf.org/html/rfc3339>
+without offset information.
 Takes an optional parameter for granularity.
 Uses the objects granularity level by default.
 
@@ -297,18 +309,18 @@ Uses the objects granularity level by default.
 L<Time::Local>.
 
 
-=head1 COPYRIGHT AND LICENSE
-
-The code is heavily based on L<Mojo::Date>,
-written by Sebastian Riedel. See L<Mojo::Date>
-for additional copyright and license information.
-
 =head1 AVAILABILITY
 
   https://github.com/Akron/XML-Loy
 
 
+=head1 COPYRIGHT AND LICENSE
+
 Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+
+The code is heavily based on L<Mojo::Date>,
+written by Sebastian Riedel. See L<Mojo::Date>
+for additional copyright and license information.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

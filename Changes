@@ -1,3 +1,9 @@
+0.05 2013-03-08
+        - Fix documentation bugs.
+        - Fix small bug in Atom::category.
+	- Improved documentation.
+	- Delete version information from Date::RFC3339.
+
 0.04 2013-03-08
         - Added Atom and ActivityStreams.
 	- Replaced "children" with own method.

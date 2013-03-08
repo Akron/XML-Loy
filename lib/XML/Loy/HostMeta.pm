@@ -35,7 +35,7 @@ __END__
 
 =head1 NAME
 
-XML::Loy::Hostmeta - HostMeta Extension for XRD
+XML::Loy::HostMeta - HostMeta Extension for XRD
 
 
 =head1 SYNOPSIS
@@ -64,7 +64,7 @@ XML::Loy::Hostmeta - HostMeta Extension for XRD
 L<XML::Loy::HostMeta> is an extension
 to L<XML::Loy::XRD> and provides addititional
 functionality for the work with
-L<HostMeta|http://tools.ietf.org/html/draft-hammer-hostmeta>
+L<HostMeta|https://tools.ietf.org/html/rfc6415>
 documents.
 
 B<This module is an early release! There may be significant changes in the future.>
@@ -81,7 +81,9 @@ from L<XML::Loy> and implements the following new ones.
   $xrd->host('sojolicio.us');
   print $xrd->host;
 
-Host information of the xrd.
+Sets or returns host information of the xrd.
+The support of this element was removed from
+the specification in draft C<09>.
 
 
 =head1 DEPENDENCIES

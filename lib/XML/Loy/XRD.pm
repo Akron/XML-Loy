@@ -374,7 +374,7 @@ XML::Loy::XRD - Extensible Resource Descriptor Extension
   # Create new document
   my $xrd = XML::Loy::XRD->new;
 
-  # Set subject and alias
+  # Set subject and add alias
   $xrd->subject('http://sojolicio.us/');
   $xrd->alias('https://sojolicio.us/');
 
@@ -432,7 +432,7 @@ from L<XML::Loy> and implements the following new ones.
   my $xrd = XML::Loy::XRD->new;
 
   # New document by XRD
-  $xrd = XML::Loy::XRD->new(<<XRD);
+  $xrd = XML::Loy::XRD->new(<<'XRD');
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -461,7 +461,7 @@ from L<XML::Loy> and implements the following new ones.
 
 
 Create a new XRD document object.
-Beside the accepted input of L<XML::Loy' new|XML::Loy/new>,
+Beside the accepted input of L<XML::Loy::new|XML::Loy/new>,
 it can also parse L<JRD|https://tools.ietf.org/html/rfc6415> input.
 
 
@@ -518,12 +518,11 @@ object with a different API!>
   # use Mojo::DOM remove method
   $xrd->link('hcard')->remove;
 
-Adds links to the xrd document or retrieve them.
-Accepts the relation as a string and for adding a link
-a hash reference containing the attributes.
-Is a string following the relation,
-this is assumed to be the C<href> attribute.
-Returns a L<XML::Loy::XRD> object.
+Adds links to the xrd document or retrieves them.
+Accepts the relation as a scalar and for adding
+either an additional hash reference containing
+the attributes, or a scalar value referring to the
+C<href> attribute.
 
 
 =head2 property
@@ -540,9 +539,9 @@ Returns a L<XML::Loy::XRD> object.
   # use Mojo::DOM remove method
   $xrd->property('private')->remove;
 
-Add properties to the xrd document or retrieve them.
-To add empty propertys, you have to pass C<undef> as the value.
-Returns a L<XML::Loy::XRD> object.
+Adds properties to the xrd document or retrieves them.
+To add empty properties, C<undef> has to be passed
+as the property's value.
 
 
 =head2 subject
@@ -550,8 +549,8 @@ Returns a L<XML::Loy::XRD> object.
   $xrd->subject('http://sojolicio.us/');
   my $subject = $xrd->subject;
 
-Set the subject of the xrd document
-or return it.
+Sets the subject of the xrd document
+or returns it.
 
 
 =head2 to_json

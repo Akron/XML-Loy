@@ -14,7 +14,8 @@ WriteMakefile(
     'Test::Warn' => '0.24'
   },
   PREREQ_PM => {
-    'Mojolicious' => '3.89'
+    'Mojolicious' => '3.89',
+    'Time::Local' => 0
   },
   LICENSE     => 'perl',
   META_MERGE  => {
@@ -24,5 +25,6 @@ WriteMakefile(
       repository  => 'https://github.com/Akron/XML-Loy'
     }
   },
+  MIN_PERL_VERSION => '5.010001',
   test => {TESTS => 't/*.t t/Extensions/*.t t/Date/*.t' }
 );
