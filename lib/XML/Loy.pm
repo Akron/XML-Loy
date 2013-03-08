@@ -254,6 +254,45 @@ sub set {
 };
 
 
+# Children of the node
+sub children {
+  my ($self, $type) = @_;
+
+  # This method is a modified version of
+  # the children method of Mojo::DOM
+  # It works as written in the documentation,
+  # but is also aware of namespace prefixes.
+
+  my @children;
+  my $charset = $self->charset;
+  my $xml     = $self->xml;
+  my $tree    = $self->tree;
+  my $type_l  = length $type;
+  for my $e (@$tree[($tree->[0] eq 'root' ? 1 : 4) .. $#$tree]) {
+
+    # Make sure child is the right type
+    next unless $e->[0] eq 'tag';
+
+    # Type is given
+    if (defined $type) {
+
+      # Type is already prefixed or element is not prefixed
+      if (index($type, ':') > 0 || index($e->[1], ':') < 0) {
+	next if $e->[1] ne $type;
+      }
+
+      # Check, if type is valid, but ignore prefixes
+      elsif ((rindex($e->[1], $type) - (length($e->[1]) - $type_l)) == 0) {
+	next;
+      };
+    };
+    push @children, $self->new->charset($charset)->tree($e)->xml($xml);
+  }
+
+  # Create new Mojo::Collection
+  return Mojo::Collection->new(@children);
+}
+
 # Append a new child node to the XML Node
 sub _add_clean {
   my $self = shift;

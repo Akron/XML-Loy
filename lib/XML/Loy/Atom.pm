@@ -3,6 +3,10 @@ use Carp qw/carp/;
 use Mojo::ByteStream 'b';
 use XML::Loy::Date::RFC3339;
 
+# Todo:
+#  - see http://search.cpan.org/dist/XML-Atom-SimpleFeed
+#  - Do not use constant
+
 our @CARP_NOT;
 
 use XML::Loy with => (
@@ -14,10 +18,6 @@ use XML::Loy with => (
 
 # Namespace declaration
 use constant XHTML_NS => 'http://www.w3.org/1999/xhtml';
-
-# Todo:
-#  - see http://search.cpan.org/dist/XML-Atom-SimpleFeed
-#  - Do not use constant
 
 
 # New person construct
@@ -162,6 +162,7 @@ sub category {
     $coll->map( sub { $_ = $_->{term} });
   };
 };
+
 
 # Add contributor information
 sub contributor {
@@ -633,7 +634,7 @@ L<RFC4287|http://tools.ietf.org/html/rfc4287>.
 
 =head1 METHODS
 
-L<Mojolicious::Plugin::XML::Atom> inherits all methods
+L<XML::Loy::Atom> inherits all methods
 from L<XML::Loy> and implements the
 following new ones.
 
@@ -646,6 +647,7 @@ following new ones.
   );
 
 Returns a new person construction.
+Accepts a hash with element descriptions.
 
 
 =head2 new_text
@@ -657,7 +659,7 @@ Returns a new person construction.
     content => 'This is a <strong>test</strong>!'
   );
 
-Create a new text construct. Accepts either a simple string
+Creates a new text construct. Accepts either a simple string
 (of type C<text>), a tupel with the first argument being the
 media type and the second argument being the content,
 or a hash with the parameters C<type>,
@@ -696,7 +698,7 @@ for further details).
 
   print $atom->author->[0]->at('name')->text;
 
-Add author information to the Atom object or get it.
+Adds author information to the Atom object or returns it.
 Accepts a person construct (see L<new_person|/new_person>)
 or the parameters accepted by L<new_person|/new_person>.
 
@@ -709,7 +711,7 @@ Returns a collection of author nodes.
 
   print $atom->category->[0];
 
-Adds category information to the Atom object or get it.
+Adds category information to the Atom object or returns it.
 Accepts either a hash for attributes
 (with, e.g., term and label)
 or one string representing the category's term.
@@ -731,7 +733,7 @@ Returns a collection of category terms.
 
   print $atom->content->all_text;
 
-Set content information to the Atom object or get it.
+Sets content information to the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>) or the
 parameters accepted by L<new_text|/new_text>.
 Returns the content node or,
@@ -749,7 +751,7 @@ the wrapped div node.
 
   print $atom->contributor->[0]->at('name')->text;
 
-Add contributor information to the Atom object or get it.
+Adds contributor information to the Atom object or returns it.
 Accepts a person construct (see L<new_person|/new_person>)
 or the parameters accepted by L<new_person|/new_person>.
 
@@ -766,7 +768,7 @@ Returns a collection of contributor nodes.
   # Get entry by id
   my $entry = $atom->entry('entry_id_1');
 
-Add an entry to the Atom feed or get one.
+Adds an entry to the Atom feed or returns one.
 Accepts a hash of simple entry information
 for adding or an id for retrieval.
 
@@ -774,21 +776,18 @@ for adding or an id for retrieval.
 =head2 generator
 
   $atom->generator('XML-Loy-Atom');
-
   print $atom->generator;
 
-Set generator information of the feed or returns it
+Sets generator information of the feed or returns it
 as a text string.
 
 
 =head2 icon
 
   $atom->icon('http://sojolicio.us/favicon.ico');
-
   print $atom->icon;
 
-Set icon url of the feed or return it
-as a text string.
+Sets icon url of the feed or returns it as a text string.
 The image should be suitable for a small representation size
 and have an aspect ratio of 1:1.
 
@@ -796,17 +795,16 @@ and have an aspect ratio of 1:1.
 =head2 id
 
   $atom->id('http://sojolicio.us/#12345');
-
   print $atom->id;
 
-Set or return the unique identifier of the Atom object.
+Sets or returns the unique identifier of the Atom object.
 
 
 =head2 link
 
   $atom->link(related => 'http://sojolicio.us/#12345');
   $atom->link(
-    rel => 'self',
+    rel  => 'self',
     href => 'http://sojolicio.us/#12345'
   );
 
@@ -814,20 +812,19 @@ Set or return the unique identifier of the Atom object.
   $atom->link('related');
 
 
-Adds link information to the Atom object. If no relation
-attribute is given, the default relation is 'related'.
+Adds link information to the Atom object.
 Accepts either one scalar as a reference of a related link,
-a pair of scalars for the relational type and the reference
+a pair of scalars for the relational type and the reference,
 or multiple hashes for the attributes of the link.
+If no relation attribute is given, the default relation is 'related'.
 
 
 =head2 logo
 
   $atom->logo('http://sojolicio.us/sojolicious.png');
-
   print $atom->logo;
 
-Set logo url of the feed or return it as a text string.
+Sets logo url of the feed or returns it as a text string.
 The image should have an aspect ratio of 2:1.
 
 
@@ -841,8 +838,8 @@ The image should have an aspect ratio of 2:1.
 
   print $atom->published->to_string;
 
-Set the publishing date of the Atom object
-or get the publishing date as a
+Sets the publishing date of the Atom object
+or returns the publishing date as a
 L<XML::Loy::Date::RFC3339> object.
 Accepts all valid parameters of
 L<XML::Loy::Date::RFC3339::new|XML::Loy::Date::RFC3339/new>.
@@ -854,10 +851,9 @@ object with a different API!>
 =head2 rights
 
   $atom->rights('Public Domain');
-
   print $atom->rights->all_text;
 
-Set legal information of the Atom object.
+Sets legal information of the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
 Returns the rights node or,
@@ -876,7 +872,7 @@ the wrapped div node.
         ->source
         ->author->[0]->at('name')->all_text;
 
-Set or get source information of an atom entry.
+Sets or returns the source information of an atom entry.
 Expects for setting a hash reference (at least empty)
 of the attributes of the source.
 Returns the source node.
@@ -894,7 +890,7 @@ Returns the source node.
 
   print $atom->subtitle->all_text;
 
-Set subtitle information to the Atom feed.
+Sets subtitle information to the Atom feed or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
 Returns the subtitle node or,
@@ -914,7 +910,7 @@ the wrapped div node.
 
   print $atom->summary->all_text;
 
-Set summary information to the Atom entry.
+Sets summary information to the Atom entry or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
 Returns the summary node or,
@@ -932,9 +928,9 @@ the wrapped div node.
   $atom->title($text);
   $atom->title('This is a title!');
 
-  print $atom->subtitle->all_text;
+  print $atom->title->all_text;
 
-Set title information to the Atom object.
+Sets title information to the Atom object or returns it.
 Accepts a text construct (see L<new_text|/new_text>)
 or the parameters accepted by L<new_text|/new_text>.
 Returns the title node or,
@@ -952,11 +948,11 @@ the wrapped div node.
 
   print $atom->updated->to_string;
 
-Set the date of the last update of the Atom object
-or get the date as a
+Sets the date of the last update of the Atom object
+or returns it as a
 L<XML::Loy::Date::RFC3339> object.
 Accepts all valid parameters of
-L<XML::Loy::Date::RFC3339::new|XML::Loy::Date::RFC3339/new>.
+L<XML::Loy::Date::RFC3339's new|XML::Loy::Date::RFC3339/new>.
 
 B<This method is experimental and may return another
 object with a different API!>

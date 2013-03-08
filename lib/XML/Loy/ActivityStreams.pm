@@ -1,5 +1,4 @@
 package XML::Loy::ActivityStreams;
-
 our $NS;
 BEGIN { $NS = 'http://activitystrea.ms/schema/1.0/' };
 
@@ -34,8 +33,24 @@ sub actor {
 
   # Get actor
   else {
-    return $self->author->[0];
+    my $actor = $self->author->[0];
+    if ($actor) {
+
+      warn $actor;
+
+      my $object_type = $actor->children('object-type');
+
+      return unless $object_type = $object_type->[0];
+
+      if (index($object_type->text, '/') == -1) {
+	$object_type->replace_content($NS . lc($object_type->text));
+      };
+
+      return $actor;
+    };
   };
+
+  return;
 };
 
 
@@ -51,15 +66,11 @@ sub verb {
 
   # Get verb
   else {
-    my $verb = $self->children('activity:verb');
-
-warn $verb;
+    my $verb = $self->children('verb');
 
     return unless $verb->[0];
 
     $verb = $verb->[0]->text;
-
-warn '++++++++++++++++';
 
     # Add ns prefix if not given
     if (index($verb, '/') == -1) {
