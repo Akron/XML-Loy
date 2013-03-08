@@ -2,15 +2,15 @@
 
 =head1 NAME
 
-MojoX::XML - Read and write XML documents based on Mojo::DOM
+XML::Loy - Extensible XML Reader and Writer
 
 
 =head1 SYNOPSIS
 
-  use MojoX::XML;
+  use XML::Loy;
 
   # Create new dcument with root node
-  my $xml = MojoX::XML->new('env');
+  my $xml = XML::Loy->new('env');
 
   # Add elements to the document
   my $header = $xml->add('header');
@@ -47,40 +47,42 @@ MojoX::XML - Read and write XML documents based on Mojo::DOM
 
 =head1 DESCRIPTION
 
-L<MojoX::XML> allows for the simple creation
+L<XML::Loy> allows for the simple creation
 of small serialized XML documents with
 various namespaces.
 It focuses on simplicity and extensibility,
 while giving you the full power of L<Mojo::DOM>.
 
+B<This module is an early release! There may be significant changes in the future.>
+
 
 =head1 METHODS
 
-L<MojoX::XML> inherits all methods from
+L<XML::Loy> inherits all methods from
 L<Mojo::DOM> and implements the following new ones.
 
 
 =head2 new
 
-  my $xml = MojoX::XML->new(<<'EOF');
+  my $xml = XML::Loy->new(<<'EOF');
   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <entry>
     <fun>Yeah!</fun>
   <entry>
   EOF
 
-  $xml = MojoX::XML->new('Document');
-  $xml = MojoX::XML->new(Document => { foo => 'bar' });
+  $xml = XML::Loy->new('Document');
+  $xml = XML::Loy->new(Document => { foo => 'bar' });
   my $xml_new = $xml->new(Document => {id => 'new'} => 'My Content');
 
-Construct a new L<MojoX::XML> document.
+Construct a new L<XML::Loy> document.
 Accepts either all parameters supported by L<Mojo::DOM> or
 all parameters supported by L<add|/add>.
 
 
 =head2 add
 
-  my $xml = MojoX::XML->new('Document');
+  my $xml = XML::Loy->new('Document');
 
   # Add an empty element
   $xml->add('Element');
@@ -97,13 +99,13 @@ all parameters supported by L<add|/add>.
   # Add elements with rules for pretty printing
   $xml->add(Data => { -type => 'armour' }, 'PdGzjvj..');
 
-  # Add Mojox::XML objects
+  # Add XML::Loy objects
   $elem = $xml->new(Element => 'Hello World!');
   $xml->add($elem);
 
-Add a new element to a L<MojoX::XML> document, either
-as another L<MojoX::XML> object or newly defined.
-Returns the root node of the added L<MojoX::XML>
+Add a new element to a L<XML::Loy> document, either
+as another L<XML::Loy> object or newly defined.
+Returns the root node of the added L<XML::Loy>
 document.
 
 Parameters to define elements are a tag name,
@@ -125,7 +127,7 @@ C<escape>
 
 XML escape the content of the node.
 
-  my $xml = MojoX::XML->new('feed');
+  my $xml = XML::Loy->new('feed');
   my $html = $xml->add(html => { -type => 'escape' });
   $html->add(h1 => { style => 'color: red' } => 'I start blogging!');
   $html->add(p => 'What a great idea!')->comment('First post');
@@ -148,11 +150,11 @@ C<raw>
 
 Treat children as raw data (no pretty printing).
 
-  my $plain = MojoX::XML->new(<<'PLAIN');
+  my $plain = XML::Loy->new(<<'PLAIN');
   <entry>There is <b>no</b> pretty printing</entry>
   PLAIN
 
-  my $xml = MojoX::XML->new('entry');
+  my $xml = XML::Loy->new('entry');
   my $text = $xml->add(text => { -type => 'raw' });
   $text->add($plain);
 
@@ -175,7 +177,7 @@ C<n>th character.
 Intended for base64 encoded data.
 Defaults to 60 characters linewidth after indentation.
 
-  my $xml = MojoX::XML->new('entry');
+  my $xml = XML::Loy->new('entry');
 
   my $b64_data = <<'B64';
     VGhpcyBpcyBqdXN0IGEgdGVzdCBzdHJpbmcgZm
@@ -208,7 +210,7 @@ Defaults to 60 characters linewidth after indentation.
 
 =head2 set
 
-  my $xml = MojoX::XML->new('Document');
+  my $xml = XML::Loy->new('Document');
   $xml->set(Element => { id => 5 });
 
   # Overwrite
@@ -233,7 +235,7 @@ If a node already has a comment, comments will be merged.
 
 =head2 extension
 
-  my $nr = $xml->extension('Fun', 'MojoX::XML::Atom');
+  my $nr = $xml->extension('Fun', 'XML::Loy::Atom');
   my @extensions = $xml->extension;
 
 Add or get an array of extensions.
@@ -241,7 +243,8 @@ When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 
 With this package the following extensions are bundled:
-L<XRD|MojoX::XML::XRD> and L<HostMeta|MojoX::XML::HostMeta>.
+L<Atom|XML::Loy::Atom>, L<ActivityStreams|XML::Loy::ActivityStreams>,
+L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
 See L<Extensions|/Extensions> for further information.
 
 
@@ -255,7 +258,7 @@ See L<Extensions|/Extensions> for further information.
 
 =head2 namespace
 
-  my $xml = MojoX::XML->new('doc');
+  my $xml = XML::Loy->new('doc');
   $xml->namespace('http://sojolicio.us/ns/global');
   $xml->namespace(fun => 'http://sojolicio.us/ns/fun');
   $xml->add('fun:test' => { foo => 'bar' }, 'Works!');
@@ -291,7 +294,7 @@ defining the start of indentation (defaults to 0).
 =head1 EXTENSIONS
 
   package Fun;
-  use MojoX::XML with => (
+  use XML::Loy with => (
     prefix => 'fun',
     namespace => 'http://sojolicio.us/ns/fun',
     mime => 'application/fun+xml'
@@ -307,13 +310,17 @@ defining the start of indentation (defaults to 0).
     $cool->add(Happy => {foo => 'bar'}, $cry);
   };
 
-L<MojoX::XML> allows for inheritance
+L<XML::Loy> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
 base class with the L<extension|/extension> method.
 
-For this purpose three attributes can be set when
-L<MojoX::XML> is used (introduced with the keyword C<with>).
+With this package the following extensions are bundled:
+L<Atom|XML::Loy::Atom>, L<ActivityStreams|XML::Loy::ActivityStreams>,
+L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+
+For the purpose of extension, three attributes can be set when
+L<XML::Loy> is used (introduced with the keyword C<with>).
 
 =over 2
 
@@ -351,13 +358,13 @@ The defined namespace is introduced as the document's
 namespace. The prefix is not in use for derived classes.
 
 Without any changes to the class, you can use this module as an
-extension to another L<MojoX::XML> based document as well.
+extension to another L<XML::Loy> based document as well.
 
-  use MojoX::XML;
+  use XML::Loy;
 
-  my $obj = MojoX::XML->new('object');
+  my $obj = XML::Loy->new('object');
 
-  # Use MojoX::XML based class 'Fun'
+  # Use XML::Loy based class 'Fun'
   $obj->extension('Fun');
 
   # Use methods provided by the base class or any extension
@@ -380,21 +387,24 @@ To prevent this prefixing, prepend the element name with
 a C<-> (like with C<E<lt>-Cool /E<gt>> in the example
 above).
 
+Derived classes are always strict and utf8, use warnings
+and import all features of Perl 5.10.
+
 
 =head1 DEPENDENCIES
 
-L<Mojolicious>.
+L<Mojolicious>, L<Test::Warn> (for testing).
 
 
 =head1 CAVEATS
 
-L<MojoX::XML> focuses on the comfortable handling of small documents of
+L<XML::Loy> focuses on the comfortable handling of small documents of
 serialized data and the ease of extensibility.
 It is - as well as the underlying parser - written in pure perl and
 not intended to be the fastest thing out there
 (although I believe there's plenty of space for optimization).
 That said - it may not suits all your needs, but there are plenty of excellent
-other XML libraries out there, you should give them a try then.
+other XML libraries out there, you should give a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
 see L<XML::LibXML>.
@@ -402,7 +412,7 @@ see L<XML::LibXML>.
 
 =head1 AVAILABILITY
 
-  https://github.com/Akron/MojoX-XML
+  https://github.com/Akron/XML-Loy
 
 
 =head1 COPYRIGHT AND LICENSE
