@@ -1,3 +1,7 @@
+0.04 2013-03-08
+        - Added Atom and ActivityStreams.
+	- Replaced "children" with own method.
+
 0.03 2013-03-06
         - Renamed MojoX::XML to XML::Loy.
 

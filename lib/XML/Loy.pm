@@ -282,7 +282,7 @@ sub children {
       }
 
       # Check, if type is valid, but ignore prefixes
-      elsif ((rindex($e->[1], $type) - (length($e->[1]) - $type_l)) == 0) {
+      elsif (rindex($e->[1], $type) - (length($e->[1]) - $type_l)) {
 	next;
       };
     };

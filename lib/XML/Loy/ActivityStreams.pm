@@ -36,14 +36,12 @@ sub actor {
     my $actor = $self->author->[0];
     if ($actor) {
 
-      warn $actor;
-
       my $object_type = $actor->children('object-type');
 
       return unless $object_type = $object_type->[0];
 
       if (index($object_type->text, '/') == -1) {
-	$object_type->replace_content($NS . lc($object_type->text));
+	$object_type->replace_content($NS . lc$object_type->text);
       };
 
       return $actor;
@@ -61,23 +59,23 @@ sub verb {
   # Set verb
   if ($_[0]) {
     my $verb = shift;
-    return $self->add('verb', $verb);
+    return $self->add('verb', _check_prefix($verb));
   }
 
   # Get verb
   else {
     my $verb = $self->children('verb');
 
-    return unless $verb->[0];
-
-    $verb = $verb->[0]->text;
+    return unless $verb = $verb->[0];
 
     # Add ns prefix if not given
-    if (index($verb, '/') == -1) {
-      $verb = $NS . lc $verb;
+    if (index($verb->text, '/') == -1) {
+      my $nverb = $NS . lc $verb->text;
+      $verb->replace_content($nverb);
+      return $nverb;
     };
 
-    return $verb;
+    return $verb->text;
   }
 };
 
@@ -111,7 +109,7 @@ sub _target_object {
 
       my $type = delete $params{type};
 
-      $obj->set('object-type', $type);
+      $obj->set('object-type', _check_prefix($type));
     };
 
     foreach (keys %params) {
@@ -122,10 +120,11 @@ sub _target_object {
   }
 
   else {
-    my $obj = $self->children($type);
+    my $obj = $self->at($type);
+
     return unless $obj->[0];
 
-    my $object_type = $obj->at('object-type');
+    my $object_type = $obj->children('object-type')->[0];
 
     if (index($object_type->text, '/') == -1) {
       $object_type->replace_content($NS . lc($object_type->text));
@@ -136,6 +135,12 @@ sub _target_object {
 };
 
 
+sub _check_prefix {
+  if (index($_[0], '/') == -1) {
+    return $NS . lc $_[0];
+  };
+  return $_[0];
+};
 
 1;
 

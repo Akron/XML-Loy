@@ -51,14 +51,11 @@ is($as_entry->at('verb')->namespace,
 is($as_entry->verb, 'http://activitystrea.ms/schema/1.0/follow', 'Get verb');
 
 
-diag $as->to_pretty_xml;
-
-done_testing;
-
-
 # add object
-$as->add_object(type => 'person',
-                displayName => 'Leela');
+ok($as->object(
+  type => 'person',
+  displayName => 'Leela'
+), 'Set object');
 is($as->at('object > displayName')->text, 'Leela', 'Add object 1');
 is($as->at('object > object-type')->text,
    'http://activitystrea.ms/schema/1.0/person', 'Add object 2');
@@ -66,20 +63,18 @@ is($as->at('object')->namespace,
    'http://activitystrea.ms/schema/1.0/', 'Add object 3');
 is($as->at('object > object-type')->namespace,
    'http://activitystrea.ms/schema/1.0/', 'Add object 4');
-
-
-
-
-
-
-__END__
-
-
-
+is($as->object->at('object-type')->all_text,
+   'http://activitystrea.ms/schema/1.0/person',
+   'Get object');
+is($as->object->at('displayName')->all_text,
+   'Leela',
+   'Get object displayName');
 
 # add target
-$as->add_target(type => 'person',
-                displayName => 'Zoidberg');
+$as->target(
+  type => 'person',
+  displayName => 'Zoidberg'
+);
 is($as->at('target > displayName')->text, 'Zoidberg', 'Add target 1');
 is($as->at('target > object-type')->text,
    'http://activitystrea.ms/schema/1.0/person', 'Add target 2');
@@ -87,5 +82,17 @@ is($as->at('target')->namespace,
    'http://activitystrea.ms/schema/1.0/', 'Add target 3');
 is($as->at('target > object-type')->namespace,
    'http://activitystrea.ms/schema/1.0/', 'Add target 4');
+is($as->target->at('object-type')->all_text,
+   'http://activitystrea.ms/schema/1.0/person',
+   'Get target');
+is($as->target->at('displayName')->all_text,
+   'Zoidberg',
+   'Get target displayName');
+
+
+# diag $as->to_pretty_xml;
+
+done_testing;
+
 
 __END__
