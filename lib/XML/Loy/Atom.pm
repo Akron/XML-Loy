@@ -9,6 +9,7 @@ use XML::Loy::Date::RFC3339;
 
 our @CARP_NOT;
 
+# Make it an XML::Loy base class
 use XML::Loy with => (
   mime      => 'application/atom+xml',
   prefix    => 'atom',
@@ -45,7 +46,7 @@ sub new_text {
       text => {
 	type  => 'text',
 	-type => 'raw'
-      } => shift);
+      } => shift );
   };
 
   my ($type, $content, %hash);
@@ -71,6 +72,7 @@ sub new_text {
     $content = delete $hash{content} or return;
   };
 
+  # Content node
   my $c_node;
 
   # xhtml
@@ -83,9 +85,8 @@ sub new_text {
 	%hash
       });
 
-    # Content is raw and thus nonindented
-    # But also escaped
-    $c_node->add(
+    # XHTML content - allowed to be pretty printed
+   $c_node->add(
       -div => {
 	xmlns => XHTML_NS
       })->append_content($content);
@@ -94,6 +95,7 @@ sub new_text {
   # html or text
   elsif ($type eq 'html' || $type =~ /^text/i) {
 
+    # Content is raw and thus nonindented
     $c_node = $class->new(
       text => {
 	'type'  => $type,
@@ -631,6 +633,10 @@ L<XML::Loy::Atom> is a base class or extension
 for L<XML::Loy> and provides several functions
 for the work with the Atom Syndication Format as described in
 L<RFC4287|http://tools.ietf.org/html/rfc4287>.
+
+This code may help you to create your own L<XML::Loy> extensions.
+
+B<This module is an early release! There may be significant changes in the future.>
 
 =head1 METHODS
 

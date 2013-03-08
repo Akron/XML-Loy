@@ -67,8 +67,14 @@ functionality for the work with
 L<HostMeta|http://tools.ietf.org/html/draft-hammer-hostmeta>
 documents.
 
+B<This module is an early release! There may be significant changes in the future.>
+
 
 =head1 METHODS
+
+L<XML::Loy::HostMeta> inherits all methods
+from L<XML::Loy> and implements the following new ones.
+
 
 =head2 host
 

@@ -24,7 +24,7 @@ use Mojo::Base 'Mojo::DOM';
 #
 # Delete use of "constant"!
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 our @CARP_NOT;
 
@@ -199,11 +199,12 @@ sub set {
     $self = $self->at('*');
   };
 
-  # Document objects are not allowed
+  # Get tag from document object
   if (ref $_[0]) {
     $tag = $_[0]->at('*')->type;
   }
 
+  # Get tag
   else {
 
     # Store tag
@@ -501,10 +502,8 @@ sub namespace {
   # Get root element
   my $root = $self->_root_element;
 
-  unless ($root) {
-#    carp 'Unable to set namespace without root element';
-    return;
-  };
+  # No warning, but not able to set
+  return unless $root;
 
   # Save namespace as attribute
   $root->[2]->{'xmlns' . ($prefix ? ":$prefix" : '')} = $ns;
@@ -794,11 +793,6 @@ sub _root_element {
 };
 
 
-# Make all islands prefixed
-# sub _prefix_islands {
-#   shift;
-# };
-
 # Autoload for extensions
 sub AUTOLOAD {
   my $self = shift;
@@ -892,6 +886,8 @@ of small serialized XML documents with
 various namespaces.
 It focuses on simplicity and extensibility,
 while giving you the full power of L<Mojo::DOM>.
+
+B<This module is an early release! There may be significant changes in the future.>
 
 
 =head1 METHODS
@@ -1081,7 +1077,8 @@ When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 
 With this package the following extensions are bundled:
-L<XRD|XML::Loy::XRD> and L<HostMeta|XML::Loy::HostMeta>.
+L<Atom|XML::Loy::Atom>, L<ActivityStreams|XML::Loy::ActivityStreams>,
+L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
 See L<Extensions|/Extensions> for further information.
 
 
@@ -1152,7 +1149,11 @@ and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
 base class with the L<extension|/extension> method.
 
-For this purpose three attributes can be set when
+With this package the following extensions are bundled:
+L<Atom|XML::Loy::Atom>, L<ActivityStreams|XML::Loy::ActivityStreams>,
+L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+
+For the purpose of extension, three attributes can be set when
 L<XML::Loy> is used (introduced with the keyword C<with>).
 
 =over 2

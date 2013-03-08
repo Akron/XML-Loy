@@ -53,7 +53,7 @@ is($as_entry->verb, 'http://activitystrea.ms/schema/1.0/follow', 'Get verb');
 
 # add object
 ok($as->object(
-  type => 'person',
+  'object-type' => 'person',
   displayName => 'Leela'
 ), 'Set object');
 is($as->at('object > displayName')->text, 'Leela', 'Add object 1');
@@ -72,7 +72,7 @@ is($as->object->at('displayName')->all_text,
 
 # add target
 $as->target(
-  type => 'person',
+  'object-type' => 'person',
   displayName => 'Zoidberg'
 );
 is($as->at('target > displayName')->text, 'Zoidberg', 'Add target 1');

@@ -40,6 +40,7 @@ sub actor {
 
       return unless $object_type = $object_type->[0];
 
+      # Prepend namespace if not defined
       if (index($object_type->text, '/') == -1) {
 	$object_type->replace_content($NS . lc$object_type->text);
       };
@@ -68,7 +69,7 @@ sub verb {
 
     return unless $verb = $verb->[0];
 
-    # Add ns prefix if not given
+    # Prepend namespace if not defined
     if (index($verb->text, '/') == -1) {
       my $nverb = $NS . lc $verb->text;
       $verb->replace_content($nverb);
@@ -105,9 +106,9 @@ sub _target_object {
 
     $obj->id( delete $params{id} ) if exists $params{id};
 
-    if (exists $params{type}) {
+    if (exists $params{'object-type'}) {
 
-      my $type = delete $params{type};
+      my $type = delete $params{'object-type'};
 
       $obj->set('object-type', _check_prefix($type));
     };
@@ -126,6 +127,7 @@ sub _target_object {
 
     my $object_type = $obj->children('object-type')->[0];
 
+    # Prepend namespace if not defined
     if (index($object_type->text, '/') == -1) {
       $object_type->replace_content($NS . lc($object_type->text));
     };
@@ -154,107 +156,158 @@ Mojolicious::Plugin::XML::ActivityStreams - ActivityStreams (Atom) Plugin
 
 =head1 SYNOPSIS
 
-  # Mojolicious
-  $app->plugin('XML' => {
-    new_activity => ['Atom','ActivityStreams']
-  });
+  # Create new Atom object
+  my $atom = XML::Loy::Atom->new('feed');
 
-  # Mojolicious::Lite
-  plugin 'XML' => {
-    new_activity => ['Atom','ActivityStreams']
+  # Extend with ActivityStreams
+  $atom->extension('XML::Loy::ActivityStreams');
+
+  # New atom entry
+  my $entry = $atom->entry(id => 'first_post');
+
+  for ($entry) {
+
+    # Define activity actor
+    $_->actor(name => 'Fry');
+
+    # Define activity verb
+    $_->verb('loves');
+
+    # Define activity object
+    $_->object(
+      'object-type' => 'person',
+      'name'        => 'Leela'
+    )->title('Captain');
+
+    # Set related Atom information
+    $_->title(xhtml => 'Fry loves Leela');
+    $_->summary("Now it's official!");
+    $_->published(time);
   };
 
-  # In Controllers
-  my $activity = $self->new_activity(<<'ACTIVITY');
-  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  <entry xmlns="http://www.w3.org/2005/Atom"
-         xmlns:activity="http://activitystrea.ms/schema/1.0/">
-    <author>
-      <name>Fry</name>
-      <activity:object-type>person</activity:object-type>
-    </author>
-    <activity:verb>follow</activity:verb>
-    <activity:object>
-      <activity:object-type>person</activity:object-type>
-      <displayName>Leela</displayName>
-    </activity:object>
-    <title type="xhtml">
-      <div xmlns="http://www.w3.org/1999/xhtml"><p>Fry follows Leela</p></div>
-    </title>
-  </entry>
-  ACTIVITY
+  # Retrive verb
+  print $entry->verb;
 
-  my $activity = $self->new_activity('entry');
+  # Print activity stream as XML
+  print $xml->to_pretty_xml;
 
-  my $author = $activity->new_person(name => 'Fry');
-  for ($activity) {
-    $_->add_actor($author);
-    $_->add_verb('follow');
-    $_->add_object(type => 'person',
-                   displayName => 'Leela');
-    $_->add_title(xhtml => '<p>Fry follows Leela</p>');
-  };
+  # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  # <feed xmlns="http://www.w3.org/2005/Atom"
+  #       xmlns:activity="http://activitystrea.ms/schema/1.0/">
+  #   <entry xml:id="first_post">
+  #     <id>first_post</id>
+  #     <author>
+  #       <name>Fry</name>
+  #       <activity:object-type>http://activitystrea.ms/schema/1.0/person</activity:object-type>
+  #     </author>
+  #     <activity:verb>http://activitystrea.ms/schema/1.0/loves</activity:verb>
+  #     <activity:object>
+  #       <activity:object-type>http://activitystrea.ms/schema/1.0/person</activity:object-type>
+  #       <name>Leela</name>
+  #       <title xml:space="preserve"
+  #              xmlns="http://www.w3.org/2005/Atom">Captain</title>
+  #     </activity:object>
+  #     <title type="xhtml">
+  #       <div xmlns="http://www.w3.org/1999/xhtml">Fry loves Leela</div>
+  #     </title>
+  #     <summary xml:space="preserve">Now it&#39;s official!</summary>
+  #     <published>2013-03-08T14:01:14Z</published>
+  #   </entry>
+  #  </feed>
 
-  $self->render_xml($activity);
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Plugin::XML::ActivityStreams> is an extension
-for L<Mojolicious::Plugin::XML::Atom> and provides several functions
-for the work with the Atom ActivityStreams Format as described in
-L<http://activitystrea.ms/|ActivityStrea.ms>.
+L<XML::Loy::ActivityStreams> is an extension
+to L<XML::Loy::Atom> and provides additional functionality
+for the work with L<Atom ActivityStreams|http://activitystrea.ms/>.
 
-=head1 HELPERS
+B<This module is an early release! There may be significant changes in the future.>
 
 =head1 METHODS
 
-=head2 C<add_actor>
+L<XML::Loy::ActivityStreams> inherits all methods
+from L<XML::Loy> and implements the following new ones.
 
-  my $person = $activity->new_person( name => 'Bender',
-                                      uri  => 'acct:bender@example.org');
-  my $actor = $atom->add_actor($person);
 
-Adds actor information to the ActivityStreams object.
-Accepts a person construct (see L<new_person> in
-L<Mojolicious::Plugin::Atom::Document>) or the
-parameters accepted by L<new_person>.
+=head2 actor
 
-=head2 C<add_verb>
+  my $person = $atom->new_person(
+    name => 'Bender',
+    uri  => 'acct:bender@example.org'
+  );
+  my $actor = $atom->actor($person);
 
-  $activity->add_verb('follow');
+  print $atom->actor->at('name')->text;
 
-Adds verb information to the ActivityStreams object.
+
+Sets the actor of the ActivityStreams object or returns it.
+Accepts a person construct
+(see L<new_person|XML::Loy::Atom/new_person>) or the
+parameters accepted by
+L<new_person|XML::Loy::Atom/new_person>.
+
+
+=head2 verb
+
+  $atom->verb('follow');
+  print $atom->verb;
+
+Set the verb of the ActivityStreams object or returns it.
 Accepts a verb string.
+Relative verbs will be prefixed with the ActivityStreams
+namespace.
 
-=head2 C<add_object>
 
-  $activity->add_object( type => 'person',
-                         displayName => 'Leela' );
+=head2 object
 
-Adds object information to the ActivityStreams object.
-Accepts various parameters depending on the object's type.
+  $atom->object(
+    'object-type' => 'person',
+    'displayName' => 'Leela'
+  );
+  print $atom->object->at('object-type')->text;
 
-=head2 C<add_target>
+Sets object information to the ActivityStreams object
+or returns it.
+Accepts a hash with various parameters
+depending on the object's type. The object's type is
+given by the C<object-type> parameter.
 
-  $activity->add_target( type => 'person',
-                         displayName => 'Fry' );
 
-Adds target information to the ActivityStreams object.
-Accepts various parameters depending on the object's type.
+=head2 C<target>
+
+  $atom->target(
+    'object-type' => 'robot',
+    'displayName' => 'Bender'
+  );
+  print $atom->target->at('object-type')->text;
+
+Sets target information to the ActivityStreams object
+or returns it.
+Accepts a hash with various parameters
+depending on the target's type. The target's type is
+given by the C<object-type> parameter.
+
 
 =head1 DEPENDENCIES
 
-L<Mojolicious>,
-L<Mojolicious::Plugin::XML>,
-L<Mojolicious::Plugin::XML::Atom>.
+L<Mojolicious>.
+
+
+=head1 LIMITATIONS
+
+L<XML::Loy::ActivityStreams> has currently no support for
+JSON serialization, neither on reading nor writing.
+
 
 =head1 AVAILABILITY
 
-  https://github.com/Akron/Sojolicious
+  https://github.com/Akron/XML-Loy
+
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2012, Nils Diewald.
+Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

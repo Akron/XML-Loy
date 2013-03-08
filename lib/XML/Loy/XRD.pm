@@ -418,6 +418,7 @@ documents with L<JRD|https://tools.ietf.org/html/rfc6415> support.
 
 This code may help you to create your own L<XML::Loy> extensions.
 
+B<This module is an early release! There may be significant changes in the future.>
 
 =head1 METHODS
 
@@ -472,8 +473,8 @@ it can also parse L<JRD|https://tools.ietf.org/html/rfc6415> input.
   );
   my @aliases = $xrd->alias;
 
-Add multiple aliases to the xrd document
-or return an array of aliases.
+Adds multiple aliases to the xrd document
+or returns an array of aliases.
 
 
 =head2 expired

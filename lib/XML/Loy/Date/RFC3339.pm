@@ -212,7 +212,6 @@ XML::Loy::Date::RFC3339 - Date strings according to RFC3339
   $date->parse('1993-01-01t18:50:00-04:00');
   my $epoch = $date->epoch;
 
-
 =head1 DESCRIPTION
 
 L<XML::Loy::Date::RFC3339> implements date and time functions
