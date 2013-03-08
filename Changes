@@ -1,6 +1,7 @@
 0.04 2013-03-08
         - Added Atom and ActivityStreams.
 	- Replaced "children" with own method.
+        - Initial CPAN release.
 
 0.03 2013-03-06
         - Renamed MojoX::XML to XML::Loy.
@@ -16,3 +17,7 @@
         - Initial submission to GitHub.
 	- Change class variables to use parameters.
 	- Improve test suite
+
+        - This package was before separation part of the
+          Sojolicious project, see
+          https://github.com/Akron/Sojolicious
