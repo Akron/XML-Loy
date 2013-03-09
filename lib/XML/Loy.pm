@@ -25,6 +25,8 @@ our $VERSION = '0.06';
 #         prefixing.
 #
 # Delete use of "constant"!
+# set() should really try to overwrite.
+
 
 our @CARP_NOT;
 
