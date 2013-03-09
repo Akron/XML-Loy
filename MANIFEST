@@ -2,6 +2,7 @@ lib/XML/Loy.pm
 lib/XML/Loy/XRD.pm
 lib/XML/Loy/HostMeta.pm
 lib/XML/Loy/Atom.pm
+lib/XML/Loy/Atom/Threading.pm
 lib/XML/Loy/ActivityStreams.pm
 lib/XML/Loy/Date/RFC3339.pm
 t/add.t
