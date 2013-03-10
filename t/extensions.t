@@ -44,11 +44,14 @@ package main;
 use lib '../lib';
 
 use Test::More;
+use Test::Warn;
 
 my $fun_ns  = 'http://sojolicio.us/ns/fun';
 my $atom_ns = 'http://www.w3.org/2005/Atom';
 
 ok(my $node = Fun->new('Fun'), 'Constructor');
+warning_is { $node->add_id } { carped => q{Can't locate "add_id()" in "Fun"} }, 'Error correct';
+
 ok(my $text = $node->add('Text', 'Hello World!'), 'Add element');
 
 is($text->mime, 'application/xml', 'Mime type');
@@ -79,6 +82,7 @@ ok(!$text->namespace, 'Namespace');
 
 ok($text->extension('Atom'), 'Add Atom');
 is(join(',', $text->extension), 'Fun,Atom', 'Extensions');
+warning_is { $text->add_id } { }, 'Error correct';
 
 is($text->mime, 'application/xml', 'Mime type');
 

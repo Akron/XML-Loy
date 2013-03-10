@@ -7,6 +7,7 @@ use lib '../../lib';
 
 use Test::More;
 
+
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 
 use_ok('XML::Loy');
@@ -14,6 +15,7 @@ use_ok('XML::Loy');
 my $i = 1;
 
 ok(my $xml = XML::Loy->new('root'), 'Constructor String');
+
 ok(my $child = $xml->add('test'), 'Add child');
 ok(my $string = $xml->to_pretty_xml, 'Pretty Print');
 like($string, qr{<test />}, 'Check ' . $i++);
