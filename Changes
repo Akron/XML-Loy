@@ -1,5 +1,8 @@
-0.07 2013-03-09
+0.07 2013-03-10
         - Added Atom::Threading.
+	- Fixed bug in Atom::link().
+	- Improved Warnings.
+	- Improved tests.
 
 0.06 2013-03-08
         - Fix indexing error on CPAN.

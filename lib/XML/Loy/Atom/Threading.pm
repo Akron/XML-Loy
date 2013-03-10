@@ -10,6 +10,7 @@ use XML::Loy with => (
 
 use Carp qw/carp/;
 
+
 # No constructor
 sub new {
   carp 'Only use ' . __PACKAGE__ . ' as an extension to Atom';
@@ -21,7 +22,7 @@ sub new {
 sub in_reply_to {
   my ($self, $ref, $param) = @_;
 
-  # Set in-reply-to
+  # Add in-reply-to
   if ($ref) {
 
     # No ref defined
@@ -29,46 +30,63 @@ sub in_reply_to {
 
     # Adding a related link as advised in the spec
     if (defined $param->{href}) {
-      $self->link(related => $param->{href});
+      my $link = $self->link(related => $param->{href});
+      $link->attrs->{type} = $param->{type} if $param->{type};
     };
 
     $param->{ref} = $ref;
-    return $self->set('in-reply-to' => $param );
+    return $self->add('in-reply-to' => $param );
   };
 
+  # Current node is root
+  unless ($self->parent) {
+    return $self->at('*')->children('in-reply-to');
+  };
+
+  # Return collection
+  return $self->children('in-reply-to');
 };
 
 
-# Set 'link' element for replies
+# Add 'link' element for replies
 sub replies {
   my $self = shift;
   my $href = shift;
 
-  # No href defined
-  return unless $href;
+  # Add link
+  if ($href) {
 
-  my %param = %{ shift(@_) };
+    my %param = %{ shift(@_) };
 
-  my %new_param = (href => $href);
-  if (exists $param{count}) {
-    $new_param{$PREFIX . ':count'} = delete $param{count};
+    my %new_param = (href => $href);
+    if (exists $param{count}) {
+      $new_param{$PREFIX . ':count'} = delete $param{count};
+    };
+
+    # updated parameter exists
+    if (exists $param{updated}) {
+      my $date = delete $param{updated};
+
+      # Date is no object
+      $date = XML::Loy::Date::RFC3339->new($date) unless ref $date;
+
+      # Set parameter
+      $new_param{$PREFIX . ':updated'} = $date->to_string;
+    };
+
+    $new_param{type} = $param{type} // $self->mime;
+
+    # Add atom link
+    return $self->link(rel => 'replies',  %new_param );
   };
 
-  # updated parameter exists
-  if (exists $param{updated}) {
-    my $date = delete $param{updated};
+  # Get replies
+  my $replies = $self->link('replies');
 
-    # Date is no object
-    $date = XML::Loy::Date::RFC3339->new($date) unless ref $date;
+  # Return first link
+  return $replies->[0] if $replies->[0];
 
-    # Set parameter
-    $new_param{$PREFIX . ':updated'} = $date->to_string;
-  };
-
-  $new_param{type} = $param{type} // $self->mime;
-
-  # Add atom link
-  $self->link(rel => 'replies',  %new_param );
+  return;
 };
 
 
@@ -84,7 +102,17 @@ sub total {
   };
 
   # Get total
-  my $total = $self->children('total');
+  my $total;
+
+  # Current node is root
+  unless ($self->parent) {
+    $total = $self->at('*')->children('total');
+  }
+
+  # Current node is entry or something
+  else {
+    $total = $self->children('total');
+  };
 
   # No total set
   return 0 unless $total = $total->[0];
@@ -113,33 +141,49 @@ XML::Loy::Atom::Threading - Threading Extension for Atom
   use XML::Loy::Atom;
 
   my $entry = XML::Loy::Atom->new('entry');
-  for ($entry) {
-    $_->extension('XML::Loy::Atom::Threading');
-    $_->author(name => 'Zoidberg');
-    $_->id('http://sojolicio.us/blog/2');
 
-    # Set threading information
-    $_->in_reply_to('http://sojolicio.us/blog/1' => {
-      href => 'http://sojolicio.us/blog/1'
-    });
-  };
+  # Add threading extension
+  $entry->extension('XML::Loy::Atom::Threading');
+
+  # Add Atom author and id
+  $entry->author(name => 'Zoidberg');
+  $entry->id('http://sojolicio.us/blog/2');
+
+  # Add threading information
+  $entry->in_reply_to('urn:entry:1' => {
+    href => 'http://sojolicio.us/blog/1'
+  });
+
+  # Add replies information
+  $entry->replies('http://sojolicio.us/blog/1/replies' => {
+    count => 7,
+    updated => time
+  });
+
+  # Get threading information
+  print $entry->in_reply_to->[0]->attrs('href');
 
   # Pretty print
   print $entry->to_pretty_xml;
 
   # <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-  # <entry xmlns="http://www.w3.org/2005/Atom"
+  # <entry xml:id="http://sojolicio.us/blog/2"
+  #        xmlns="http://www.w3.org/2005/Atom"
   #        xmlns:thr="http://purl.org/syndication/thread/1.0">
   #   <author>
   #     <name>Zoidberg</name>
   #   </author>
   #   <id>http://sojolicio.us/blog/2</id>
-  #   <link rel="related"
-  #         href="http://sojolicio.us/blog/1" />
-  #   <thr:in-reply-to ref="http://sojolicio.us/blog/1"
-  #                    href="http://sojolicio.us/blog/1" />
+  #   <link href="http://sojolicio.us/blog/1"
+  #         rel="related" />
+  #   <thr:in-reply-to href="http://sojolicio.us/blog/1"
+  #                    ref="urn:entry:1" />
+  #   <link href="http://sojolicio.us/blog/1/replies"
+  #         rel="replies"
+  #         thr:count="7"
+  #         thr:updated="2013-03-10T09:55:13Z"
+  #         type="application/atom+xml" />
   # </entry>
-
 
 =head1 DESCRIPTION
 
@@ -148,41 +192,62 @@ L<XML::Loy::Atom> and provides additional
 functionality for the work with
 L<Threading|https://www.ietf.org/rfc/rfc4685.txt>.
 
+B<This module is an early release! There may be significant changes in the future.>
 
-=head2 C<in_reply_to>
+=head1 METHODS
 
-  $self->in_reply_to('http://sojolicio.us/entry/1' => {
-    href => 'http://sojolicio.us/entry/1.html
+L<XML::Loy::Atom::Threading> inherits all methods
+from L<XML::Loy> and implements the following new ones.
+
+
+=head2 in_reply_to
+
+  $entry->in_reply_to('urn:entry:1' => {
+    href => 'http://sojolicio.us/blog/1.html',
+    type => 'application/xhtml+xml'
   });
 
-Adds an C<in-reply-to> element to the Atom object.
+  print $entry->in_reply_to->attrs('href');
+
+Adds an C<in-reply-to> element to the Atom object or returns it.
+Accepts for adding a universally unique ID for the entry to be referred to,
+and a hash reference containing attributes like C<href>, C<type> and C<source>.
 Will automatically introduce a 'related' link, if a C<href> parameter is given.
-Accepts one parameter with the reference string and an optional hash with
-further attributes.
+Returns the newly added node.
+
+On retrieval, returns the first C<in-reply-to> element.
 
 
-=head2 C<replies>
+=head2 replies
 
-  $self->replies('http://sojolicio.us/entry/1/replies' => {
+  $entry->replies('http://sojolicio.us/entry/1/replies' => {
     count   => 5,
     updated => '2011-08-30T16:16:40Z'
   });
 
-Adds a C<link> element with a relation of 'replies' to the atom object.
-Accepts optional parameters for reply count and update.
+  print $entry->replies->attrs('thr:count');
+
+Adds a C<link> element with a relation of C<replies> to the atom object
+or returns it.
+Accepts the reference URL for replies and optional parameters
+like C<count> and C<update> of replies.
 
 The update parameter accepts all valid parameters of
 L<XML::Loy::Date::RFC3339::new|XML::Loy::Date::RFC3339/new>.
 
-B<This method is experimental and may return another
+On retrieval returns the first C<replies> node.
+
+B<This update attribute is experimental and may return another
 object with a different API!>
 
 
-=head2 C<total>
+=head2 total
 
-  $self->total(5);
+  $entry->total(5);
+  print $entry->total;
 
-Adds a C<total> element for response count to the atom object.
+Sets the C<total> number of responses to the atom object
+or returns it.
 
 
 =head1 DEPENDENCIES

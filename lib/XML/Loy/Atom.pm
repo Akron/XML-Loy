@@ -300,7 +300,19 @@ sub link {
   };
 
   my $rel = shift;
-  return $self->find(qq{link[rel="$rel"]});
+
+  my $children;
+  # Node is root
+  unless ($self->parent) {
+    $children = $self->at('*')->children('link');
+  }
+
+  # Node is under root
+  else {
+    $children = $self->children('link');
+  };
+
+  return $children->grep(sub { $_->attrs('rel') eq $rel });
 };
 
 

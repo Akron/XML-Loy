@@ -40,10 +40,19 @@ sub add_happy {
 };
 
 
+package Animal;
+use lib '../lib';
+
+use XML::Loy with => (
+  namespace => 'http://sojolicio.us/ns/animal',
+  prefix => 'anim'
+);
+
 package main;
 use lib '../lib';
 
 use Test::More;
+use Test::Warn;
 
 my $fun_ns  = 'http://sojolicio.us/ns/fun';
 my $atom_ns = 'http://www.w3.org/2005/Atom';
@@ -66,8 +75,22 @@ ok($node = XML::Loy->new('object'), 'Constructor');
 
 ok(!$node->at(':root')->namespace, 'Namespace');
 
+warning_is { $node->add_happy('yeah') }
+q{Can't locate "add_happy" in "XML::Loy"},
+  'Warning';
+
 ok($node->extension('Fun'), 'Add extension');
 ok($yeah = $node->add_happy('Yeah!'), 'Add another yeah');
+
+warning_is { $node->add_puppy('yeah') }
+q{Can't locate "add_puppy" in "XML::Loy" with extension "Fun"},
+  'Warning';
+
+ok($node->extension('Animal'), 'Add extension');
+
+warning_is { $node->add_puppy('yeah') }
+q{Can't locate "add_puppy" in "XML::Loy" with extensions "Fun", "Animal"},
+  'Warning';
 
 is($yeah->namespace, $fun_ns, 'Namespace');
 is($yeah->mime, 'application/xml', 'Mime type');
@@ -77,8 +100,9 @@ ok($text = $node->add('Text', 'Hello World!'), 'Add hello world');
 
 ok(!$text->namespace, 'Namespace');
 
+is(join(',', $text->extension), 'Fun,Animal', 'Extensions');
 ok($text->extension('Atom'), 'Add Atom');
-is(join(',', $text->extension), 'Fun,Atom', 'Extensions');
+is(join(',', $text->extension), 'Fun,Animal,Atom', 'Extensions');
 
 is($text->mime, 'application/xml', 'Mime type');
 

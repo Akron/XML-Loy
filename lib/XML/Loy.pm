@@ -822,8 +822,11 @@ sub AUTOLOAD {
     };
   };
 
-  my $errstr = qq{Can't locate "${method}()" in "$package"};
-  $errstr .= ' with ' . join(', ', @ext) . ' extensions' if @ext;
+  my $errstr = qq{Can't locate "${method}" in "$package"};
+  if (@ext) {
+    $errstr .= ' with extension' . (@ext > 1 ? 's' : '');
+    $errstr .= ' "' . join('", "', @ext) . '"';
+  };
 
   carp $errstr and return;
 };

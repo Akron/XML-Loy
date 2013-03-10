@@ -18,6 +18,8 @@ t/Extensions/XRD.t
 t/Extensions/HostMeta.t
 t/Extensions/Atom.t
 t/Extensions/Atom-Synopsis.t
+t/Extensions/Atom-Threading.t
+t/Extensions/Atom-Threading-Synopsis.t
 t/Extensions/ActivityStreams.t
 t/Extensions/ActivityStreams-Synopsis.t
 t/Date/RFC3339.t
