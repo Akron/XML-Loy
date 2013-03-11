@@ -21,55 +21,55 @@ is($date->epoch, 1312043400, 'Date4');
 
 # Offset
 $date = XML::Loy::Date::RFC3339->new('1993-01-01t18:50:00-04:00');
-is $date->to_string, '1993-01-01T22:50:00Z', 'right date';
+is($date->to_string, '1993-01-01T22:50:00Z', 'right date');
 
 # Offset
 $date = XML::Loy::Date::RFC3339->new('1993-01-01t22:50:00-04:00');
-is $date->to_string, '1993-01-02T02:50:00Z', 'right date';
-is $date->epoch, '725943000', 'right epoch';
+is($date->to_string, '1993-01-02T02:50:00Z', 'right date');
+is($date->epoch, '725943000', 'right epoch');
 
 # Relaxed
 $date = XML::Loy::Date::RFC3339->new('1993-1-1t18:50:0-4');
-is $date->to_string, '1993-01-01T22:50:00Z', 'right date';
+is($date->to_string, '1993-01-01T22:50:00Z', 'right date');
 
 # Negative epoch value
 $date = XML::Loy::Date::RFC3339->new;
-ok $date->parse('1900-01-01T00:00:00Z'), 'right format';
-is $date->epoch, undef, 'no epoch value';
+ok($date->parse('1900-01-01T00:00:00Z'), 'right format 1');
+is($date->epoch, undef, 'no epoch value');
 
 # Granularity 4
 $date = XML::Loy::Date::RFC3339->new;
-ok $date->parse('1993'), 'right format';
-is $date->to_string, 1993, 'correct date value';
-is $date->granularity, 4, 'correct granularity';
+ok($date->parse('1993'), 'right format 2');
+is($date->to_string, 1993, 'correct date value');
+is($date->granularity, 4, 'correct granularity');
 
 # Granularity 3
-ok $date->parse('1993-11'), 'right format';
-is $date->to_string, '1993-11', 'correct date value';
-is $date->granularity, 3, 'correct granularity';
+ok($date->parse('1993-11'), 'right format 3');
+is($date->to_string, '1993-11', 'correct date value');
+is($date->granularity, 3, 'correct granularity');
 
 # Granularity 2
-ok $date->parse('1993-11-3'), 'right format';
-is $date->to_string, '1993-11-03', 'correct date value';
-is $date->granularity, 2, 'correct granularity';
+ok($date->parse('1993-11-3'), 'right format 4');
+is($date->to_string, '1993-11-03', 'correct date value');
+is($date->granularity, 2, 'correct granularity');
 
 # Granularity 1
-ok $date->parse('1993-11-3t19:20z'), 'right format';
-is $date->to_string, '1993-11-03T19:20Z', 'correct date value';
-is $date->granularity, 1, 'correct granularity';
+ok($date->parse('1993-11-3t19:20z'), 'right format 5');
+is($date->to_string, '1993-11-03T19:20Z', 'correct date value');
+is($date->granularity, 1, 'correct granularity');
 
 # Underspecified
-ok $date->parse('1993-11-3'), 'right format';
-is $date->to_string(4), '1993', 'correct date value';
-is $date->to_string(3), '1993-11', 'correct date value';
-is $date->to_string(2), '1993-11-03', 'correct date value';
-is $date->to_string(1), '1993-11-03T00:00Z', 'correct date value';
-is $date->to_string(0), '1993-11-03T00:00:00Z', 'correct date value';
+ok($date->parse('1993-11-3'), 'right format 6');
+is($date->to_string(4), '1993', 'correct date value');
+is($date->to_string(3), '1993-11', 'correct date value');
+is($date->to_string(2), '1993-11-03', 'correct date value');
+is($date->to_string(1), '1993-11-03T00:00Z', 'correct date value');
+is($date->to_string(0), '1993-11-03T00:00:00Z', 'correct date value');
 
 # Heavily underspecified
-ok $date->parse('2002'), 'right format';
-is $date->to_string, '2002', 'correct date value';
-is $date->to_string(0), '2002-01-01T00:00:00Z', 'correct date value';
+ok($date->parse('2002'), 'right format 7');
+is($date->to_string, '2002', 'correct date value');
+is($date->to_string(0), '2002-01-01T00:00:00Z', 'correct date value');
 
 
 __END__

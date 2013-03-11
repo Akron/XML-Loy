@@ -270,7 +270,7 @@ sub children {
   my $charset = $self->charset;
   my $xml     = $self->xml;
   my $tree    = $self->tree;
-  my $type_l  = length $type;
+  my $type_l  = $type ? length $type : 0;
   for my $e (@$tree[($tree->[0] eq 'root' ? 1 : 4) .. $#$tree]) {
 
     # Make sure child is the right type
