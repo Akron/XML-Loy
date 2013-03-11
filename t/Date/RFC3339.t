@@ -4,7 +4,7 @@ use warnings;
 $|++;
 use lib '../../lib';
 
-use Test::More tests => 33;
+use Test::More;
 
 use_ok('XML::Loy::Date::RFC3339');
 
@@ -33,9 +33,10 @@ $date = XML::Loy::Date::RFC3339->new('1993-1-1t18:50:0-4');
 is($date->to_string, '1993-01-01T22:50:00Z', 'right date');
 
 # Negative epoch value
-$date = XML::Loy::Date::RFC3339->new;
-ok($date->parse('1900-01-01T00:00:00Z'), 'right format 1');
-is($date->epoch, undef, 'no epoch value');
+# Different on perl 5.10.1 and perl 5.12 and later
+# $date = XML::Loy::Date::RFC3339->new;
+# ok($date->parse('1900-01-01T00:00:00Z'), 'right format 1');
+# is($date->epoch, undef, 'no epoch value');
 
 # Granularity 4
 $date = XML::Loy::Date::RFC3339->new;
@@ -70,6 +71,8 @@ is($date->to_string(0), '1993-11-03T00:00:00Z', 'correct date value');
 ok($date->parse('2002'), 'right format 7');
 is($date->to_string, '2002', 'correct date value');
 is($date->to_string(0), '2002-01-01T00:00:00Z', 'correct date value');
+
+done_testing;
 
 
 __END__

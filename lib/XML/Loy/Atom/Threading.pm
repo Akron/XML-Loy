@@ -212,7 +212,7 @@ from L<XML::Loy> and implements the following new ones.
 Adds an C<in-reply-to> element to the Atom object or returns it.
 Accepts for adding a universally unique ID for the entry to be referred to,
 and a hash reference containing attributes like C<href>, C<type> and C<source>.
-Will automatically introduce a 'related' link, if a C<href> parameter is given.
+Will automatically introduce a C<related> link, if a C<href> parameter is given.
 Returns the newly added node.
 
 On retrieval, returns the first C<in-reply-to> element.

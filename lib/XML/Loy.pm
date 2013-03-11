@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # Todo:
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
@@ -24,7 +24,6 @@ our $VERSION = '0.07';
 #         namespace to add instead of the package name before
 #         prefixing.
 #
-# Delete use of "constant"!
 # set() should really try to overwrite.
 
 
@@ -63,13 +62,6 @@ sub import {
 };
 
 
-use constant {
-  I  => '  ',
-  NS => 'http://sojolicio.us/ns/xml-serial',
-  PI => 'xml version="1.0" encoding="UTF-8" standalone="yes"'
-};
-
-
 # Return class variables
 {
   no strict 'refs';
@@ -104,13 +96,16 @@ sub new {
     my $att  = ref( $_[0] ) eq 'HASH' ? shift : +{};
     my ($text, $comment) = @_;
 
-    $att->{'xmlns:serial'} = NS;
+    $att->{'xmlns:serial'} = 'http://sojolicio.us/ns/xml-serial';
 
     # Transform special attributes
     _special_attributes($att) if $att;
 
     # Create root
-    my $tree = ['root', [pi => PI]];
+    my $tree = [
+      'root',
+      [ pi => 'xml version="1.0" encoding="UTF-8" standalone="yes"']
+    ];
 
     # Add comment if given
     push(@$tree, [comment => $comment]) if $comment;
@@ -562,16 +557,16 @@ sub _render_pretty {
   elsif ($e eq 'comment') {
 
     # Padding for every line
-    my $p = I x $i;
+    my $p = '  ' x $i;
     my $comment = join "\n$p     ", split(/;\s+/, $tree->[1]);
 
-    return "\n" . (I x $i) . "<!-- $comment -->\n";
+    return "\n" . ('  ' x $i) . "<!-- $comment -->\n";
 
   }
 
   # Element is processing instruction
   elsif ($e eq 'pi') {
-    return (I x $i) . '<?' . $tree->[1] . "?>\n";
+    return ('  ' x $i) . '<?' . $tree->[1] . "?>\n";
 
   }
 
@@ -598,10 +593,10 @@ sub _element {
     unless $qname =~ /^(?:[a-zA-Z_]+:)?[^\s]+$/;
 
   # Start start tag
-  my $content = (I x $i) . "<$qname";
+  my $content = ('  ' x $i) . "<$qname";
 
   # Add attributes
-  $content .= _attr((I x $i). (' ' x ( length($qname) + 2)), $attr);
+  $content .= _attr(('  ' x $i). (' ' x ( length($qname) + 2)), $attr);
 
   # Has the element a child?
   if ($child->[0]) {
@@ -625,9 +620,9 @@ sub _element {
 	  $string =~ tr{\t-\x0d }{}d;
 
 	  # Introduce newlines after n characters
-	  $content .= "\n" . (I x ($i + 1));
-	  $content .= join  "\n" . ( I x ($i + 1) ), (unpack "(A$n)*", $string );
-	  $content .= "\n" . (I x $i);
+	  $content .= "\n" . ('  ' x ($i + 1));
+	  $content .= join  "\n" . ( '  ' x ($i + 1) ), (unpack "(A$n)*", $string );
+	  $content .= "\n" . ('  ' x $i);
 	}
 
 	# No special treatment
@@ -681,7 +676,7 @@ sub _element {
 	};
 
 	# Correct Indent
-	$content .= (I x $i);
+	$content .= ('  ' x $i);
 
       };
     }
@@ -712,7 +707,7 @@ sub _element {
       };
 
       # Correct Indent
-      $content .= (I x $i);
+      $content .= ('  ' x $i);
     };
 
     # End Tag
