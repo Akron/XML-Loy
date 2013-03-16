@@ -5,14 +5,14 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 # Todo:
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
 #
 #   sub try_further { };
 #   # usage:
-#   sub get_author {
+#   sub author {
 #     return $autor or $self->try_further;
 #   };
 #

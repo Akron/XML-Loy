@@ -27,7 +27,7 @@ my $OFFSET_RE = qr/^([-\+])(\d?\d)(?::(\d?\d))?$/;
 
 # Constructor
 sub new {
-  my $self = bless {}, shift;
+  my $self = bless {}, (ref $_[0] ? ref shift : shift);
 
   # Set granularity
   $self->granularity(0);

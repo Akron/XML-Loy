@@ -5,6 +5,7 @@ lib/XML/Loy/Atom.pm
 lib/XML/Loy/Atom/Threading.pm
 lib/XML/Loy/ActivityStreams.pm
 lib/XML/Loy/Date/RFC3339.pm
+lib/XML/Loy/Date/RFC822.pm
 t/add.t
 t/add-node.t
 t/comment.t
@@ -23,6 +24,7 @@ t/Extensions/Atom-Threading-Synopsis.t
 t/Extensions/ActivityStreams.t
 t/Extensions/ActivityStreams-Synopsis.t
 t/Date/RFC3339.t
+t/Date/RFC822.t
 Changes
 MANIFEST
 LICENSE

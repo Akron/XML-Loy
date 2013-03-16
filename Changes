@@ -1,3 +1,7 @@
+0.09 2013-03-16
+        - Added Date::RFC822.
+	- Improved Date::RFC3339.
+
 0.08 2013-03-11
         - Fixed time::local test to work with perl-5.10.1.
 	- Fixed undefined type length in children().
