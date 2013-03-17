@@ -117,6 +117,7 @@ sub epoch {
 
 1;
 
+
 __END__
 
 =pod
@@ -150,7 +151,7 @@ renamed without warnings.>
 
 L<XML::Loy::Date::RFC822> implements the following attributes.
 
-=head2 C<epoch>
+=head2 epoch
 
   my $epoch = $date->epoch;
   $date     = $date->epoch(1317832113);
@@ -159,23 +160,29 @@ Epoch seconds.
 
 =head1 METHODS
 
-=head2 C<new>
+=head2 new
 
   my $date = XML::Loy::Date::RFC822->new;
   my $date = XML::Loy::Date::RFC822->new($string);
 
-Construct a new L<XML::Loy::Date::RFC822> object.
+Constructs a new L<XML::Loy::Date::822> object.
+Accepts a date string to be parsed.
 
-=head2 C<parse>
+=head2 parse
 
   $date = $date->parse('Wed, 05 Oct 2011 09:28:33 PDT');
   $date = $date->parse(1317832113);
 
-=head2 C<to_string>
+Parses L<RFC822|http://tools.ietf.org/html/rfc822> compliant date strings.
+Also accepts epoch seconds.
+
+
+=head2 to_string
 
   my $string = $date->to_string;
 
-Render date suitable to RFC822 without offset information.
+Renders date suitable to L<RFC822|http://tools.ietf.org/html/rfc822>
+without offset information.
 
 
 =head1 DEPENDENCIES
