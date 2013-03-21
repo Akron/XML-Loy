@@ -1,3 +1,7 @@
+0.10 2013-03-21
+        - Update Dependency (Unicode).
+	- Add Unicode test.
+
 0.09 2013-03-16
         - Added Date::RFC822.
 	- Improved Date::RFC3339.

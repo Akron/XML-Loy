@@ -480,4 +480,12 @@ is($person->at('person birthday')->namespace, $poco_ns, 'Person-Poco-NS');
 $atom->updated(1313131313);
 is($atom->at('updated')->text, '2011-08-12T06:41:53Z', 'Updated');
 
+# Unicode!
+$atom = XML::Loy::Atom->new('feed');
+ok($atom->charset('UTF-8'), 'Set charset');
+is(ref($atom), 'XML::Loy::Atom', 'new 1');
+
+ok($atom->content('Halä'), 'Add unicode content');
+is($atom->content->text, 'Halä', 'Get content');
+
 done_testing;
