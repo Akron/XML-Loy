@@ -4,7 +4,7 @@ use warnings;
 $|++;
 use lib '../../lib';
 
-use Test::More tests => 9;
+use Test::More tests => 12;
 
 # "Can't we have one meeting that doesn't end with digging up a corpse?"
 use_ok 'XML::Loy::Date::RFC822';
@@ -34,3 +34,12 @@ is $date->new('Wed, 05 Oct 2011 09:28:33 PDT')->to_string,
 
 is $date->new('Sun, 06 Nov 1994 08:49:37 UT')->to_string,
   'Sun, 06 Nov 1994 08:49:37 GMT', 'right date value';
+
+is $date->new('Sat, 23 Mar 2013 04:19:22 +0000')->to_string,
+  'Sat, 23 Mar 2013 04:19:22 GMT', 'right date value';
+
+is $date->new('Sat, 23 Mar 2013 04:19:22 +0200')->to_string,
+  'Sat, 23 Mar 2013 02:19:22 GMT', 'right date value';
+
+is $date->new('Sat, 23 Mar 2013 04:19:22 +0230')->to_string,
+  'Sat, 23 Mar 2013 01:49:22 GMT', 'right date value';

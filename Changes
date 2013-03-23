@@ -1,3 +1,6 @@
+0.11 2013-03-23
+        - Fixed bug in RFC822.
+
 0.10 2013-03-21
         - Update Dependency (Unicode).
 	- Add Unicode test.

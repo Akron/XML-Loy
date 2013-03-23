@@ -21,7 +21,7 @@ my $ZONE   = qr/(?:(?:GM|U)|(?:([ECMP])([SD])))T/;
 @ZONE{qw/E C M P/} = (4..7);
 
 my $RFC822_RE = qr/^\s*(?:$DAYS[a-z]*,)?\s*(\d+)\s+(\w+)\s+
-                    (\d+)\s+(\d+):(\d+):(\d+)\s*(?:$ZONE)?\s*$/x;
+                    (\d+)\s+(\d+):(\d+):(\d+)\s*(?:$ZONE|([-+]\d{4}))?\s*$/x;
 
 # Constructor
 sub new {
@@ -45,16 +45,28 @@ sub parse {
 
   elsif (my ($mday, $month, $year,
 	     $hour, $min, $sec,
-	     $zone_1, $zone_2) = ($date =~ $RFC822_RE)) {
+	     $zone_1, $zone_2, $zone_o) = ($date =~ $RFC822_RE)) {
 
     my $epoch;
     $month = $MONTHS{$month};
 
     # Set timezone offset
     my $offset = 0;
+    my $offset_min = 0;
+
     if ($zone_1) {
       $offset = $ZONE{$zone_1};
       $offset++ if $zone_2 eq 'S';
+    }
+    elsif ($zone_o && $zone_o =~ /^([-+])\s*(\d\d)(\d\d)$/) {
+      if ($1 eq '-') {
+	$offset += $2;
+	$offset_min += $3;
+      }
+      else {
+	$offset -= $2;
+	$offset_min -= $3;
+      };
     };
 
     eval {
@@ -62,7 +74,8 @@ sub parse {
 				   $mday, $month, $year);
     };
 
-    $epoch += ($offset * 60 * 60);
+    $epoch += ($offset * 60 * 60) if $offset;
+    $epoch += ($offset_min * 60)  if $offset_min;
 
     if (!$@ && $epoch > 0) {
       $self->epoch($epoch);
