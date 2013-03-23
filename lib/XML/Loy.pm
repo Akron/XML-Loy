@@ -158,7 +158,7 @@ sub add {
   };
 
   # Add element
-  my $element = $self->_add_clean(@_);
+  my $element = $self->_add_clean(@_) or return;
 
   my $tree = $element->tree;
 
@@ -250,7 +250,7 @@ sub set {
   unshift(@_, $tag) unless blessed $_[0];
 
   # Add element (Maybe prefixed)
-  return $self->_add_clean(@_);
+  return $self->_add_clean(@_) or return;
 };
 
 
@@ -353,6 +353,10 @@ sub _add_clean {
   # Node is a string
   else {
     my $name = shift;
+
+    # Pretty sloppy check for valid names
+    return unless $name =~ m!^-?[^\s<>]+$!;
+
     my $att  = shift if ref( $_[0] ) eq 'HASH';
     my ($text, $comment) = @_;
 

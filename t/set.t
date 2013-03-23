@@ -73,6 +73,9 @@ is($xml->at('subject')->text, 'Mark', 'Get');
 is($xml->at('try subject')->text, 'Mark', 'Get');
 is($xml->find('subject')->size, 2, 'Size');
 
+# Invalid elements
+ok(!$xml->set('not valid'), 'No valid Element');
+
 done_testing;
 
 __END__

@@ -83,4 +83,7 @@ like($string, qr{<empty />}, 'Check ' . $i++);
 like($string, qr{</foo>}, 'Check ' . $i++);
 like($string, qr{\Q$pi\E}, 'Check ' . $i++);
 
+# Invalid elements
+ok(!$xml->add('not valid'), 'No valid Element');
+
 done_testing;

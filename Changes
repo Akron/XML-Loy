@@ -1,5 +1,6 @@
 0.12 2013-03-23
         - Made mime class method.
+	- Fixed bug for invalid element names.
 
 0.11 2013-03-23
         - Fixed bug in RFC822.
