@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 # Todo:
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
@@ -67,6 +67,7 @@ sub import {
   no strict 'refs';
   sub _namespace { ${"${_[0]}::NAMESPACE"}  || '' };
   sub _prefix    { ${"${_[0]}::PREFIX"}     || '' };
+  sub _mime      { ${"${_[0]}::MIME"}       || 'application/xml' };
   sub mime       { ${ref($_[0]) . '::MIME'} || 'application/xml' };
 };
 

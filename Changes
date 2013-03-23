@@ -1,3 +1,6 @@
+0.12 2013-03-23
+        - Made _mime class method.
+
 0.11 2013-03-23
         - Fixed bug in RFC822.
 
