@@ -67,8 +67,9 @@ sub import {
   no strict 'refs';
   sub _namespace { ${"${_[0]}::NAMESPACE"}  || '' };
   sub _prefix    { ${"${_[0]}::PREFIX"}     || '' };
-  sub _mime      { ${"${_[0]}::MIME"}       || 'application/xml' };
-  sub mime       { ${ref($_[0]) . '::MIME'} || 'application/xml' };
+  sub mime       {
+    ${ (blessed $_[0] || $_[0]) . '::MIME'} || 'application/xml'
+  };
 };
 
 

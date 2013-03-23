@@ -63,6 +63,9 @@ ok(my $text = $node->add('Text', 'Hello World!'), 'Add element');
 is($text->mime, 'application/xml', 'Mime type');
 is($node->mime, 'application/xml', 'Mime type');
 
+is(Fun->mime, 'application/xml', 'Mime class method');
+
+
 is($node->at(':root')->namespace, $fun_ns, 'Namespace');
 is($text->namespace, $fun_ns, 'Namespace');
 
