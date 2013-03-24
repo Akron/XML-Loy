@@ -1,3 +1,7 @@
+0.13 2013-03-24
+        - Fixed bug for XML string on construction.
+	- Some documentation improvements.
+
 0.12 2013-03-23
         - Made mime class method.
 	- Fixed bug for invalid element names.

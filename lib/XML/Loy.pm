@@ -5,26 +5,28 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
+
 
 # Todo:
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
 #
-#   sub try_further { };
-#   # usage:
-#   sub author {
-#     return $autor or $self->try_further;
-#   };
+# - sub try_further { };
+#     # usage:
+#     sub author {
+#       return $autor or $self->try_further;
+#     };
 #
-#  ALERT! Do not allow for namespace islands
-#         Search $obj->find('* *[xmlns]') and change prefixing
-#         After ->SUPER::new;
-#         Or:
-#         Do allow for namespace islands and check for the
-#         namespace to add instead of the package name before
-#         prefixing.
+#  - ALERT!
+#      Do not allow for namespace islands
+#      Search $obj->find('* *[xmlns]') and change prefixing
+#      After ->SUPER::new;
+#      Or:
+#      Do allow for namespace islands and check for the
+#      namespace to add instead of the package name before
+#      prefixing.
 #
-# set() should really try to overwrite.
+# - set() should really try to overwrite.
 
 
 our @CARP_NOT;
@@ -86,10 +88,8 @@ sub new {
     return $class->SUPER::new(@_);
   }
 
-  elsif (index($_[0],'<') >= 0) {  # XML string
+  elsif (index($_[0],'<') >= 0 || index($_[0],' ') >= 0) {  # XML string
     return $class->SUPER::new(@_);
-
-    # return _prefix_islands($obj);
   }
 
   # Create a new node
@@ -858,13 +858,13 @@ XML::Loy - Extensible XML Reader and Writer
   # Nest elements
   $header->add('greetings')->add(title => 'Hello!');
 
-  # Append elements with attributes
+  # Append elements with attributes and textual data
   $xml->add(body => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
   $xml->at('title')->attrs(style => 'color: red');
 
-  # Attach comments to elements
+  # Attach comments
   $xml->at('greetings')->comment('My Greeting');
 
   # Print with pretty indentation
@@ -898,7 +898,7 @@ B<This module is an early release! There may be significant changes in the futur
 
 =head1 METHODS
 
-L<XML::Loy> inherits all methods from
+L<XML::Loy> inherits all explicit methods from
 L<Mojo::DOM> and implements the following new ones.
 
 
@@ -956,8 +956,9 @@ and an optional comment on the element
 (if the comment should be introduced to an empty element,
 text content has to be C<undef>).
 
-For rendering element content with L<pretty printing|/to_pretty_xml>,
-a special C<-type> attribute has to be defined:
+For giving directives for rendering element content
+with L<pretty printing|/to_pretty_xml>,
+a special C<-type> attribute can be defined:
 
 =over 2
 
@@ -1015,7 +1016,7 @@ Indent the content and automatically
 introduce linebreaks after every
 C<n>th character.
 Intended for base64 encoded data.
-Defaults to 60 characters linewidth after indentation.
+Defaults to 60 characters line-width after indentation.
 
   my $xml = XML::Loy->new('entry');
 
@@ -1136,9 +1137,9 @@ defining the start of indentation (defaults to C<0>).
 
   package Fun;
   use XML::Loy with => (
-    prefix => 'fun',
+    prefix    => 'fun',
     namespace => 'http://sojolicio.us/ns/fun',
-    mime => 'application/fun+xml'
+    mime      => 'application/fun+xml'
   );
 
   # Add new methods to the object
@@ -1157,7 +1158,8 @@ By using a derived class as a base class or by extending a
 base class with the L<extension|/extension> method.
 
 With this package the following extensions are bundled:
-L<Atom|XML::Loy::Atom>, L<ActivityStreams|XML::Loy::ActivityStreams>,
+L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
+L<ActivityStreams|XML::Loy::ActivityStreams>,
 L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
 
 For the purpose of extension, three attributes can be set when
@@ -1223,7 +1225,7 @@ extension to another L<XML::Loy> based document as well.
 
 The defined namespace of C<Fun> is introduced with the
 prefix C<fun>. The prefix is prepended to all elements
-added by the L<add|/add> method in the extension class.
+added by the L<add|/add> and L<set|/set> methods in the extension class.
 To prevent this prefixing, prepend the element name with
 a C<-> (like with C<E<lt>-Cool /E<gt>> in the example
 above).
@@ -1244,7 +1246,7 @@ serialized data and the ease of extensibility.
 It is - as well as the underlying parser - written in pure perl and
 not intended to be the fastest thing out there
 (although I believe there's plenty of space for optimization).
-That said - it may not suits all your needs, but there are loads of excellent
+That said - it may not suit all your needs, but there are loads of excellent
 XML libraries out there, you can give a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
