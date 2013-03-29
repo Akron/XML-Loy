@@ -1,6 +1,7 @@
-0.13 2013-03-24
+0.13 2013-03-29
         - Fixed bug for XML string on construction.
 	- Some documentation improvements.
+	- Fixed bug in children() reimplementation.
 
 0.12 2013-03-23
         - Made mime class method.

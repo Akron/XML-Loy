@@ -344,11 +344,15 @@ sub _to_json_titles {
 # Serialize node properties
 sub _to_json_properties {
   my $node = shift;
-  my %property;
+  my %property = ();
   $node->children('Property')->each(
     sub {
-      my $val = $_->text || undef;
-      my $type = $_->attrs->{'type'};
+      my $p = shift;
+      my $val = $p->text || undef;
+      my $type = $p->attrs->{'type'};
+
+#      warn "\n>> " . $type . ' || ' . $p->to_xml . "\n\n";
+
       $property{$type} = $val;
     });
   return \%property;

@@ -281,11 +281,13 @@ sub children {
 	next if $e->[1] ne $type;
       }
 
-      # Check, if type is valid, but ignore prefixes
-      elsif (rindex($e->[1], $type) - (length($e->[1]) - $type_l)) {
-	next;
+      # Check, if type is valid, and ignore prefixes, cause tag is prefixed
+      elsif (index($e->[1], ':') > 0) {
+	next if substr($e->[1], (index($e->[1], ':') + 1)) ne $type;
+
       };
     };
+
     push @children, $self->new->charset($charset)->tree($e)->xml($xml);
   }
 

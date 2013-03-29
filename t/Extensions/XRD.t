@@ -286,6 +286,31 @@ is_deeply(
 is ($xrd->expires, '2010-01-30T09:30:00Z', 'Expiration date');
 is ($xrd->expires->epoch, '1264843800', 'Expiration date');
 
+
+$xrd_doc = <<'XRD';
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
+     xmlns:hm="http://host-meta.net/xrd/1.0"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <hm:Host>hostme.ta</hm:Host>
+  <Property type="permanentcheck">1</Property>
+  <Property type="foo">bar</Property>
+  <Property type="check">4</Property>
+  <Link href="http://www.sojolicio.us/"
+        rel="salmon">
+    <Title>Salmon</Title>
+  </Link>
+</XRD>
+XRD
+
+$xrd = XML::Loy::XRD->new($xrd_doc);
+
+my @prop = $xrd->root->at(':root')->children('Property')->each;
+
+is($prop[0]->attrs('type'), 'permanentcheck', 'Found prop 1');
+is($prop[1]->attrs('type'), 'foo', 'Found prop 2');
+is($prop[2]->attrs('type'), 'check', 'Found prop 3');
+
 done_testing;
 
 exit;
