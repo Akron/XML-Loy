@@ -9,6 +9,12 @@ use XML::Loy with => (
   prefix    => 'xrd'
 );
 
+# Todo:
+# - XRD defines a sequence
+#   1. Expires
+#   2. Subject
+#   3. Alias/Property/Link
+
 our @CARP_NOT;
 
 # Constructor
