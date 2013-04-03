@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-$|++;
-
 package Atom;
 use lib '../lib';
 

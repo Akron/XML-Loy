@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 
-$|++;
-
 use lib ('lib', '../lib', '../../lib', '../../../lib');
 
 use Mojo::ByteStream 'b';

@@ -4,9 +4,6 @@ use warnings;
 use Test::More;
 use Test::Warn;
 
-
-$|++;
-
 use lib '../lib', '../../lib';
 
 use_ok('XML::Loy::Atom');

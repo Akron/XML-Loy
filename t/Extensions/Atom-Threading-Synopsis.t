@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use Test::More;
 
-$|++;
-
 use lib '../lib', '../../lib';
 
 use_ok('XML::Loy::Atom');

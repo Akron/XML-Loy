@@ -1,3 +1,6 @@
+0.14 2013-04-03
+        - Improved test suite.
+
 0.13 2013-03-29
         - Fixed bug for XML string on construction.
 	- Some documentation improvements.
