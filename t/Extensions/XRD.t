@@ -341,6 +341,8 @@ is($xrd3->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
 is($xrd3->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
 ok(!$xrd3->link('hub'), 'Link 3');
 
+my $xrd5 = $xrd->filter_rel;
+
 is($xrd4->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd4->property('foo')->text, 'bar', 'Found prop 2');
 is($xrd4->property('check')->text, 4, 'Found prop 3');
@@ -348,7 +350,12 @@ ok(!$xrd4->link('salmon'), 'Link 1');
 is($xrd4->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
 is($xrd4->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
 
-
+is($xrd5->property('permanentcheck')->text, 1, 'Found prop 1');
+is($xrd5->property('foo')->text, 'bar', 'Found prop 2');
+is($xrd5->property('check')->text, 4, 'Found prop 3');
+ok(!$xrd5->link('salmon'), 'Link 1');
+ok(!$xrd5->link('author'), 'Link 2');
+ok(!$xrd5->link('hub'), 'Link 3');
 
 done_testing;
 

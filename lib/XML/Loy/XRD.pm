@@ -211,7 +211,9 @@ sub filter_rel {
   };
 
   # Create unwanted link relation query
-  my $rel = 'Link:' . join(':', map { 'not([rel=' . quote($_) . '])'} @rel);
+  my $rel = scalar @rel ? 'Link:' . join(':', map {
+    'not([rel=' . quote($_) . '])'
+  } @rel) : 'Link';
 
   # Remove unwanted link relations
   $xrd->find($rel)->pluck('remove');
@@ -557,6 +559,9 @@ object with a different API!>
   my $new_xrd = $xrd->filter_rel(qw/lrdd author/);
   $new_xrd = $xrd->filter_rel('lrdd author');
   $new_xrd = $xrd->filter_rel(['lrdd', 'author']);
+
+  # New XRD without any link relations
+  $new_xrd = $xrd->filter_rel;
 
 Returns a cloned XRD document, with filtered links
 based on their relations. Accepts an array, an array reference,

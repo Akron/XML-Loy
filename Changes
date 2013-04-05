@@ -1,3 +1,6 @@
+0.15 2013-04-06
+        - Small improvement in filter_rel().
+
 0.14 2013-04-03
         - Improved test suite.
 	- Added experimantal filter_rel() method to

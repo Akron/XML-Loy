@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util 'blessed';
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 
 # Todo:
