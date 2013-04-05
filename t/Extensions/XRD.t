@@ -311,6 +311,45 @@ is($prop[0]->attrs('type'), 'permanentcheck', 'Found prop 1');
 is($prop[1]->attrs('type'), 'foo', 'Found prop 2');
 is($prop[2]->attrs('type'), 'check', 'Found prop 3');
 
+ok($xrd->link(author => { href => 'http://sojolicio.us/author'}), 'Add link');
+ok($xrd->link(hub => { href => 'http://sojolicio.us/hub'}), 'Add link');
+
+my $xrd2 = $xrd->filter_rel('salmon hub');
+
+is($xrd->property('permanentcheck')->text, 1, 'Found prop 1');
+is($xrd->property('foo')->text, 'bar', 'Found prop 2');
+is($xrd->property('check')->text, 4, 'Found prop 3');
+is($xrd->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
+is($xrd->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
+is($xrd->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+
+my $xrd3 = $xrd->filter_rel(['salmon', 'author']);
+
+is($xrd2->property('permanentcheck')->text, 1, 'Found prop 1');
+is($xrd2->property('foo')->text, 'bar', 'Found prop 2');
+is($xrd2->property('check')->text, 4, 'Found prop 3');
+is($xrd2->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
+ok(!$xrd2->link('author'), 'Link 2');
+is($xrd2->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+
+my $xrd4 = $xrd->filter_rel('hub', 'author');
+
+is($xrd3->property('permanentcheck')->text, 1, 'Found prop 1');
+is($xrd3->property('foo')->text, 'bar', 'Found prop 2');
+is($xrd3->property('check')->text, 4, 'Found prop 3');
+is($xrd3->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
+is($xrd3->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
+ok(!$xrd3->link('hub'), 'Link 3');
+
+is($xrd4->property('permanentcheck')->text, 1, 'Found prop 1');
+is($xrd4->property('foo')->text, 'bar', 'Found prop 2');
+is($xrd4->property('check')->text, 4, 'Found prop 3');
+ok(!$xrd4->link('salmon'), 'Link 1');
+is($xrd4->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
+is($xrd4->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+
+
+
 done_testing;
 
 exit;

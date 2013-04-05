@@ -1,5 +1,6 @@
 package XML::Loy::XRD;
 use Mojo::JSON;
+use Mojo::Util 'quote';
 use Carp qw/carp/;
 use XML::Loy::Date::RFC3339;
 
@@ -177,6 +178,44 @@ sub expired {
 
   # Document is still current
   return;
+};
+
+
+# Filter link relations
+sub filter_rel {
+  my $self = shift;
+  my $xrd = $self->new( $self->to_xml );
+
+  # No xrd
+  return unless $xrd;
+
+  my @rel;
+
+  # Push valid relations
+  if (@_ == 1) {
+
+    # Based on array reference
+    if (ref $_[0] && ref $_[0] eq 'ARRAY') {
+      @rel = @{ shift() };
+    }
+
+    # Based on string
+    else {
+      @rel = split /\s+/, shift;
+    }
+  }
+
+  # As array
+  else {
+    @rel = @_;
+  };
+
+  # Create unwanted link relation query
+  my $rel = 'Link:' . join(':', map { 'not([rel=' . quote($_) . '])'} @rel);
+
+  # Remove unwanted link relations
+  $xrd->find($rel)->pluck('remove');
+  return $xrd;
 };
 
 
@@ -511,6 +550,21 @@ as a L<XML::Loy::Date::RFC3339> object.
 
 B<This method is experimental and may return another
 object with a different API!>
+
+
+=head2 filter_rel
+
+  my $new_xrd = $xrd->filter_rel(qw/lrdd author/);
+  $new_xrd = $xrd->filter_rel('lrdd author');
+  $new_xrd = $xrd->filter_rel(['lrdd', 'author']);
+
+Returns a cloned XRD document, with filtered link relations
+based on their relations. Accepts an array, an array reference,
+or a space separated string.
+See L<WebFinger|http://tools.ietf.org/html/draft-ietf-appsawg-webfinger>
+for further information.
+
+B<This method is experimental and may change without warnings!>
 
 
 =head2 link
