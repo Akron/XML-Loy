@@ -27,7 +27,11 @@ our $VERSION = '0.15';
 #      prefixing.
 #
 # - set() should really try to overwrite.
-
+#
+# Either support
+# $xml->extension('Atom') and $xml->extension('+MyXml::Cool');
+#  or (backwards compatible and emphasizing on extensibility
+# $xml->extension('-Atom') and $xml->extension('MyXml::Cool');
 
 our @CARP_NOT;
 
