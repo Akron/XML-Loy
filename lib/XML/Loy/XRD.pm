@@ -558,9 +558,9 @@ object with a different API!>
   $new_xrd = $xrd->filter_rel('lrdd author');
   $new_xrd = $xrd->filter_rel(['lrdd', 'author']);
 
-Returns a cloned XRD document, with filtered link relations
+Returns a cloned XRD document, with filtered links
 based on their relations. Accepts an array, an array reference,
-or a space separated string.
+or a space separated string describing the relation types.
 See L<WebFinger|http://tools.ietf.org/html/draft-ietf-appsawg-webfinger>
 for further information.
 
