@@ -8,7 +8,7 @@
 
 0.14 2013-04-03
         - Improved test suite.
-	- Added experimantal filter_rel() method to
+	- Added experimental filter_rel() method to
 	  XML::Loy::XRD.
 
 0.13 2013-03-29
