@@ -10,6 +10,7 @@ our $VERSION = '0.15';
 
 # Todo:
 #  - Add ->clone
+#    (Maybe via JSON serialisation of ->tree or using Storable or Dumper)
 #
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
 #
