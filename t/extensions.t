@@ -52,6 +52,8 @@ use lib '../lib';
 use Test::More;
 use Test::Warn;
 
+use_ok('XML::Loy::Atom');
+
 my $fun_ns  = 'http://sojolicio.us/ns/fun';
 my $atom_ns = 'http://www.w3.org/2005/Atom';
 
@@ -141,6 +143,28 @@ ok($xml = Atom->new('entry'), 'Constructor');
 ok($xml->add_id(45), 'Add id');
 
 is($xml->mime, 'application/atom+xml', 'Check mime');
+
+
+# Default extensions:
+ok($xml = XML::Loy::Atom->new('feed'), 'Constructor');
+is($xml->extension('-Atom::Threading', -ActivityStreams), 2, 'Extensions');
+is($xml->extension('XML::Loy::Atom::Threading', 'XML::Loy::ActivityStreams'), 0,
+   'Extensions');
+
+is($xml->at('feed')->attrs('loy:ext'),
+   'XML::Loy::Atom::Threading; XML::Loy::ActivityStreams',
+   'Extensions');
+
+ok(my $entry = $xml->entry(id => 'myentry'), 'New entry');
+ok($entry->actor(name => 'Donald'), 'Add actor');
+ok($entry->total(4), 'Add total');
+is($entry->author->[0]->at('name')->text, 'Donald', 'Get name');
+is($entry->actor->at('object-type')->text,
+   'http://activitystrea.ms/schema/1.0/person', 'Is person');
+is($entry->total, 4, 'total');
+is($xml->at('feed')->attrs('loy:ext'),
+   'XML::Loy::Atom::Threading; XML::Loy::ActivityStreams',
+   'Extensions');
 
 
 done_testing;

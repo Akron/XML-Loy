@@ -1,5 +1,10 @@
 0.15 2013-04-06
         - Small improvement in filter_rel().
+	- Added default namespace to 'XML::Loy::' via
+	  prepended minus symbol.
+	- Changed namespace prefix to 'loy' and
+	  namespace to 'http://sojolicio.us/ns/xml-loy'.
+	- Improvements to documentation.
 
 0.14 2013-04-03
         - Improved test suite.

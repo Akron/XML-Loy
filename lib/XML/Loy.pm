@@ -9,11 +9,6 @@ our $VERSION = '0.15';
 
 
 # Todo:
-#  - Either support
-#    $xml->extension('Atom') and $xml->extension('+MyXml::Cool');
-#      or (backwards compatible and emphasizing on extensibility
-#    $xml->extension('-Atom') and $xml->extension('MyXml::Cool');
-#
 #  - Add ->clone
 #
 #   Maybe necessary: *AUTOLOAD = \&XML::Loy::AUTOLOAD;
@@ -104,7 +99,7 @@ sub new {
     my $att  = ref( $_[0] ) eq 'HASH' ? shift : +{};
     my ($text, $comment) = @_;
 
-    $att->{'xmlns:serial'} = 'http://sojolicio.us/ns/xml-serial';
+    $att->{'xmlns:loy'} = 'http://sojolicio.us/ns/xml-loy';
 
     # Transform special attributes
     _special_attributes($att) if $att;
@@ -238,10 +233,10 @@ sub set {
   my $att = $self->tree->[2];
 
   # Introduce attribute 'once'
-  $att->{'serial:once'} //= '';
+  $att->{'loy:once'} //= '';
 
   # Check if set to once
-  if (index($att->{'serial:once'}, "($tag)") >= 0) {
+  if (index($att->{'loy:once'}, "($tag)") >= 0) {
 
     # Todo: Maybe escaping - check in extensions
     $self->children("$tag")->pluck('remove');
@@ -249,7 +244,7 @@ sub set {
 
   # Set if not already set
   else {
-    $att->{'serial:once'} .= "($tag)";
+    $att->{'loy:once'} .= "($tag)";
   };
 
   # Add a ref, not the tag
@@ -337,11 +332,11 @@ sub _add_clean {
     my $base_root_attr = $self->_root_element->[2];
 
     # Copy extensions
-    if (exists $root_attr->{'serial:ext'}) {
-      my $ext = $base_root_attr->{'serial:ext'};
+    if (exists $root_attr->{'loy:ext'}) {
+      my $ext = $base_root_attr->{'loy:ext'};
 
-      $base_root_attr->{'serial:ext'} =
-	join('; ', $ext, split(/;\s/, $root_attr->{'serial:ext'}));
+      $base_root_attr->{'loy:ext'} =
+	join('; ', $ext, split(/;\s/, $root_attr->{'loy:ext'}));
     };
 
 
@@ -411,7 +406,7 @@ sub _special_attributes {
   foreach ( grep { index($_, '-') == 0 } keys %$att ) {
 
     # Set special attribute
-    $att->{'serial:' . substr($_, 1) } = lc(delete $att->{$_});
+    $att->{'loy:' . substr($_, 1) } = lc(delete $att->{$_});
   };
 };
 
@@ -460,7 +455,7 @@ sub extension {
   my $root = $self->_root_element or return;
 
   # Get ext string
-  my @ext = split(/;\s/, $root->[2]->{'serial:ext'} || '');
+  my @ext = split(/;\s/, $root->[2]->{'loy:ext'} || '');
 
   return @ext unless $_[0];
 
@@ -474,7 +469,10 @@ sub extension {
 
     next if $ext ~~ \@ext;
 
-    # Todo: Support default 'XML::Loy::' prefix
+    # Default 'XML::Loy::' prefix
+    if (index($ext, '-') == 0) {
+      $ext =~ s/^-/XML::Loy::/;
+    };
 
     # Unable to load extension
     if (my $e = $loader->load($ext)) {
@@ -494,7 +492,7 @@ sub extension {
   };
 
   # Save extension list as attribute
-  $root->[2]->{'serial:ext'} = join('; ', @ext);
+  $root->[2]->{'loy:ext'} = join('; ', @ext);
 
   return $loaded;
 };
@@ -622,10 +620,10 @@ sub _element {
     if (!$child->[1] && ($child->[0] && $child->[0]->[0] eq 'text')) {
 
       # Special content treatment
-      if (exists $attr->{'serial:type'}) {
+      if (exists $attr->{'loy:type'}) {
 
 	# With base64 indentation
-	if ($attr->{'serial:type'} =~ /^armour(?::(\d+))?$/i) {
+	if ($attr->{'loy:type'} =~ /^armour(?::(\d+))?$/i) {
 	  my $n = $1 || 60;
 
 	  my $string = $child->[0]->[1];
@@ -656,10 +654,10 @@ sub _element {
     }
 
     # Treat children special
-    elsif (exists $attr->{'serial:type'}) {
+    elsif (exists $attr->{'loy:type'}) {
 
       # Raw
-      if ($attr->{'serial:type'} eq 'raw') {
+      if ($attr->{'loy:type'} eq 'raw') {
 
 	foreach (@$child) {
 
@@ -673,7 +671,7 @@ sub _element {
       }
 
       # Todo:
-      elsif ($attr->{'serial:type'} eq 'escape') {
+      elsif ($attr->{'loy:type'} eq 'escape') {
 	$content .= "\n";
 
 	foreach (@$child) {
@@ -701,7 +699,7 @@ sub _element {
       my $offset = 0;
 
       # First element is unformatted textual
-      if (!exists $attr->{'serial:type'} &&
+      if (!exists $attr->{'loy:type'} &&
 	    $child->[0] &&
 	      $child->[0]->[0] eq 'text') {
 
@@ -745,7 +743,7 @@ sub _attr {
 
   # Delete special and namespace attributes
   my @special = grep {
-    $_ eq 'xmlns:serial' || index($_, 'serial:') == 0
+    $_ eq 'xmlns:loy' || index($_, 'loy:') == 0
   } keys %attr;
 
   # Delete special attributes
@@ -1084,7 +1082,12 @@ If a node already has a comment, comments will be merged.
 
 =head2 extension
 
-  my $nr = $xml->extension('Fun', 'XML::Loy::Atom');
+  # Add extensions
+  my $nr = $xml->extension('Fun', 'XML::Loy::Atom', -HostMeta);
+
+  # Further additions
+  $xml->extension(-Atom::Threading);
+
   my @extensions = $xml->extension;
 
 Adds or returns an array of extensions.
@@ -1095,6 +1098,10 @@ With this package the following extensions are bundled:
 L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
 L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+If an extension has a leading minus symbol, it is assumed
+to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
+and C<-Atom> equivalent.
+
 See L<Extensions|/Extensions> for further information.
 
 

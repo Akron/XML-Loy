@@ -13,7 +13,7 @@ use XML::Loy::Atom;
 ok(my $entry = XML::Loy::Atom->new('entry'), 'Get object');
 
 # Add threading extension
-ok($entry->extension('XML::Loy::Atom::Threading'), 'Add extension');
+ok($entry->extension(-Atom::Threading), 'Add extension');
 
 # Add Atom author and id
 ok($entry->author(name => 'Zoidberg'), 'Add author');

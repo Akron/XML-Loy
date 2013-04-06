@@ -236,7 +236,12 @@ If a node already has a comment, comments will be merged.
 
 =head2 extension
 
-  my $nr = $xml->extension('Fun', 'XML::Loy::Atom');
+  # Add extensions
+  my $nr = $xml->extension('Fun', 'XML::Loy::Atom', -HostMeta);
+
+  # Further additions
+  $xml->extension(-Atom::Threading);
+
   my @extensions = $xml->extension;
 
 Adds or returns an array of extensions.
@@ -247,6 +252,10 @@ With this package the following extensions are bundled:
 L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
 L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+If an extension has a leading minus symbol, it is assumed
+to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
+and C<-Atom> equivalent.
+
 See L<Extensions|/Extensions> for further information.
 
 

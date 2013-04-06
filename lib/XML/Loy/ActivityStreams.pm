@@ -164,7 +164,7 @@ XML::Loy::ActivityStreams - ActivityStreams Extension for Atom
   my $atom = XML::Loy::Atom->new('feed');
 
   # Extend with ActivityStreams
-  $atom->extension('XML::Loy::ActivityStreams');
+  $atom->extension(-ActivityStreams);
 
   # New atom entry
   my $entry = $atom->entry(id => 'first_post');

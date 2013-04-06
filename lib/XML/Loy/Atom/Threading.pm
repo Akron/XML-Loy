@@ -143,7 +143,7 @@ XML::Loy::Atom::Threading - Threading Extension for Atom
   my $entry = XML::Loy::Atom->new('entry');
 
   # Add threading extension
-  $entry->extension('XML::Loy::Atom::Threading');
+  $entry->extension(-Atom::Threading);
 
   # Add Atom author and id
   $entry->author(name => 'Zoidberg');

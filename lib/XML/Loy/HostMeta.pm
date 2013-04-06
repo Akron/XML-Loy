@@ -43,7 +43,7 @@ XML::Loy::HostMeta - HostMeta Extension for XRD
   use XML::Loy::XRD;
 
   my $xrd = XML::Loy::XRD->new;
-  $xrd->extension('XML::Loy::HostMeta');
+  $xrd->extension(-HostMeta);
 
   $xrd->subject('http://sojolicio.us/');
   $xrd->host('sojolicio.us');
