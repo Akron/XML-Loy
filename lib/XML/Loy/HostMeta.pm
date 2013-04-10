@@ -14,7 +14,7 @@ sub new {
 
 # host information
 sub host {
-  my $self = shift;
+  my $self = shift->root->at('*');;
 
   unless ($_[0]) {
     my $h = $self->at('Host') or return;

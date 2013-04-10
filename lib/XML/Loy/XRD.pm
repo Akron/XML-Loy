@@ -52,7 +52,7 @@ sub new {
 
 # Set subject
 sub subject {
-  my $self = shift;
+  my $self = shift->root->at('*');;
 
   # Return subject
   unless ($_[0]) {
@@ -69,7 +69,7 @@ sub subject {
 
 # Add alias
 sub alias {
-  my $self = shift;
+  my $self = shift->root->at('*');
 
   # Return subject
   unless ($_[0]) {
@@ -168,7 +168,7 @@ sub expires {
 
 # Check for expiration
 sub expired {
-  my $self = shift;
+  my $self = shift->root->at('*');;
 
   # No expiration date given
   my $exp = $self->expires or return;
@@ -526,6 +526,9 @@ it can also parse L<JRD|https://tools.ietf.org/html/rfc6415> input.
 
 Adds multiple aliases to the xrd document
 or returns an array of aliases.
+
+B<Note>: This is an experimental method and may be changed
+in further versions.
 
 
 =head2 expired
