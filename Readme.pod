@@ -259,6 +259,30 @@ and C<-Atom> equivalent.
 See L<Extensions|/Extensions> for further information.
 
 
+=head2 as
+
+  my $xml = XML::Loy->new('<XRD><Subject>akron</Subject></XRD>');
+  my $xrd = $xml->as(-XRD, -HostMeta);
+
+  $xrd->alias('acct:akron@sojolicio.us');
+
+  print $xrd->to_pretty_xml;
+
+  # <xrd xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
+  #      xmlns:hm="http://host-meta.net/xrd/1.0"
+  #      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  #   <subject>akron</subject>
+  #   <alias>acct:akron@sojolicio.us</alias>
+  # </xrd>
+
+Convert an L<XML::Loy> based object to another object.
+Accepts the base class and optionally a list of extensions.
+This only changes the namespace of the base class - extensions
+will stay intact.
+
+B<Note:> This method is experimental and may change without warnings!
+
+
 =head2 mime
 
   print $xml->mime;
