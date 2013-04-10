@@ -1163,12 +1163,12 @@ See L<Extensions|/Extensions> for further information.
 
   print $xrd->to_pretty_xml;
 
-  # <xrd xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
+  # <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"
   #      xmlns:hm="http://host-meta.net/xrd/1.0"
   #      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  #   <subject>akron</subject>
-  #   <alias>acct:akron@sojolicio.us</alias>
-  # </xrd>
+  #   <Subject>akron</Subject>
+  #   <Alias>acct:akron@sojolicio.us</Alias>
+  # </XRD>
 
 Convert an L<XML::Loy> based object to another object.
 Accepts the base class and optionally a list of extensions.
