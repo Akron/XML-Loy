@@ -456,7 +456,12 @@ sub extension {
   my $self = shift;
 
   # Get root element
-  my $root = $self->_root_element or return;
+  my $root = $self->_root_element;
+
+  unless ($root) {
+    carp 'There is no document to associate the extension with';
+    return;
+  };
 
   # Get ext string
   my @ext = split(/;\s/, $root->[2]->{'loy:ext'} || '');

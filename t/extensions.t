@@ -167,19 +167,30 @@ is($xml->at('feed')->attrs('loy:ext'),
    'Extensions');
 
 
+# Delegate:
+$node = XML::Loy->new;
+
+warning_is {
+  $node->extension('Stupid', 'Atom');
+}
+q{There is no document to associate the extension with},
+  'Warning';
+
+
 done_testing;
+
 
 __END__
 
-# Delegate:
-$node = XML::Loy->new('object');
-$node->extension('Stupid', 'Atom');
-
-$yeah = $node->add_happy('Yeah!');
-
 $id = $node->add_id('1138');
+
+  $yeah = $node->add_happy('Yeah!');
 
 is($yeah->namespace, $fun_ns, 'Namespace');
 is($node->at('Cool')->namespace, $fun_ns, 'Namespace');
 is($id->namespace, $atom_ns, 'Namespace');
 is($id->text, '1138', 'Content');
+
+
+__END__
+
