@@ -2,6 +2,7 @@
         - Fixed a small bug in extension copying.
 	- Fixed a huge bug in XML treatment of strings.
 	- Added experimental as() method.
+	- Fixed add for fragments.
 
 0.15 2013-04-06
         - Small improvement in filter_rel().

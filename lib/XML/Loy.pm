@@ -152,7 +152,10 @@ sub add {
   my $tag = $_[0];
 
   # If node is root, use first element
-  if (!$self->parent && $self->tree->[1]->[0] eq 'pi') {
+  if (!$self->parent &&
+	ref($self->tree->[1]) &&
+	  ref($self->tree->[1]) eq 'ARRAY' &&
+	    $self->tree->[1]->[0] eq 'pi') {
     $self = $self->at('*');
   };
 

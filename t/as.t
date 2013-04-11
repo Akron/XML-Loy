@@ -84,6 +84,6 @@ my ($alias) = $xrd->alias;
 
 is($alias, 'acct:akron@sojolicio.us', 'Alias is correct');
 
-diag $xrd->to_pretty_xml;
+# diag $xrd->to_pretty_xml;
 
 done_testing;
