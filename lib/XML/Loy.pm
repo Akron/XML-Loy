@@ -2,7 +2,7 @@ package XML::Loy;
 use Mojo::ByteStream 'b';
 use Mojo::Loader;
 use Carp qw/croak carp/;
-use Scalar::Util 'blessed';
+use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
 our $VERSION = '0.16';
@@ -30,6 +30,9 @@ our $VERSION = '0.16';
 #      prefixing.
 #
 # - set() should really try to overwrite.
+#
+# - Use pi for ext! <?loy ext="" ?>
+
 
 our @CARP_NOT;
 
@@ -83,7 +86,28 @@ sub new {
 
   # Create from parent class
   unless ($_[0]) {                 # Empty constructor
-    return $class->SUPER::new->xml(1);
+
+    # Create root
+    my $tree = [
+      'root',
+      [ pi => 'xml version="1.0" encoding="UTF-8" standalone="yes"']
+    ];
+
+    my $att = {
+      'xmlns:loy' => 'http://sojolicio.us/ns/xml-loy'
+    };
+
+    # Set namespace if given
+    if (my $ns = $class->_namespace) {
+      $att->{xmlns} = $ns;
+    };
+
+    # Create Tag element
+    push(@$tree, ['tag', 'loy:root', $att, $tree]);
+    weaken $tree;
+
+    my $object = $class->SUPER::new->xml(1)->tree( $tree );
+    return $object;
   }
 
   elsif (ref $_[0]) {              # XML::Loy object
@@ -100,22 +124,23 @@ sub new {
     my $att  = ref( $_[0] ) eq 'HASH' ? shift : +{};
     my ($text, $comment) = @_;
 
-    $att->{'xmlns:loy'} = 'http://sojolicio.us/ns/xml-loy';
-
-    # Transform special attributes
-    _special_attributes($att) if $att;
-
     # Create root
     my $tree = [
       'root',
       [ pi => 'xml version="1.0" encoding="UTF-8" standalone="yes"']
     ];
 
+    $att->{'xmlns:loy'} = 'http://sojolicio.us/ns/xml-loy';
+
+    # Transform special attributes
+    _special_attributes($att) if $att;
+
     # Add comment if given
     push(@$tree, [comment => $comment]) if $comment;
 
     # Create Tag element
     my $element = ['tag', $name, $att, $tree];
+    weaken $tree;
 
     # Add element
     push(@$tree, $element);
@@ -302,11 +327,36 @@ sub children {
 sub _add_clean {
   my $self = shift;
 
+  my (@extensions, %att);
+
+  # Replace temporary root
+  if ($self->type eq 'loy:root') {
+    use Data::Dumper;
+
+    # Temporary save extension
+    @extensions = $self->extension;
+
+    # Delete attribute
+    delete $self->attrs->{'loy:ext'};
+
+    # Copy all other attributes
+    %att = %{ $self->attrs };
+
+    $self->root->at('loy\:root')->remove;
+#    warn '~~~~~~' .  $self->root;
+
+    $self = $self->root;
+  };
+
+  my $node;
+
+#  warn '* ' . $self . ' = ' . join(',', @_);
+
   # Node is a node object
   if (ref $_[0]) {
 
     # Serialize node
-    my $node = $self->SUPER::new->xml(1)->parse(
+    $node = $self->SUPER::new->xml(1)->parse(
       shift->to_xml
     );
 
@@ -354,7 +404,7 @@ sub _add_clean {
     $self->append_content($node);
 
     # Return first child
-    return $self->children->[-1];
+    $node = $self->children->[-1];
   }
 
   # Node is a string
@@ -383,7 +433,7 @@ sub _add_clean {
     $self->append_content( $string );
 
     # Get first child
-    my $node = $self->children->[-1];
+    $node = $self->children->[-1];
 
     # Attributes were given
     if ($att) {
@@ -397,9 +447,46 @@ sub _add_clean {
 
     # Add comment
     $node->comment($comment) if $comment;
-
-    return $node;
   };
+
+  # Replace temporary root
+  if (@extensions || %att) {
+#    use Data::Dumper;
+#    $node = $self->root->remove;
+#    warn $self->to_xml;
+#exit;
+
+#    warn '~ ' . $self;
+
+    # Replace placeholder
+#    warn '555555555555555555555555' . $self;
+
+
+#    warn '566666666666666666666666' . Dumper $self->tree;
+
+#    warn '++++++++++++' . $self;
+#    use Data::Dumper;
+#    warn $top;
+#    warn '------------' . $self;
+
+#    $self->parse($node->to_xml);
+
+#    warn '?' . $node->root; # Dumper $self->root->at('*')->remove->root->tree;
+
+#    my $top = $self->at('*');
+
+#    # Set old attributes
+    foreach (keys %att) {
+      $node->attrs($_ => $att{$_});
+#warn '+++++' . $_ . '=' . $att{$_} . ' ( ' . $node;
+    };
+#
+    $node->extension(@extensions);
+#
+#    $node = $top;
+  };
+
+  return $node;
 };
 
 
