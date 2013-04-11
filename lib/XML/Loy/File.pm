@@ -7,10 +7,12 @@ use XML::Loy with => (
 
 use Carp qw/carp/;
 
-# No constructor
+# Constructor
 sub new {
-  carp 'Only use ' . __PACKAGE__ . ' as an extension';
-  return;
+  $class = shift;
+  my $file = shift;
+  my $data = Mojo::ByteStream->new($file)->slurp or return;
+  return $class->SUPER::new($data);
 };
 
 
