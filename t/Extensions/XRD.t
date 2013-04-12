@@ -357,6 +357,31 @@ ok(!$xrd5->link('salmon'), 'Link 1');
 ok(!$xrd5->link('author'), 'Link 2');
 ok(!$xrd5->link('hub'), 'Link 3');
 
+ok(my $xrd6 = XML::Loy::XRD->new, 'New XRD document');
+ok($xrd6->link(name => 'Akron'), 'Add name link');
+ok($xrd6->alias('Peter'), 'Add alias');
+ok($xrd6->subject('Sorted Test'), 'Add subject');
+ok($xrd6->expires(time), 'Add expires');
+
+my $xrd6r = $xrd6->at('*');
+is($xrd6r->children->[0]->type, 'Subject', 'Check Subject');
+is($xrd6r->children->[1]->type, 'Expires', 'Check Subject');
+is($xrd6r->children->[2]->type, 'Link', 'Check Subject');
+is($xrd6r->children->[3]->type, 'Alias', 'Check Subject');
+
+ok(my $xrd7 = XML::Loy->new('test'), 'New XRD with prefixes');
+ok($xrd7->extension(-XRD), 'Add extension');
+ok($xrd7->link(name => 'Akron'), 'Add name link');
+ok($xrd7->alias('Peter'), 'Add alias');
+ok($xrd7->subject('Sorted Test'), 'Add subject');
+ok($xrd7->expires(time), 'Add expires');
+
+my $xrd7r = $xrd7->at('*');
+is($xrd7r->children->[0]->type, 'xrd:Subject', 'Check Subject');
+is($xrd7r->children->[1]->type, 'xrd:Expires', 'Check Subject');
+is($xrd7r->children->[2]->type, 'xrd:Link', 'Check Subject');
+is($xrd7r->children->[3]->type, 'xrd:Alias', 'Check Subject');
+
 done_testing;
 
 exit;

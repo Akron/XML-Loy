@@ -10,12 +10,6 @@ use XML::Loy with => (
   prefix    => 'xrd'
 );
 
-# Todo:
-# - XRD defines a sequence
-#   1. Expires
-#   2. Subject
-#   3. Alias/Property/Link
-
 our @CARP_NOT;
 
 # Constructor
@@ -62,8 +56,17 @@ sub subject {
     return $sub->text;
   };
 
+  my $new_node = $self->set(Subject => @_);
+
   # Set subject (only once)
-  return $self->set(Subject => @_);
+  if (my $np = $self->at('*:root > *')) {
+
+    # Put in correct order - maybe not effective
+    return $np->prepend($self->at('Subject')->remove);
+  };
+
+  # Set subject
+  return $new_node;
 };
 
 
@@ -155,14 +158,30 @@ sub expires {
     # Subject found
     my $exp = $self->at('Expires');
 
-    return 0 unless $exp;
+    # Return
+    return unless $exp;
 
+    # Return RFC3339 object
     return XML::Loy::Date::RFC3339->new($exp->text);
   };
 
+  # New RFC3339 object
   my $new_time = XML::Loy::Date::RFC3339->new($_[0])->to_string(0);
 
-  return $self->set(Expires => $new_time) if $new_time;
+  # RFC3339 obect undefined
+  return unless $new_time;
+
+  my $new_node = $self->set(Expires => $new_time);
+
+  # Set subject (only once)
+  if (my $np = $self->at('Link, Alias, Property')) {
+
+    # Put in correct order - maybe not effective
+    return $np->prepend($self->at('Expires')->remove);
+  };
+
+  # Return new node
+  return $new_node;
 };
 
 

@@ -30,9 +30,6 @@ our $VERSION = '0.16';
 #      prefixing.
 #
 # - set() should really try to overwrite.
-#
-# - Use pi for ext! <?loy ext="" ?>
-
 
 our @CARP_NOT;
 
@@ -86,28 +83,7 @@ sub new {
 
   # Create from parent class
   unless ($_[0]) {                 # Empty constructor
-
-    # Create root
-    my $tree = [
-      'root',
-      [ pi => 'xml version="1.0" encoding="UTF-8" standalone="yes"']
-    ];
-
-    my $att = {
-      'xmlns:loy' => 'http://sojolicio.us/ns/xml-loy'
-    };
-
-    # Set namespace if given
-    if (my $ns = $class->_namespace) {
-      $att->{xmlns} = $ns;
-    };
-
-    # Create Tag element
-    push(@$tree, ['tag', 'loy:root', $att, $tree]);
-    weaken $tree;
-
-    my $object = $class->SUPER::new->xml(1)->tree( $tree );
-    return $object;
+    return $class->SUPER::new->xml(1);
   }
 
   elsif (ref $_[0]) {              # XML::Loy object
@@ -124,23 +100,22 @@ sub new {
     my $att  = ref( $_[0] ) eq 'HASH' ? shift : +{};
     my ($text, $comment) = @_;
 
+    $att->{'xmlns:loy'} = 'http://sojolicio.us/ns/xml-loy';
+
+    # Transform special attributes
+    _special_attributes($att) if $att;
+
     # Create root
     my $tree = [
       'root',
       [ pi => 'xml version="1.0" encoding="UTF-8" standalone="yes"']
     ];
 
-    $att->{'xmlns:loy'} = 'http://sojolicio.us/ns/xml-loy';
-
-    # Transform special attributes
-    _special_attributes($att) if $att;
-
     # Add comment if given
     push(@$tree, [comment => $comment]) if $comment;
 
     # Create Tag element
     my $element = ['tag', $name, $att, $tree];
-    weaken $tree;
 
     # Add element
     push(@$tree, $element);
@@ -327,36 +302,11 @@ sub children {
 sub _add_clean {
   my $self = shift;
 
-  my (@extensions, %att);
-
-  # Replace temporary root
-  if ($self->type eq 'loy:root') {
-    use Data::Dumper;
-
-    # Temporary save extension
-    @extensions = $self->extension;
-
-    # Delete attribute
-    delete $self->attrs->{'loy:ext'};
-
-    # Copy all other attributes
-    %att = %{ $self->attrs };
-
-    $self->root->at('loy\:root')->remove;
-#    warn '~~~~~~' .  $self->root;
-
-    $self = $self->root;
-  };
-
-  my $node;
-
-#  warn '* ' . $self . ' = ' . join(',', @_);
-
   # Node is a node object
   if (ref $_[0]) {
 
     # Serialize node
-    $node = $self->SUPER::new->xml(1)->parse(
+    my $node = $self->SUPER::new->xml(1)->parse(
       shift->to_xml
     );
 
@@ -404,7 +354,7 @@ sub _add_clean {
     $self->append_content($node);
 
     # Return first child
-    $node = $self->children->[-1];
+    return $self->children->[-1];
   }
 
   # Node is a string
@@ -433,7 +383,7 @@ sub _add_clean {
     $self->append_content( $string );
 
     # Get first child
-    $node = $self->children->[-1];
+    my $node = $self->children->[-1];
 
     # Attributes were given
     if ($att) {
@@ -447,46 +397,9 @@ sub _add_clean {
 
     # Add comment
     $node->comment($comment) if $comment;
+
+    return $node;
   };
-
-  # Replace temporary root
-  if (@extensions || %att) {
-#    use Data::Dumper;
-#    $node = $self->root->remove;
-#    warn $self->to_xml;
-#exit;
-
-#    warn '~ ' . $self;
-
-    # Replace placeholder
-#    warn '555555555555555555555555' . $self;
-
-
-#    warn '566666666666666666666666' . Dumper $self->tree;
-
-#    warn '++++++++++++' . $self;
-#    use Data::Dumper;
-#    warn $top;
-#    warn '------------' . $self;
-
-#    $self->parse($node->to_xml);
-
-#    warn '?' . $node->root; # Dumper $self->root->at('*')->remove->root->tree;
-
-#    my $top = $self->at('*');
-
-#    # Set old attributes
-    foreach (keys %att) {
-      $node->attrs($_ => $att{$_});
-#warn '+++++' . $_ . '=' . $att{$_} . ' ( ' . $node;
-    };
-#
-    $node->extension(@extensions);
-#
-#    $node = $top;
-  };
-
-  return $node;
 };
 
 
@@ -545,6 +458,7 @@ sub extension {
   # Get root element
   my $root = $self->_root_element;
 
+  # No root to associate extension to
   unless ($root) {
     carp 'There is no document to associate the extension with';
     return;
@@ -1238,6 +1152,10 @@ Adds or returns an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 
+The extensions are associated to the document, they are not associated
+to the object. That means, you can't add extensions to documents
+without a root node.
+
 With this package the following extensions are bundled:
 L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
@@ -1247,6 +1165,9 @@ to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
 and C<-Atom> equivalent.
 
 See L<Extensions|/Extensions> for further information.
+
+B<Note:> The return value of the extension method is experimental
+and may change without warnings.
 
 
 =head2 as
@@ -1269,6 +1190,8 @@ Convert an L<XML::Loy> based object to another object.
 Accepts the base class and optionally a list of extensions.
 This only changes the namespace of the base class - extensions
 will stay intact.
+
+See L<Extensions|/Extensions> for further information.
 
 B<Note:> This method is experimental and may change without warnings!
 

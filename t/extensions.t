@@ -168,7 +168,7 @@ is($xml->at('feed')->attrs('loy:ext'),
 
 
 # Delegate:
-$node = XML::Loy->new;
+ok($node = XML::Loy->new, 'New document');
 
 warning_is {
   $node->extension('Stupid', 'Atom');

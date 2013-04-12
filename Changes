@@ -1,8 +1,10 @@
-0.16 2013-04-10
+0.16 2013-04-12
         - Fixed a small bug in extension copying.
 	- Fixed a huge bug in XML treatment of strings.
 	- Added experimental as() method.
 	- Fixed add for fragments.
+	- Fixed sequence bug in XRD.
+	- Added experimental note to extension.
 
 0.15 2013-04-06
         - Small improvement in filter_rel().
