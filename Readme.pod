@@ -248,6 +248,10 @@ Adds or returns an array of extensions.
 When adding, returns the number of successfully added extensions.
 When getting, returns the array of associated extensions.
 
+The extensions are associated to the document, they are not associated
+to the object. That means, you can't add extensions to documents
+without a root node.
+
 With this package the following extensions are bundled:
 L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
@@ -257,6 +261,9 @@ to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
 and C<-Atom> equivalent.
 
 See L<Extensions|/Extensions> for further information.
+
+B<Note:> The return value of the extension method is experimental
+and may change without warnings.
 
 
 =head2 as
@@ -279,6 +286,8 @@ Convert an L<XML::Loy> based object to another object.
 Accepts the base class and optionally a list of extensions.
 This only changes the namespace of the base class - extensions
 will stay intact.
+
+See L<Extensions|/Extensions> for further information.
 
 B<Note:> This method is experimental and may change without warnings!
 
