@@ -8,6 +8,7 @@ lib/XML/Loy/Date/RFC3339.pm
 lib/XML/Loy/Date/RFC822.pm
 t/add.t
 t/add-node.t
+t/as.t
 t/comment.t
 t/constructor.t
 t/extensions.t
