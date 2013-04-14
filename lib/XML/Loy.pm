@@ -30,6 +30,12 @@ our $VERSION = '0.16';
 #      prefixing.
 #
 # - set() should really try to overwrite.
+#
+# - add() with -before => '' and -after => ''
+#  - maybe possible to save to element
+#  - Maybe with small changes a change to the object
+#    (encoding, xml etc.) can be done
+
 
 our @CARP_NOT;
 
