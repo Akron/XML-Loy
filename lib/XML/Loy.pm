@@ -35,6 +35,12 @@ our $VERSION = '0.16';
 #  - maybe possible to save to element
 #  - Maybe with small changes a change to the object
 #    (encoding, xml etc.) can be done
+#
+# - on_init => sub {
+#     my $self = shift;
+#     $self->namespace(dcterms => 'http://purl.org/dc/terms/');
+#   }
+
 
 
 our @CARP_NOT;
@@ -271,6 +277,14 @@ sub children {
   # It works as written in the documentation,
   # but is also aware of namespace prefixes.
 
+  # If node is root, use first element
+  if (!$self->parent &&
+	ref($self->tree->[1]) &&
+	  ref($self->tree->[1]) eq 'ARRAY' &&
+	    $self->tree->[1]->[0] eq 'pi') {
+    $self = $self->at('*');
+  };
+
   my @children;
   my $charset = $self->charset;
   my $xml     = $self->xml;
@@ -296,7 +310,7 @@ sub children {
       };
     };
 
-    push @children, $self->new->charset($charset)->tree($e)->xml($xml);
+    push(@children, $self->new->charset($charset)->tree($e)->xml($xml));
   }
 
   # Create new Mojo::Collection
