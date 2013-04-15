@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 
 # Todo:
@@ -35,11 +35,6 @@ our $VERSION = '0.16';
 #  - maybe possible to save to element
 #  - Maybe with small changes a change to the object
 #    (encoding, xml etc.) can be done
-#
-# - on_init => sub {
-#     my $self = shift;
-#     $self->namespace(dcterms => 'http://purl.org/dc/terms/');
-#   }
 
 
 
