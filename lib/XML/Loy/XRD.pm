@@ -7,7 +7,12 @@ use XML::Loy::Date::RFC3339;
 use XML::Loy with => (
   mime      => 'application/xrd+xml',
   namespace => 'http://docs.oasis-open.org/ns/xri/xrd-1.0',
-  prefix    => 'xrd'
+  prefix    => 'xrd',
+  on_init   => sub {
+    shift->namespace(
+      xsi => 'http://www.w3.org/2001/XMLSchema-instance'
+    );
+  }
 );
 
 our @CARP_NOT;
@@ -34,11 +39,6 @@ sub new {
   else {
     $xrd = $class->SUPER::new(@_);
   };
-
-  # Add XMLSchema instance namespace
-  $xrd->namespace(
-    xsi => 'http://www.w3.org/2001/XMLSchema-instance'
-  );
 
   return $xrd;
 };

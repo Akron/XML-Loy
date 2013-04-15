@@ -66,7 +66,14 @@ sub import {
 
     # Set class variables
     foreach (qw/namespace prefix mime/) {
-      ${ "${caller}::" . uc $_} = $param{$_} if exists $param{$_};
+      if (exists $param{$_}) {
+	${ "${caller}::" . uc $_ } = delete $param{$_};
+      };
+    };
+
+    # Set class hook
+    if (exists $param{on_init}) {
+      *{"${caller}::ON_INIT"} = delete $param{on_init};
     };
   };
 
@@ -81,10 +88,29 @@ sub import {
 # Return class variables
 {
   no strict 'refs';
-  sub _namespace { ${"${_[0]}::NAMESPACE"}  || '' };
-  sub _prefix    { ${"${_[0]}::PREFIX"}     || '' };
+  sub _namespace { ${"${_[0]}::NAMESPACE"}   || '' };
+  sub _prefix    { ${"${_[0]}::PREFIX"}      || '' };
   sub mime       {
-    ${ (blessed $_[0] || $_[0]) . '::MIME'} || 'application/xml'
+    ${ (blessed $_[0] || $_[0]) . '::MIME'}  || 'application/xml'
+  };
+  sub _on_init   {
+    my $class = shift;
+    my $self = $class;
+
+    # Run object method
+    if (blessed $class) {
+      $class = blessed $class;
+    }
+
+    # Run class method
+    else {
+      $self = shift;
+    };
+
+    # Run init hook
+    if ($class->can('ON_INIT')) {
+      *{"${class}::ON_INIT"}->($self) ;
+    };
   };
 };
 
@@ -93,17 +119,22 @@ sub import {
 sub new {
   my $class = shift;
 
+  my $self;
+
   # Create from parent class
-  unless ($_[0]) {                 # Empty constructor
-    return $class->SUPER::new->xml(1);
+  # Empty constructor
+  unless ($_[0]) {
+    $self = $class->SUPER::new->xml(1);
   }
 
-  elsif (ref $_[0]) {              # XML::Loy object
-    return $class->SUPER::new(@_);
+  # XML::Loy object
+  elsif (ref $_[0]) {
+    $self = $class->SUPER::new(@_)->xml(1);
   }
 
-  elsif (index($_[0],'<') >= 0 || index($_[0],' ') >= 0) {  # XML string
-    return $class->SUPER::new->xml(1)->parse(@_);
+  # XML string
+  elsif (index($_[0],'<') >= 0 || index($_[0],' ') >= 0) {
+    $self = $class->SUPER::new->xml(1)->parse(@_);
   }
 
   # Create a new node
@@ -136,10 +167,10 @@ sub new {
     push(@$element, [text => $text]) if $text;
 
     # Create root element by parent class
-    my $root = $class->SUPER::new->xml(1);
+    $self = $class->SUPER::new->xml(1);
 
     # Add newly created tree
-    $root->tree($tree);
+    $self->tree($tree);
 
     # The class is derived
     if ($class ne __PACKAGE__) {
@@ -148,11 +179,15 @@ sub new {
       if (my $ns = $class->_namespace) {
 	$att->{xmlns} = $ns;
       };
-    };
 
-    # Return root node
-    return $root;
+    };
   };
+
+  # Start init hook
+  $self->_on_init;
+
+  # Return root node
+  return $self;
 };
 
 
@@ -513,6 +548,10 @@ sub extension {
 
     # Add extension to extensions list
     push(@ext, $ext);
+
+    # Start init hook
+    $ext->_on_init($self);
+
     $loaded++;
 
     if ((my $n_ns = $ext->_namespace) &&
@@ -579,6 +618,9 @@ sub as {
 
   # Create new base document
   my $xml = $base->new( $self->to_xml );
+
+  # Start init hook
+  $xml->_on_init;
 
   # Set base namespace
   if ($base->_namespace) {

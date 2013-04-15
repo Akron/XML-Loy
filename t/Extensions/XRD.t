@@ -35,6 +35,8 @@ is($xrd->to_pretty_xml, << 'XRD', 'Pretty Print');
 </XRD>
 XRD
 
+is($xrd->at('*')->attrs('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
+
 is($xrd->subject, 'http://sojolicio.us/', 'Get subject');
 
 ok($xrd->subject('blabla'), 'Set subject');
@@ -381,6 +383,13 @@ is($xrd7r->children->[0]->type, 'xrd:Subject', 'Check Subject');
 is($xrd7r->children->[1]->type, 'xrd:Expires', 'Check Subject');
 is($xrd7r->children->[2]->type, 'xrd:Link', 'Check Subject');
 is($xrd7r->children->[3]->type, 'xrd:Alias', 'Check Subject');
+
+
+my $wrapper = XML::Loy->new('test');
+ok($wrapper->extension(-XRD), 'Set extension');
+ok($wrapper->property(test => 'geht'), 'Set property');
+
+is($wrapper->at('*')->attrs('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
 
 done_testing;
 
