@@ -35,7 +35,8 @@ our $VERSION = '0.17';
 #  - maybe possible to save to element
 #  - Maybe with small changes a change to the object
 #    (encoding, xml etc.) can be done
-
+#
+# - closest() (jQuery)
 
 
 our @CARP_NOT;
