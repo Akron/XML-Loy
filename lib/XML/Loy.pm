@@ -562,7 +562,7 @@ sub extension {
   # Save extension list as attribute
   $root->[2]->{'loy:ext'} = join('; ', @ext);
 
-  return $loaded;
+  return $self;
 };
 
 
@@ -1202,7 +1202,7 @@ If a node already has a comment, comments will be merged.
 =head2 extension
 
   # Add extensions
-  my $nr = $xml->extension('Fun', 'XML::Loy::Atom', -HostMeta);
+  my $xml = $xml->extension('Fun', 'XML::Loy::Atom', -HostMeta);
 
   # Further additions
   $xml->extension(-Atom::Threading);
@@ -1210,7 +1210,7 @@ If a node already has a comment, comments will be merged.
   my @extensions = $xml->extension;
 
 Adds or returns an array of extensions.
-When adding, returns the number of successfully added extensions.
+When adding, returns the document.
 When getting, returns the array of associated extensions.
 
 The extensions are associated to the document, they are not associated

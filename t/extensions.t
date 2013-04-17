@@ -118,8 +118,6 @@ ok(!$node->at('Cool')->namespace, 'Namespace');
 ok($node = Fun->new('Fun'), 'Get node');
 
 ok($node->extension('Atom'), 'Add Atom 1');
-ok(!$node->extension('Atom'), 'Add Atom 2');
-ok(!$node->extension('Atom'), 'Add Atom 3');
 is(join(',', $node->extension), 'Atom', 'Extensions');
 
 $yeah = $node->add_happy('Yeah!');
@@ -136,8 +134,8 @@ is($id->text, '1138', 'Content');
 
 # New test
 ok(my $xml = XML::Loy->new('entry'), 'Constructor');
-is($xml->extension('Fun', 'Atom'), 2, 'Add 2 extensions');
-is($xml->extension('Fun', 'Atom'), 0, 'Add  extensions');
+ok($xml->extension('Fun', 'Atom'), 'Add 2 extensions');
+ok($xml->extension('Fun', 'Atom'), 'Add  extensions');
 
 ok($xml = Atom->new('entry'), 'Constructor');
 ok($xml->add_id(45), 'Add id');
@@ -147,9 +145,8 @@ is($xml->mime, 'application/atom+xml', 'Check mime');
 
 # Default extensions:
 ok($xml = XML::Loy::Atom->new('feed'), 'Constructor');
-is($xml->extension('-Atom::Threading', -ActivityStreams), 2, 'Extensions');
-is($xml->extension('XML::Loy::Atom::Threading', 'XML::Loy::ActivityStreams'), 0,
-   'Extensions');
+ok($xml->extension('-Atom::Threading', -ActivityStreams), 'Extensions');
+ok($xml->extension('XML::Loy::Atom::Threading', 'XML::Loy::ActivityStreams'), 'Extensions');
 
 is($xml->at('feed')->attrs('loy:ext'),
    'XML::Loy::Atom::Threading; XML::Loy::ActivityStreams',
