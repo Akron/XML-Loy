@@ -49,9 +49,6 @@ sub import {
 
   if ($flag =~ /^-?(?i:with|base)$/) {
 
-    # Get class variables
-    my %param = @_;
-
     # Allow for manipulating the symbol table
     no strict 'refs';
     no warnings 'once';
@@ -60,16 +57,22 @@ sub import {
     my $caller = caller;
     push @{"${caller}::ISA"}, __PACKAGE__;
 
-    # Set class variables
-    foreach (qw/namespace prefix mime/) {
-      if (exists $param{$_}) {
-	${ "${caller}::" . uc $_ } = delete $param{$_};
-      };
-    };
+    if (@_) {
 
-    # Set class hook
-    if (exists $param{on_init}) {
-      *{"${caller}::ON_INIT"} = delete $param{on_init};
+      # Get class variables
+      my %param = @_;
+
+      # Set class variables
+      foreach (qw/namespace prefix mime/) {
+	if (exists $param{$_}) {
+	  ${ "${caller}::" . uc $_ } = delete $param{$_};
+	};
+      };
+
+      # Set class hook
+      if (exists $param{on_init}) {
+	*{"${caller}::ON_INIT"} = delete $param{on_init};
+      };
     };
   };
 
