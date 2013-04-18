@@ -526,8 +526,6 @@ sub extension {
   # New Loader
   my $loader = Mojo::Loader->new;
 
-  my $loaded = 0;
-
   # Try all given extension names
   while (my $ext = shift( @_ )) {
 
@@ -550,8 +548,6 @@ sub extension {
 
     # Start init hook
     $ext->_on_init($self);
-
-    $loaded++;
 
     if ((my $n_ns = $ext->_namespace) &&
 	  (my $n_pref = $ext->_prefix)) {
