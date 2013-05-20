@@ -180,7 +180,7 @@ sub granularity {
   return $self->{granularity} unless @_;
 
   # Set granularity if valid
-  if (defined $_[0] && $_[0] ~~ [0 .. 4]) {
+  if (defined $_[0] && grep { $_[0] == $_ } 0 .. 4) {
 
     # Fine to set
     $self->{granularity} = shift;

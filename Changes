@@ -1,3 +1,6 @@
+0.18 2013-05-20
+        - Fixed compatibility bug to Mojolicious 4.0.
+
 0.17 2013-04-15
         - Added experimental on_init hook.
 	- Made -base faster.

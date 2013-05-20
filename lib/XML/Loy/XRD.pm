@@ -255,33 +255,31 @@ sub _to_xml {
 
   # Itterate over all XRD elements
   foreach my $key (keys %$jrd) {
-
-    given ($key = lc($key)) {
+    $key = lc $key;
 
       # Properties
-      when ('properties') {
-	_to_xml_properties($xrd, $jrd->{$key});
-      }
+    if ($key eq 'properties') {
+      _to_xml_properties($xrd, $jrd->{$key});
+    }
 
-      # Links
-      when ('links') {
-	_to_xml_links($xrd, $jrd->{$key});
-      }
+    # Links
+    elsif ($key eq 'links') {
+      _to_xml_links($xrd, $jrd->{$key});
+    }
 
-      # Subject or Expires
-      when (['subject','expires']) {
-	$xrd->set(ucfirst($key), $jrd->{$key});
-      }
+    # Subject or Expires
+    elsif ($key eq 'subject' || $key eq 'expires') {
+      $xrd->set(ucfirst($key), $jrd->{$key});
+    }
 
-      # Aliases
-      when ('aliases') {
-	$xrd->alias($_) foreach (@{$jrd->{$key}});
-      }
+    # Aliases
+    elsif ($key eq 'aliases') {
+      $xrd->alias($_) foreach (@{$jrd->{$key}});
+    }
 
-      # Titles
-      when ('titles') {
-	_to_xml_titles($xrd, $jrd->{$key});
-      };
+    # Titles
+    elsif ($key eq 'titles') {
+      _to_xml_titles($xrd, $jrd->{$key});
     };
   };
 };

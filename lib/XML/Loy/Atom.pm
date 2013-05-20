@@ -52,7 +52,7 @@ sub new_text {
   my ($type, $content, %hash);
 
   # Only textual content
-  if (!defined $_[2] && $_[0] ~~ [qw/text xhtml html/]) {
+  if (!defined $_[2] && $_[0] =~ m/(?:text|x?html)/) {
     $type = shift;
     $content = shift;
   }
@@ -460,7 +460,7 @@ sub _addset_text {
   my $self   = shift;
   my $action = shift;
 
-  unless ($action ~~ [qw/add set/]) {
+  unless ($action eq 'add' || $action eq 'set') {
     warn 'Action has to be set or add' and return;
   };
 

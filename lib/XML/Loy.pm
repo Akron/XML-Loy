@@ -320,7 +320,6 @@ sub children {
   };
 
   my @children;
-  my $charset = $self->charset;
   my $xml     = $self->xml;
   my $tree    = $self->tree;
   my $type_l  = $type ? length $type : 0;
@@ -344,7 +343,7 @@ sub children {
       };
     };
 
-    push(@children, $self->new->charset($charset)->tree($e)->xml($xml));
+    push(@children, $self->new->tree($e)->xml($xml));
   }
 
   # Create new Mojo::Collection
@@ -529,7 +528,7 @@ sub extension {
   # Try all given extension names
   while (my $ext = shift( @_ )) {
 
-    next if $ext ~~ \@ext;
+    next if grep { $ext eq $_ } @ext;
 
     # Default 'XML::Loy::' prefix
     if (index($ext, '-') == 0) {
