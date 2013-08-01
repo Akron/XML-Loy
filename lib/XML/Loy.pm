@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.17';
+our $VERSION = '0.19';
 
 
 # Todo:
@@ -445,7 +445,7 @@ sub _add_clean {
       _special_attributes($att);
 
       # Add attributes to node
-      $node->attrs($att);
+      $node->attr($att);
     };
 
     # Add comment
@@ -982,7 +982,7 @@ XML::Loy - Extensible XML Reader and Writer
   $xml->add(body => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
-  $xml->at('title')->attrs(style => 'color: red');
+  $xml->at('title')->attr(style => 'color: red');
 
   # Attach comments
   $xml->at('greetings')->comment('My Greeting');

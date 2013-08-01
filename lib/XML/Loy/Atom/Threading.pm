@@ -31,7 +31,7 @@ sub in_reply_to {
     # Adding a related link as advised in the spec
     if (defined $param->{href}) {
       my $link = $self->link(related => $param->{href});
-      $link->attrs->{type} = $param->{type} if $param->{type};
+      $link->attr->{type} = $param->{type} if $param->{type};
     };
 
     $param->{ref} = $ref;
@@ -161,7 +161,7 @@ XML::Loy::Atom::Threading - Threading Extension for Atom
   });
 
   # Get threading information
-  print $entry->in_reply_to->[0]->attrs('href');
+  print $entry->in_reply_to->[0]->attr('href');
 
   # Pretty print
   print $entry->to_pretty_xml;
@@ -207,7 +207,7 @@ from L<XML::Loy> and implements the following new ones.
     type => 'application/xhtml+xml'
   });
 
-  print $entry->in_reply_to->attrs('href');
+  print $entry->in_reply_to->attr('href');
 
 Adds an C<in-reply-to> element to the Atom object or returns it.
 Accepts for adding a universally unique ID for the entry to be referred to,
@@ -225,7 +225,7 @@ On retrieval, returns the first C<in-reply-to> element.
     updated => '2011-08-30T16:16:40Z'
   });
 
-  print $entry->replies->attrs('thr:count');
+  print $entry->replies->attr('thr:count');
 
 Adds a C<link> element with a relation of C<replies> to the atom object
 or returns it.

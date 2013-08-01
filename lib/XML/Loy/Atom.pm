@@ -270,7 +270,7 @@ sub id {
   return unless $element;
 
   # Add xml:id also
-  $element->parent->attrs('xml:id' => $id);
+  $element->parent->attr('xml:id' => $id);
   return $self;
 };
 
@@ -312,7 +312,7 @@ sub link {
     $children = $self->children('link');
   };
 
-  return $children->grep(sub { $_->attrs('rel') eq $rel });
+  return $children->grep(sub { $_->attr('rel') eq $rel });
 };
 
 
@@ -475,12 +475,12 @@ sub _addset_text {
     my $root_elem = $text->root->at('*');
 
     $root_elem->tree->[1] = $type;
-    my $root_att = $root_elem->attrs;
+    my $root_att = $root_elem->attr;
 
     # Delete type
     my $c_type = $root_att->{type} || '';
     if ($c_type eq 'text') {
-      delete $root_elem->attrs->{'type'};
+      delete $root_elem->attr->{'type'};
     };
 
     $text->root->at('*')->tree->[1] = $type;
@@ -832,7 +832,7 @@ Sets or returns the unique identifier of the Atom object.
   );
 
   # Get link elements
-  print $atom->link('related')->[0]->attrs('href');
+  print $atom->link('related')->[0]->attr('href');
 
 
 Adds link information to the Atom object or returns it.

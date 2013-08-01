@@ -68,8 +68,8 @@ is($atom->at('entry > id')->text, '#Test1', 'Add entry 1');
 $entry = $atom->entry(id => '#Test2');
 is($atom->find('entry > id')->[0]->text, '#Test1', 'Add entry 2');
 is($atom->find('entry > id')->[1]->text, '#Test2', 'Add entry 3');
-is($atom->find('entry')->[0]->attrs('xml:id'), '#Test1', 'Add entry 4');
-is($atom->find('entry')->[1]->attrs('xml:id'), '#Test2', 'Add entry 5');
+is($atom->find('entry')->[0]->attr('xml:id'), '#Test1', 'Add entry 4');
+is($atom->find('entry')->[1]->attr('xml:id'), '#Test2', 'Add entry 5');
 
 # Add entry without id
 ok($entry = $atom->entry(summary => 'Just fun'), 'Add entry without id');
@@ -140,7 +140,7 @@ is($entry->author->[0]->at('name')->text, 'Bender', 'Get first author');
 
 # Add category
 $entry->category('world');
-is($entry->at('category')->attrs('term'),
+is($entry->at('category')->attr('term'),
    'world',
    'Add category 1');
 ok($entry->at('category[term]'),
@@ -204,23 +204,23 @@ is($atom->id, 'Test3', 'Get id');
 # Add link
 $entry->link(related => 'http://sojolicio.us/alternative');
 is($entry->at('link')->text, '', 'Add link 1');
-is($entry->at('link')->attrs('href'),
+is($entry->at('link')->attr('href'),
    'http://sojolicio.us/alternative',
    'Add link 2');
 
-is($entry->at('link')->attrs('rel'), 'related', 'Add link 3');
+is($entry->at('link')->attr('rel'), 'related', 'Add link 3');
 $entry->link(
   rel => 'self',
   href => 'http://sojolicio.us/entry',
   title => 'Self-Link'
 );
 
-is($entry->at('link[title]')->attrs('title'),
+is($entry->at('link[title]')->attr('title'),
    'Self-Link',
    'Add link 4'
  );
 
-is($entry->link('related')->[0]->attrs('href'),
+is($entry->link('related')->[0]->attr('href'),
    'http://sojolicio.us/alternative',
    'related link'
  );
@@ -278,7 +278,7 @@ ok(my $source = $entry->source(
 ), 'Add source');
 
 ok($source->author(name => 'Zoidberg'), 'Add author');
-is($source->attrs('xml:base'), 'http://source.sojolicio.us/',
+is($source->attr('xml:base'), 'http://source.sojolicio.us/',
    'Check Source');
 
 is($atom->at('source > author > name')->text,
@@ -289,7 +289,7 @@ is($entry->source->author->[0]->at('name')->all_text,
    'Zoidberg',
    'Name');
 
-is($entry->source->attrs('xml:base'),
+is($entry->source->attr('xml:base'),
    'http://source.sojolicio.us/',
    'Check Source');
 

@@ -14,7 +14,7 @@ sub add_id {
   my $id   = shift;
   return unless $id;
   my $element = $self->add('id', $id);
-  $element->parent->attrs('xml:id' => $id);
+  $element->parent->attr('xml:id' => $id);
   return $element;
 };
 
@@ -148,7 +148,7 @@ ok($xml = XML::Loy::Atom->new('feed'), 'Constructor');
 ok($xml->extension('-Atom::Threading', -ActivityStreams), 'Extensions');
 ok($xml->extension('XML::Loy::Atom::Threading', 'XML::Loy::ActivityStreams'), 'Extensions');
 
-is($xml->at('feed')->attrs('loy:ext'),
+is($xml->at('feed')->attr('loy:ext'),
    'XML::Loy::Atom::Threading; XML::Loy::ActivityStreams',
    'Extensions');
 
@@ -159,7 +159,7 @@ is($entry->author->[0]->at('name')->text, 'Donald', 'Get name');
 is($entry->actor->at('object-type')->text,
    'http://activitystrea.ms/schema/1.0/person', 'Is person');
 is($entry->total, 4, 'total');
-is($xml->at('feed')->attrs('loy:ext'),
+is($xml->at('feed')->attr('loy:ext'),
    'XML::Loy::Atom::Threading; XML::Loy::ActivityStreams',
    'Extensions');
 

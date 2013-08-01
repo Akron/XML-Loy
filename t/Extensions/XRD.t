@@ -35,7 +35,7 @@ is($xrd->to_pretty_xml, << 'XRD', 'Pretty Print');
 </XRD>
 XRD
 
-is($xrd->at('*')->attrs('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
+is($xrd->at('*')->attr('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
 
 is($xrd->subject, 'http://sojolicio.us/', 'Get subject');
 
@@ -77,7 +77,7 @@ is($xrd->property('profile')->text, '/akron.html', 'Get Property');
 
 ok($element = $xrd->link(hcard => '/me.hcard'), 'Add link');
 
-ok($element->attrs('href'), 'Return link');
+ok($element->attr('href'), 'Return link');
 
 ok($element->add(Title => 'My hcard'), 'Add title');
 
@@ -98,7 +98,7 @@ is($xrd->link('lrdd2')->all_text, 'My Webfinger', 'Get title');
 
 ok($xrd->link('lrdd3' => '/me.json'), 'Add link');
 
-is($xrd->link('lrdd3')->attrs('href'), '/me.json', 'Get link');
+is($xrd->link('lrdd3')->attr('href'), '/me.json', 'Get link');
 
 ok($xrd->link('lrdd3')->remove, 'Remove link');
 ok($xrd->link('lrdd'), 'Get link');
@@ -106,7 +106,8 @@ ok($xrd->link('lrdd2'), 'Get link');
 ok(!$xrd->link('lrdd3'), 'Get link');
 
 ok($xrd->expires('1264843800'), 'Set expiration');
-is ($xrd->expires, '2010-01-30T09:30:00Z', 'Expiration date');
+is($xrd->expires, '2010-01-30T09:30:00Z', 'Expiration date');
+
 is ($xrd->expires->epoch, '1264843800', 'Expiration date');
 
 ok($xrd->expired, 'Document has expired');
@@ -128,9 +129,9 @@ $xrd = XML::Loy::XRD->new(<<XRD);
 </XRD>
 XRD
 
-is($xrd->link('lrdd')->attrs('template'), '/.well-known/webfinger?resource={uri}', 'Get link');
+is($xrd->link('lrdd')->attr('template'), '/.well-known/webfinger?resource={uri}', 'Get link');
 
-is($xrd->property('private')->attrs('xsi:nil'), 'true', 'Get property');
+is($xrd->property('private')->attr('xsi:nil'), 'true', 'Get property');
 
 
 $xrd = XML::Loy::XRD->new(<<'JRD');
@@ -143,7 +144,7 @@ JRD
 
 is($xrd->at('Alias')->text, 'https://sojolicio.us/', 'Get Alias');
 
-is($xrd->property('private')->attrs('xsi:nil'), 'true', 'nil attribute');
+is($xrd->property('private')->attr('xsi:nil'), 'true', 'nil attribute');
 
 
 
@@ -168,7 +169,7 @@ my $subnode_1 = $xrd->add('Link',{ rel => 'foo' }, 'bar');
 is(ref($subnode_1), 'XML::Loy::XRD',
    'Subnode added');
 
-is($xrd->at('Link')->attrs('rel'), 'foo', 'Attribute');
+is($xrd->at('Link')->attr('rel'), 'foo', 'Attribute');
 is($xrd->at('Link[rel="foo"]')->text, 'bar', 'Text');
 
 my $subnode_2 = $subnode_1->comment("Foobar Link!");
@@ -309,9 +310,9 @@ $xrd = XML::Loy::XRD->new($xrd_doc);
 
 my @prop = $xrd->root->at(':root')->children('Property')->each;
 
-is($prop[0]->attrs('type'), 'permanentcheck', 'Found prop 1');
-is($prop[1]->attrs('type'), 'foo', 'Found prop 2');
-is($prop[2]->attrs('type'), 'check', 'Found prop 3');
+is($prop[0]->attr('type'), 'permanentcheck', 'Found prop 1');
+is($prop[1]->attr('type'), 'foo', 'Found prop 2');
+is($prop[2]->attr('type'), 'check', 'Found prop 3');
 
 ok($xrd->link(author => { href => 'http://sojolicio.us/author'}), 'Add link');
 ok($xrd->link(hub => { href => 'http://sojolicio.us/hub'}), 'Add link');
@@ -321,26 +322,26 @@ my $xrd2 = $xrd->filter_rel('salmon hub');
 is($xrd->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd->property('foo')->text, 'bar', 'Found prop 2');
 is($xrd->property('check')->text, 4, 'Found prop 3');
-is($xrd->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
-is($xrd->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
-is($xrd->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+is($xrd->link('salmon')->attr('href'), 'http://www.sojolicio.us/', 'Link 1');
+is($xrd->link('author')->attr('href'), 'http://sojolicio.us/author', 'Link 2');
+is($xrd->link('hub')->attr('href'), 'http://sojolicio.us/hub', 'Link 3');
 
 my $xrd3 = $xrd->filter_rel(['salmon', 'author']);
 
 is($xrd2->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd2->property('foo')->text, 'bar', 'Found prop 2');
 is($xrd2->property('check')->text, 4, 'Found prop 3');
-is($xrd2->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
+is($xrd2->link('salmon')->attr('href'), 'http://www.sojolicio.us/', 'Link 1');
 ok(!$xrd2->link('author'), 'Link 2');
-is($xrd2->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+is($xrd2->link('hub')->attr('href'), 'http://sojolicio.us/hub', 'Link 3');
 
 my $xrd4 = $xrd->filter_rel('hub', 'author');
 
 is($xrd3->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd3->property('foo')->text, 'bar', 'Found prop 2');
 is($xrd3->property('check')->text, 4, 'Found prop 3');
-is($xrd3->link('salmon')->attrs('href'), 'http://www.sojolicio.us/', 'Link 1');
-is($xrd3->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
+is($xrd3->link('salmon')->attr('href'), 'http://www.sojolicio.us/', 'Link 1');
+is($xrd3->link('author')->attr('href'), 'http://sojolicio.us/author', 'Link 2');
 ok(!$xrd3->link('hub'), 'Link 3');
 
 my $xrd5 = $xrd->filter_rel;
@@ -349,8 +350,8 @@ is($xrd4->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd4->property('foo')->text, 'bar', 'Found prop 2');
 is($xrd4->property('check')->text, 4, 'Found prop 3');
 ok(!$xrd4->link('salmon'), 'Link 1');
-is($xrd4->link('author')->attrs('href'), 'http://sojolicio.us/author', 'Link 2');
-is($xrd4->link('hub')->attrs('href'), 'http://sojolicio.us/hub', 'Link 3');
+is($xrd4->link('author')->attr('href'), 'http://sojolicio.us/author', 'Link 2');
+is($xrd4->link('hub')->attr('href'), 'http://sojolicio.us/hub', 'Link 3');
 
 is($xrd5->property('permanentcheck')->text, 1, 'Found prop 1');
 is($xrd5->property('foo')->text, 'bar', 'Found prop 2');
@@ -389,7 +390,7 @@ my $wrapper = XML::Loy->new('test');
 ok($wrapper->extension(-XRD), 'Set extension');
 ok($wrapper->property(test => 'geht'), 'Set property');
 
-is($wrapper->at('*')->attrs('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
+is($wrapper->at('*')->attr('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
 
 done_testing;
 

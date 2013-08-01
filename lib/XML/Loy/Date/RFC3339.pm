@@ -4,7 +4,7 @@ use warnings;
 
 use overload '""' => sub { shift->to_string }, fallback => 1;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require Time::Local;
 
