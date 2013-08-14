@@ -31,7 +31,7 @@ ok($entry->replies('http://sojolicio.us/blog/1/replies' => {
 }), 'Add replies information');
 
 # Get threading information
-is($entry->in_reply_to->[0]->attrs('href'),
+is($entry->in_reply_to->[0]->attr('href'),
 'http://sojolicio.us/blog/1', 'Correct href');
 
 

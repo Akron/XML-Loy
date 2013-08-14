@@ -27,7 +27,7 @@ ok($entry->in_reply_to('urn:entry:1' => {
   type => 'application/xhtml+xml'
   }), 'Add entry');
 
-is($entry->in_reply_to->[0]->attrs('href'),
+is($entry->in_reply_to->[0]->attr('href'),
    'http://sojolicio.us/blog/1.html',
    'Get in_reply_to'
 );
@@ -39,12 +39,12 @@ ok($entry->in_reply_to('urn:entry:2' => {
   type => 'application/atom+xml'
   }), 'Add entry');
 
-is($entry->in_reply_to->[0]->attrs('href'),
+is($entry->in_reply_to->[0]->attr('href'),
    'http://sojolicio.us/blog/1.html',
    'Get in_reply_to'
 );
 
-is($entry->in_reply_to->[1]->attrs('href'),
+is($entry->in_reply_to->[1]->attr('href'),
    'http://sojolicio.us/blog/2.atom',
    'Get in_reply_to'
 );
@@ -53,7 +53,7 @@ ok($atom->in_reply_to('urn:feed:1' => {
   href => 'http://sojolicio.us/blog-replies.html',
   }), 'Add entry');
 
-is($atom->in_reply_to->[0]->attrs('href'),
+is($atom->in_reply_to->[0]->attr('href'),
    'http://sojolicio.us/blog-replies.html',
    'Get in_reply_to'
 );
@@ -63,15 +63,15 @@ ok($entry->replies('http://sojolicio.us/entry/1/replies' => {
   updated => '2011-08-30T16:16:40Z'
 }), 'Set replies');
 
-is($entry->replies->attrs('thr:count'), 5, 'Get replies');
+is($entry->replies->attr('thr:count'), 5, 'Get replies');
 
 ok($atom->replies('http://sojolicio.us/feed/replies' => {
   count   => 18
 }), 'Set replies');
 
-is($atom->replies->attrs('thr:count'), 18, 'Get replies');
+is($atom->replies->attr('thr:count'), 18, 'Get replies');
 
-is($entry->replies->attrs('thr:count'), 5, 'Get replies');
+is($entry->replies->attr('thr:count'), 5, 'Get replies');
 
 
 ok($entry->total(6), 'Set total okay');

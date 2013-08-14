@@ -12,13 +12,13 @@ use_ok('XML::Loy');
 my $xml = XML::Loy->new('test');
 my $subnode = $xml->add('Test', { foo => 'bar' });
 
-is($xml->at('Test')->attrs->{foo}, 'bar', 'Attribute request');
+is($xml->at('Test')->attr->{foo}, 'bar', 'Attribute request');
 
 $subnode->comment('This is a Test.');
 my $subsubnode = $subnode->add('SubTest',{ rel => 'simple'} );
 $subsubnode->add('SubTest', {rel => 'hard'}, 'Huhu');
 
-is($xml->at('SubTest')->attrs('rel'), 'simple', 'Attribute');
+is($xml->at('SubTest')->attr('rel'), 'simple', 'Attribute');
 is($xml->at('SubTest[rel="hard"]')->text, 'Huhu', 'Text');
 is($xml->at('SubTest[rel="simple"]')->text, '', 'Text');
 is($xml->at('SubTest[rel="simple"]')->all_text, 'Huhu', 'All Text');
@@ -34,14 +34,14 @@ $xml = XML::Loy->new(<<'XML');
 </xml>
 XML
 
-is($xml->at('SubTest')->attrs('rel'), 'simple', 'Attribute');
+is($xml->at('SubTest')->attr('rel'), 'simple', 'Attribute');
 is($xml->at('SubTest[rel="hard"]')->text, 'Huhu', 'Text');
 is($xml->at('SubTest[rel="simple"]')->text, '', 'Text');
 is($xml->at('SubTest[rel="simple"]')->all_text, 'Huhu', 'All Text');
 
 $xml->add('ParaTest', { rel => "para" }, 'Para');
 
-is($xml->at('ParaTest')->attrs('rel'), 'para', 'Attribute');
+is($xml->at('ParaTest')->attr('rel'), 'para', 'Attribute');
 is($xml->at('ParaTest[rel="para"]')->text, 'Para', 'Text');
 
 # New document
@@ -50,7 +50,7 @@ my $body = $xml->add('body', {color => '#ffffff' })->comment('body');
 $body->add('h1', 'Headline');
 $body->add('p', 'Paragraph');
 
-is($xml->at('body')->attrs('color'), '#ffffff', 'Attribute');
+is($xml->at('body')->attr('color'), '#ffffff', 'Attribute');
 is($xml->at('h1')->text, 'Headline', 'Text');
 is($xml->at('p')->text, 'Paragraph', 'Text');
 is($xml->at('body')->all_text, 'Headline Paragraph', 'Text');
@@ -72,12 +72,12 @@ $new_para_2->namespace('my' => $my_ns);
 $new_para_2->add('my:strong', {check => 'this'}, 'Works!' );
 
 is($new_para_2->at('strong')->namespace, $my_ns, 'Namespace');
-is($new_para_2->at('*')->attrs('xmlns:my'), $my_ns, 'Namespace-Declaration');
+is($new_para_2->at('*')->attr('xmlns:my'), $my_ns, 'Namespace-Declaration');
 
 $xml->add($new_para_2);
 
 is($xml->at('strong')->namespace, $my_ns, 'Namespace');
-is($xml->at('*')->attrs('xmlns:my'), $my_ns, 'Namespace-Declaration');
+is($xml->at('*')->attr('xmlns:my'), $my_ns, 'Namespace-Declaration');
 
 
 # Example from documentation

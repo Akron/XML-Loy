@@ -62,7 +62,9 @@ sub subject {
   if (my $np = $self->at('*:root > *')) {
 
     # Put in correct order - maybe not effective
-    return $np->prepend($self->at('Subject')->remove);
+    my $clone = $self->at('Subject');
+    $self->at('Subject')->remove;
+    return $np->prepend($clone);
   };
 
   # Set subject
@@ -177,7 +179,9 @@ sub expires {
   if (my $np = $self->at('Link, Alias, Property')) {
 
     # Put in correct order - maybe not effective
-    return $np->prepend($self->at('Expires')->remove);
+    my $clone = $self->at('Expires');
+    $self->at('Expires')->remove;
+    return $np->prepend($clone);
   };
 
   # Return new node
@@ -255,33 +259,31 @@ sub _to_xml {
 
   # Itterate over all XRD elements
   foreach my $key (keys %$jrd) {
-
-    given ($key = lc($key)) {
+    $key = lc $key;
 
       # Properties
-      when ('properties') {
-	_to_xml_properties($xrd, $jrd->{$key});
-      }
+    if ($key eq 'properties') {
+      _to_xml_properties($xrd, $jrd->{$key});
+    }
 
-      # Links
-      when ('links') {
-	_to_xml_links($xrd, $jrd->{$key});
-      }
+    # Links
+    elsif ($key eq 'links') {
+      _to_xml_links($xrd, $jrd->{$key});
+    }
 
-      # Subject or Expires
-      when (['subject','expires']) {
-	$xrd->set(ucfirst($key), $jrd->{$key});
-      }
+    # Subject or Expires
+    elsif ($key eq 'subject' || $key eq 'expires') {
+      $xrd->set(ucfirst($key), $jrd->{$key});
+    }
 
-      # Aliases
-      when ('aliases') {
-	$xrd->alias($_) foreach (@{$jrd->{$key}});
-      }
+    # Aliases
+    elsif ($key eq 'aliases') {
+      $xrd->alias($_) foreach (@{$jrd->{$key}});
+    }
 
-      # Titles
-      when ('titles') {
-	_to_xml_titles($xrd, $jrd->{$key});
-      };
+    # Titles
+    elsif ($key eq 'titles') {
+      _to_xml_titles($xrd, $jrd->{$key});
     };
   };
 };
@@ -368,7 +370,7 @@ sub to_json {
   $root->children('Link')->each(
     sub {
       my $link = shift;
-      my $link_att = $link->attrs;
+      my $link_att = $link->attr;
 
       my %link_prop;
       foreach (qw/rel template href type/) {
@@ -400,7 +402,7 @@ sub _to_json_titles {
   $node->children('Title')->each(
     sub {
       my $val  = $_->text;
-      my $lang = $_->attrs->{'xml:lang'} || 'default';
+      my $lang = $_->attr->{'xml:lang'} || 'default';
       $titles{$lang} = $val;
     });
   return \%titles;
@@ -415,9 +417,7 @@ sub _to_json_properties {
     sub {
       my $p = shift;
       my $val = $p->text || undef;
-      my $type = $p->attrs->{'type'};
-
-#      warn "\n>> " . $type . ' || ' . $p->to_xml . "\n\n";
+      my $type = $p->attr->{'type'};
 
       $property{$type} = $val;
     });
@@ -516,7 +516,7 @@ from L<XML::Loy> and implements the following new ones.
   </XRD>
   XRD
 
-  print $xrd->link('lrdd')->attrs('template');
+  print $xrd->link('lrdd')->attr('template');
 
   # New document by JRD
   my $jrd = XML::Loy::XRD->new(<<'JRD');
@@ -604,7 +604,7 @@ B<This method is experimental and may change without warnings!>
   })->add(Title => 'My hcard');
 
   # Get links
-  print $xrd->link('lrdd')->attrs('href');
+  print $xrd->link('lrdd')->attr('href');
 
   # use Mojo::DOM remove method
   $xrd->link('hcard')->remove;

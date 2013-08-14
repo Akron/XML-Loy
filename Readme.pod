@@ -22,7 +22,7 @@ XML::Loy - Extensible XML Reader and Writer
   $xml->add(body => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
-  $xml->at('title')->attrs(style => 'color: red');
+  $xml->at('title')->attr(style => 'color: red');
 
   # Attach comments
   $xml->at('greetings')->comment('My Greeting');

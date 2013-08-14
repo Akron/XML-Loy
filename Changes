@@ -1,4 +1,15 @@
-0.17 2013-04-22
+0.20 2013-08-14
+        - Small optimizations.
+
+0.19 2013-08-01
+        - Fixed compatibility bugs to Mojolicious 4.23.
+	- No backwards compatibility, as now Mojo::DOM::attr
+	  is used instead of Mojo::DOM::attrs.
+
+0.18 2013-05-20
+        - Fixed compatibility bug to Mojolicious 4.0.
+
+0.17 2013-04-15
         - Added experimental on_init hook.
 	- Made -base faster.
 	- Changed return value of extension().

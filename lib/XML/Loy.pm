@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.17';
+our $VERSION = '0.20';
 
 
 # Todo:
@@ -32,9 +32,9 @@ our $VERSION = '0.17';
 # - set() should really try to overwrite.
 #
 # - add() with -before => '' and -after => ''
-#  - maybe possible to save to element
-#  - Maybe with small changes a change to the object
-#    (encoding, xml etc.) can be done
+#   - maybe possible to save to element
+#   - Maybe with small changes a change to the object
+#     (encoding, xml etc.) can be done
 #
 # - closest() (jQuery)
 
@@ -154,16 +154,16 @@ sub new {
     ];
 
     # Add comment if given
-    push(@$tree, [comment => $comment]) if $comment;
+    push(@$tree, [ comment => $comment ]) if $comment;
 
     # Create Tag element
-    my $element = ['tag', $name, $att, $tree];
+    my $element = [ tag => $name, $att, $tree ];
 
     # Add element
     push(@$tree, $element);
 
     # Add text if given
-    push(@$element, [text => $text]) if $text;
+    push(@$element, [ text => $text ]) if $text;
 
     # Create root element by parent class
     $self = $class->SUPER::new->xml(1);
@@ -320,7 +320,6 @@ sub children {
   };
 
   my @children;
-  my $charset = $self->charset;
   my $xml     = $self->xml;
   my $tree    = $self->tree;
   my $type_l  = $type ? length $type : 0;
@@ -344,12 +343,12 @@ sub children {
       };
     };
 
-    push(@children, $self->new->charset($charset)->tree($e)->xml($xml));
+    push(@children, $self->new->tree($e)->xml($xml));
   }
 
   # Create new Mojo::Collection
-  return Mojo::Collection->new(@children);
-}
+  return Mojo::Collection->new( @children );
+};
 
 
 # Append a new child node to the XML Node
@@ -360,9 +359,7 @@ sub _add_clean {
   if (ref $_[0]) {
 
     # Serialize node
-    my $node = $self->SUPER::new->xml(1)->parse(
-      shift->to_xml
-    );
+    my $node = $self->SUPER::new->xml(1)->tree( shift->tree );
 
     # Get root attributes
     my $root_attr = $node->_root_element->[2];
@@ -446,7 +443,7 @@ sub _add_clean {
       _special_attributes($att);
 
       # Add attributes to node
-      $node->attrs($att);
+      $node->attr($att);
     };
 
     # Add comment
@@ -464,7 +461,7 @@ sub _special_attributes {
   foreach ( grep { index($_, '-') == 0 } keys %$att ) {
 
     # Set special attribute
-    $att->{'loy:' . substr($_, 1) } = lc(delete $att->{$_});
+    $att->{'loy:' . substr($_, 1) } = lc delete $att->{$_};
   };
 };
 
@@ -529,7 +526,7 @@ sub extension {
   # Try all given extension names
   while (my $ext = shift( @_ )) {
 
-    next if $ext ~~ \@ext;
+    next if grep { $ext eq $_ } @ext;
 
     # Default 'XML::Loy::' prefix
     if (index($ext, '-') == 0) {
@@ -624,7 +621,9 @@ sub as {
 
   # Delete extension information
   $xml->find('*[loy\:ext]')->each(
-    sub { delete $_->{attrs}->{'loy:ext'} }
+    sub {
+      delete $_->{attrs}->{'loy:ext'}
+    }
   );
 
   # Add extensions
@@ -803,8 +802,7 @@ sub _element {
 	};
 
 	# Correct Indent
-	$content .= ('  ' x $i);
-
+	$content .= '  ' x $i;
       };
     }
 
@@ -983,7 +981,7 @@ XML::Loy - Extensible XML Reader and Writer
   $xml->add(body => { date => 'today' })->add(p => "That's all!");
 
   # Use CSS3 selectors for element traversal
-  $xml->at('title')->attrs(style => 'color: red');
+  $xml->at('title')->attr(style => 'color: red');
 
   # Attach comments
   $xml->at('greetings')->comment('My Greeting');

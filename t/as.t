@@ -14,7 +14,7 @@ sub add_id {
   my $id   = shift;
   return unless $id;
   my $element = $self->add('id', $id);
-  $element->parent->attrs('xml:id' => $id);
+  $element->parent->attr('xml:id' => $id);
   return $element;
 };
 
