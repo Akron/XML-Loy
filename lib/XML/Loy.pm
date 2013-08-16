@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 
 # Todo:
@@ -1216,6 +1216,7 @@ L<Atom|XML::Loy::Atom>,
 L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
 L<GeoRSS|XML::Loy::GeoRSS>,
+L<OStatus|XML::Loy::OStatus>,
 L<XRD|XML::Loy::XRD>,
 and L<HostMeta|XML::Loy::HostMeta>.
 If an extension has a leading minus symbol, it is assumed

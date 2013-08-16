@@ -1,3 +1,7 @@
+0.22 2013-08-16
+        - Added OStatus extension.
+	- Fix bug in ActivityStreams.
+
 0.21 2013-08-16
 	- Fix GeoRSS bug.
 

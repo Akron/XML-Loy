@@ -1,10 +1,7 @@
 package XML::Loy::ActivityStreams;
-our $NS;
-BEGIN { $NS = 'http://activitystrea.ms/schema/1.0/' };
-
 use XML::Loy with => (
   prefix    => 'activity',
-  namespace => $NS
+  namespace => 'http://activitystrea.ms/schema/1.0/'
 );
 
 # Todo: support to_json
@@ -26,7 +23,7 @@ sub actor {
   if ($_[0]) {
     my $actor = $self->author( @_ );
 
-    # Maybe: $NS . 'person';
+    # Maybe: $namespace . 'person';
     $actor->set('object-type', 'person');
     return $actor;
   }
@@ -42,7 +39,9 @@ sub actor {
 
       # Prepend namespace if not defined
       if (index($object_type->text, '/') == -1) {
-	$object_type->replace_content($NS . lc$object_type->text);
+	$object_type->replace_content(
+	  __PACKAGE__->_namespace . lc $object_type->text
+	);
       };
 
       return $actor;
@@ -59,7 +58,7 @@ sub verb {
 
   # Set verb
   if ($_[0]) {
-    return $self->add(verb => _check_prefix($_[0]));
+    return $self->set(verb => _check_prefix($_[0]));
   }
 
   # Get verb
@@ -70,7 +69,7 @@ sub verb {
 
     # Prepend namespace if not defined
     if (index($verb->text, '/') == -1) {
-      my $nverb = $NS . lc $verb->text;
+      my $nverb = __PACKAGE__->_namespace . lc $verb->text;
       $verb->replace_content($nverb);
       return $nverb;
     };
@@ -128,7 +127,9 @@ sub _target_object {
 
     # Prepend namespace if not defined
     if (index($object_type->text, '/') == -1) {
-      $object_type->replace_content($NS . lc($object_type->text));
+      $object_type->replace_content(
+	__PACKAGE__->_namespace . lc($object_type->text)
+      );
     };
 
     return $obj;
@@ -140,7 +141,7 @@ sub _target_object {
 # ActivityStreams namespace
 sub _check_prefix {
   if (index($_[0], '/') == -1) {
-    return $NS . lc $_[0];
+    return __PACKAGE__->_namespace . lc $_[0];
   };
   return $_[0];
 };

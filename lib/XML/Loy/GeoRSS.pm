@@ -211,6 +211,8 @@ XML::Loy::GeoRSS - GeoRSS (Simple) Format Extension
 
 =head1 SYNOPSIS
 
+  use XML::Loy::Atom;
+
   my $atom = XML::Loy::Atom->new('entry');
   $atom->extension(-GeoRSS);
 
@@ -224,8 +226,8 @@ XML::Loy::GeoRSS - GeoRSS (Simple) Format Extension
 
 L<XML::Loy::GeoRSS> is an extension
 for L<XML::Loy> base classes and provides addititional
-functions for the work with geographic location as described in
-L<http://georss.org/simple|Specification>.
+functions for the work with geographic location as described in the
+L<specification|http://georss.org/simple>.
 This represents the simple variant rather than the GML flavour.
 
 B<This module is an early release! There may be significant changes in the future.>
@@ -328,8 +330,8 @@ or get coordinates.
     featuretypetag  => [qw/foo bar/]
   );
 
-Add geo features by means of C<relationshiptag>, C<featuretypetag> or
-C<featurename> element.
+Add geo features by means of C<relationshiptag>,
+C<featuretypetag> or C<featurename> element.
 
 =head2 C<geo_radius>
 

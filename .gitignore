@@ -6,8 +6,6 @@ MYMETA*
 Makefile
 sandbox
 pm_to_blib
-lib/XML/Loy/XStandoff.pm
-t/Extensions/XStandoff.t
 t/Extensions/files
 *~
 *.sqlite
