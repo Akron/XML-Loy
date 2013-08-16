@@ -1,5 +1,6 @@
-0.20 2013-08-14
+0.20 2013-08-16
         - Small optimizations.
+	- Added GeoRSS extension.
 
 0.19 2013-08-01
         - Fixed compatibility bugs to Mojolicious 4.23.

@@ -2,6 +2,7 @@ lib/XML/Loy.pm
 lib/XML/Loy/XRD.pm
 lib/XML/Loy/HostMeta.pm
 lib/XML/Loy/Atom.pm
+lib/XML/Loy/GeoRSS.pm
 lib/XML/Loy/Atom/Threading.pm
 lib/XML/Loy/ActivityStreams.pm
 lib/XML/Loy/Date/RFC3339.pm
@@ -19,6 +20,7 @@ t/summary.t
 t/Extensions/XRD.t
 t/Extensions/HostMeta.t
 t/Extensions/Atom.t
+t/Extensions/GeoRSS.t
 t/Extensions/Atom-Synopsis.t
 t/Extensions/Atom-Threading.t
 t/Extensions/Atom-Threading-Synopsis.t

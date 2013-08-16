@@ -11,7 +11,8 @@ WriteMakefile(
   VERSION_FROM => 'lib/XML/Loy.pm',
   BUILD_REQUIRES => {
     'Test::More' => 0,
-    'Test::Warn' => '0.24'
+    'Test::Warn' => '0.24',
+    'Scalar::Util' => 0
   },
   PREREQ_PM => {
     'Mojolicious' => '4.23',

@@ -253,9 +253,12 @@ to the object. That means, you can't add extensions to documents
 without a root node.
 
 With this package the following extensions are bundled:
-L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
+L<Atom|XML::Loy::Atom>,
+L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
-L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+L<GeoRSS|XML::Loy::GeoRSS>,
+L<XRD|XML::Loy::XRD>,
+and L<HostMeta|XML::Loy::HostMeta>.
 If an extension has a leading minus symbol, it is assumed
 to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
 and C<-Atom> equivalent.
