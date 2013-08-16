@@ -46,7 +46,7 @@ ok($where->geo_property(
 
 
 ok($where->geo_floor(5), 'Add floor');
-ok($where->geo_even(19), 'Add even');
+ok($where->geo_elev(19), 'Add even');
 ok($where->geo_radius(500), 'Add radius');
 
 is($atom->at('point')->text, '45.34 -23.67', 'Point');
@@ -91,19 +91,19 @@ is($atom->geo_circle->[0]->[0], 45.34, 'StartX');
 is($atom->geo_circle->[0]->[1], -23.67, 'StartY');
 is($atom->geo_circle->[1], 90, 'Radius');
 
-is($atom->find('relationshipTag')->[0]->text, 'tag1', 'Property1');
-ok(!$atom->find('relationshipTag')->[1], 'Property2');
-my $ftt = $atom->find('featureTypeTag');
+is($atom->find('relationshiptag')->[0]->text, 'tag1', 'Property1');
+ok(!$atom->find('relationshiptag')->[1], 'Property2');
+my $ftt = $atom->find('featuretypetag');
 is($ftt->[0]->text, 'tag2', 'Property3');
 is($ftt->[1]->text, 'tag3', 'Property4');
 is($ftt->[2]->text, 'tag4', 'Property5');
 ok(!$ftt->[3], 'Property6');
-is($atom->find('featureName')->[0]->text, 'tag5', 'Property7');
-ok(!$atom->find('featureName')->[1], 'Property8');
+is($atom->find('featurename')->[0]->text, 'tag5', 'Property7');
+ok(!$atom->find('featurename')->[1], 'Property8');
 ok(!$atom->at('foo'), 'Property9');
 
 is($atom->at('floor')->text, '5', 'Floor');
-is($atom->at('even')->text, '19', 'Even');
+is($atom->at('elev')->text, '19', 'Even');
 is($atom->at('radius')->text, '500', 'Radius');
 
 is($atom->at('author > name')->text, 'Fry', 'Atom Check');

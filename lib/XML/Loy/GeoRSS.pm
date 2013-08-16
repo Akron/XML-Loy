@@ -108,14 +108,14 @@ sub geo_property {
   my %properties = @_;
 
   # Add all available properties
-  foreach my $tag (grep(/^(?:(?:relationship|featureType)Tag|featureName)$/,
+  foreach my $tag (grep(/^(?:(?:relationship|featuretype)tag|featurename)$/i,
 		keys %properties)) {
 
     my $val = $properties{$tag};
 
     # Add as an array, if it is one
     foreach (ref $val ? @$val : ($val)) {
-      $self->add($tag => $_);
+      $self->add( lc($tag) => $_ );
     };
   };
 
@@ -129,9 +129,9 @@ sub geo_floor {
 };
 
 
-# Add 'even' element
-sub geo_even {
-  shift->add(even => shift);
+# Add 'elev' element
+sub geo_elev {
+  shift->add(elev => shift);
 };
 
 
@@ -269,11 +269,11 @@ Add C<circle> element based on one coordinate
 and a value for radius, or get circle.
 
 
-=head2 C<geo_even>
+=head2 C<geo_elev>
 
-  $atom->geo_even(40);
+  $atom->geo_elev(40);
 
-Add C<even> element.
+Add C<elev> element.
 
 
 =head2 C<geo_floor>
@@ -324,12 +324,12 @@ or get coordinates.
 =head2 C<geo_property>
 
   $atom->geo_property(
-    relationshipTag => 'test',
-    featureTypeTag  => [qw/foo bar/]
+    relationshiptag => 'test',
+    featuretypetag  => [qw/foo bar/]
   );
 
-Add geo features by means of C<relationshipTag>, C<featureTypeTag> or
-C<featureName> element.
+Add geo features by means of C<relationshiptag>, C<featuretypetag> or
+C<featurename> element.
 
 =head2 C<geo_radius>
 
