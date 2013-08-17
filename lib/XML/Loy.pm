@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 
 # Todo:
@@ -1223,7 +1223,7 @@ If an extension has a leading minus symbol, it is assumed
 to be located in the C<XML::Loy> namespace, making C<XML::Loy::Atom>
 and C<-Atom> equivalent.
 
-See L<Extensions|/Extensions> for further information.
+See L<Extensions|/EXTENSIONS> for further information.
 
 B<Note:> The return value of the extension method is experimental
 and may change without warnings.
@@ -1250,7 +1250,7 @@ Accepts the base class and optionally a list of extensions.
 This only changes the namespace of the base class - extensions
 will stay intact.
 
-See L<Extensions|/Extensions> for further information.
+See L<Extensions|/EXTENSIONS> for further information.
 
 B<Note:> This method is experimental and may change without warnings!
 
@@ -1260,7 +1260,7 @@ B<Note:> This method is experimental and may change without warnings!
   print $xml->mime;
 
 The mime type associated with the object class.
-See L<Extensions|/Extensions> for further information.
+See L<Extensions|/EXTENSIONS> for further information.
 
 
 =head2 namespace
@@ -1320,12 +1320,16 @@ defining the start of indentation (defaults to C<0>).
 L<XML::Loy> allows for inheritance
 and thus provides two ways of extending the functionality:
 By using a derived class as a base class or by extending a
-base class with the L<extension|/extension> method.
+base class with the L<extension|extension> method.
 
 With this package the following extensions are bundled:
-L<Atom|XML::Loy::Atom>, L<Atom-Threading|XML::Loy::Atom::Threading>,
+L<Atom|XML::Loy::Atom>,
+L<Atom-Threading|XML::Loy::Atom::Threading>,
 L<ActivityStreams|XML::Loy::ActivityStreams>,
-L<XRD|XML::Loy::XRD>, and L<HostMeta|XML::Loy::HostMeta>.
+L<GeoRSS|XML::Loy::GeoRSS>,
+L<OStatus|XML::Loy::OStatus>,
+L<XRD|XML::Loy::XRD>,
+and L<HostMeta|XML::Loy::HostMeta>.
 
 For the purpose of extension, three attributes can be set when
 L<XML::Loy> is used (introduced with the keyword C<with>).

@@ -309,7 +309,7 @@ or get coordinates.
   # 4.56
 
 Add C<point> element based on one coordinate,
-or get them.
+or get it.
 
 
 =head2 C<geo_polygon>

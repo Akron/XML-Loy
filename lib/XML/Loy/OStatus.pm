@@ -133,21 +133,21 @@ Add or get attention link.
 
   say $entry->conversation;
 
-Add or get conversation.
+Add or get conversation link.
 
 
 =head2 C<verb_leave>
 
   $entry->verb_leave;
 
-Add ostatus C<leave> verb for ActivityStreams.
+Add OStatus C<leave> verb for ActivityStreams.
 This needs the L<ActivityStreams|XML::Loy::ActivityStreams> extension.
 
 =head2 C<verb_unfavorite>
 
   $entry->verb_unfavorite;
 
-Add ostatus C<unfavorite> verb for ActivityStreams.
+Add OStatus C<unfavorite> verb for ActivityStreams.
 This needs the L<ActivityStreams|XML::Loy::ActivityStreams> extension.
 
 
@@ -155,7 +155,7 @@ This needs the L<ActivityStreams|XML::Loy::ActivityStreams> extension.
 
   $entry->verb_unfollow;
 
-Add ostatus C<unfollow> verb for ActivityStreams.
+Add OStatus C<unfollow> verb for ActivityStreams.
 This needs the L<ActivityStreams|XML::Loy::ActivityStreams> extension.
 
 
