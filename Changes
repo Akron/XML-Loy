@@ -1,9 +1,10 @@
 0.25 2013-02-12
         - Update year.
+	- Improvements on documentation.
 
 0.24 2013-02-12
         - Fixed bug in ActivityStreams.
-	- Updated to recent Mojolicious version.
+	- Updated to recent Mojolicious (4.77) version.
 
 0.23 2013-08-17
         - Fixed docs.

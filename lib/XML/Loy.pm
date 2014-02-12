@@ -1419,7 +1419,8 @@ That said - it may not suit all your needs, but there are loads of excellent
 XML libraries out there, you can give a try then.
 Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
-see L<XML::LibXML>.
+see L<XML::LibXML>. For simple deserialization,
+try L<XML::Bare> and L<XML::Fast>.
 
 
 =head1 AVAILABILITY
