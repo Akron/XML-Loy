@@ -207,7 +207,7 @@ sub expired {
 # Filter link relations
 sub filter_rel {
   my $self = shift;
-  my $xrd = $self->new( $self->to_xml );
+  my $xrd = $self->new( $self->to_string );
 
   # No xrd
   return unless $xrd;

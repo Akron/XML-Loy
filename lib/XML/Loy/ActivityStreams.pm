@@ -23,8 +23,7 @@ sub actor {
   if ($_[0]) {
     my $actor = $self->author( @_ );
 
-    # Maybe: $namespace . 'person';
-    $actor->set('object-type', 'person');
+    $actor->set('object-type', _check_prefix('person'));
     return $actor;
   }
 
@@ -39,7 +38,7 @@ sub actor {
 
       # Prepend namespace if not defined
       if (index($object_type->text, '/') == -1) {
-	$object_type->replace_content(
+	$object_type->content(
 	  __PACKAGE__->_namespace . lc $object_type->text
 	);
       };
@@ -70,7 +69,7 @@ sub verb {
     # Prepend namespace if not defined
     if (index($verb->text, '/') == -1) {
       my $nverb = __PACKAGE__->_namespace . lc $verb->text;
-      $verb->replace_content($nverb);
+      $verb->content($nverb);
       return $nverb;
     };
 
@@ -127,7 +126,7 @@ sub _target_object {
 
     # Prepend namespace if not defined
     if (index($object_type->text, '/') == -1) {
-      $object_type->replace_content(
+      $object_type->content(
 	__PACKAGE__->_namespace . lc($object_type->text)
       );
     };

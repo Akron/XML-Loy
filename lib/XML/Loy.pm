@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 
 # Todo:
@@ -609,7 +609,7 @@ sub as {
   };
 
   # Create new base document
-  my $xml = $base->new( $self->to_xml );
+  my $xml = $base->new( $self->to_string );
 
   # Start init hook
   $xml->_on_init;
@@ -780,7 +780,7 @@ sub _element {
 	  $dom->xml(1);
 
 	  # Print without prettifying
-	  $content .= $dom->tree($_)->to_xml;
+	  $content .= $dom->tree($_)->to_string;
 	};
       }
 
