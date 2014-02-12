@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 
 # Todo:
@@ -1429,7 +1429,7 @@ see L<XML::LibXML>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
