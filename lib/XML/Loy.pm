@@ -298,7 +298,7 @@ sub set {
   unshift(@_, $tag) unless blessed $_[0];
 
   # Add element (Maybe prefixed)
-  return $self->_add_clean(@_) or return;
+  return $self->_add_clean(@_);
 };
 
 
