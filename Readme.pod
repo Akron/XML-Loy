@@ -458,10 +458,14 @@ not intended to be the fastest thing out there
 (although I believe there's plenty of space for optimization).
 That said - it may not suit all your needs, but there are loads of excellent
 XML libraries out there, you can give a try then.
-Just to name a few: For fast parsing of huge documents, see L<XML::Twig>.
+Just to name a few:
+For fast parsing of huge documents, try L<XML::Twig>.
 For validation and the availability of lots of tools from the XML world,
-see L<XML::LibXML>. For simple deserialization,
+try L<XML::LibXML>.
+For simple deserialization,
 try L<XML::Bare> and L<XML::Fast>.
+For similar scope, but without dependencies aside the core,
+try L<XML::MyXML>.
 
 
 =head1 AVAILABILITY
