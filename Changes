@@ -1,10 +1,13 @@
-0.25 2013-02-19
+0.26 2014-06-30
+        - Corrected year in changes file (Thanks, Karjala!).
+
+0.25 2014-02-19
         - Update year.
 	- Improvements on documentation.
 	- Fix minor problem in value return.
 	- Updated to recent Mojolicious (4.81).
 
-0.24 2013-02-12
+0.24 2014-02-12
         - Fixed bug in ActivityStreams.
 	- Updated to recent Mojolicious (4.77).
 
