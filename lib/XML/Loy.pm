@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.26';
+our $VERSION = '0.29';
 
 
 # Todo:
@@ -47,7 +47,7 @@ sub import {
 
   return unless my $flag = shift;
 
-  if ($flag =~ /^-?(?i:with|base)$/) {
+  if ($flag =~ /^-?(?i:base|with)$/) {
 
     # Allow for manipulating the symbol table
     no strict 'refs';
@@ -286,7 +286,7 @@ sub set {
   if (index($att->{'loy:once'}, "($tag)") >= 0) {
 
     # Todo: Maybe escaping - check in extensions
-    $self->children("$tag")->pluck('remove');
+    $self->children("$tag")->map(sub { $_->remove });
   }
 
   # Set if not already set

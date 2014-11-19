@@ -192,7 +192,6 @@ L<XML::Loy::Atom> and provides additional
 functionality for the work with
 L<Threading|https://www.ietf.org/rfc/rfc4685.txt>.
 
-B<This module is an early release! There may be significant changes in the future.>
 
 =head1 METHODS
 
@@ -262,7 +261,7 @@ L<Mojolicious>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

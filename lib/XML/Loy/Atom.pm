@@ -5,7 +5,6 @@ use XML::Loy::Date::RFC3339;
 
 # Todo:
 #  - see http://search.cpan.org/dist/XML-Atom-SimpleFeed
-#  - Do not use constant
 
 our @CARP_NOT;
 
@@ -18,7 +17,7 @@ use XML::Loy with => (
 
 
 # Namespace declaration
-use constant XHTML_NS => 'http://www.w3.org/1999/xhtml';
+state $XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
 
 # New person construct
@@ -88,7 +87,7 @@ sub new_text {
     # XHTML content - allowed to be pretty printed
    $c_node->add(
       -div => {
-	xmlns => XHTML_NS
+	xmlns => $XHTML_NS
       })->append_content($content);
   }
 
@@ -1009,7 +1008,7 @@ L<Mojolicious>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

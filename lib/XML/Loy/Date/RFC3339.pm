@@ -4,7 +4,7 @@ use warnings;
 
 use overload '""' => sub { shift->to_string }, fallback => 1;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 require Time::Local;
 
@@ -12,7 +12,7 @@ require Time::Local;
 my $RFC3339_RE = qr/^(\d{4})          # year
                      (?:-(\d?\d)      # year and month
                       (?:-(\d?\d)     # complete date
-                       (?:[Tt](\d?\d) # + hour and minutes
+                       (?:[^\d](\d?\d) # + hour and minutes
                          :(\d?\d)
                         (?::(\d?\d)   # + hour, minutes and seconds
                          (?:\.\d*)?   # + hour, minutes, seconds and a
@@ -318,7 +318,7 @@ L<Time::Local>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 The code is heavily based on L<Mojo::Date>,
 written by Sebastian Riedel. See L<Mojo::Date>

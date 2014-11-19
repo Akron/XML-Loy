@@ -6,6 +6,7 @@ use XML::Loy with => (
 
 # Todo: support to_json
 # Todo: verbs and object-types may need namespaces
+# Todo: Support ActivityStreams 2 as a anamespace
 
 use Carp qw/carp/;
 
@@ -15,7 +16,7 @@ sub new {
   return;
 };
 
-# Add ActivityStreams actor
+# Add or get ActivityStreams actor
 sub actor {
   my $self  = shift;
 
@@ -51,7 +52,7 @@ sub actor {
 };
 
 
-# Add ActivityStreams verb
+# Add or get ActivityStreams verb
 sub verb {
   my $self = shift;
 
@@ -78,17 +79,15 @@ sub verb {
 };
 
 
-# Add ActivityStreams object
+# Add or get ActivityStreams object
 sub object {
-  my $self = shift;
-  return $self->_target_object(object => @_ );
+  shift->_target_object(object => @_ );
 };
 
 
-# Add ActivityStreams target
+# Add or get ActivityStreams target
 sub target {
-  my $self = shift;
-  return $self->_target_object(target => @_ );
+  shift->_target_object(target => @_ );
 };
 
 
@@ -96,6 +95,7 @@ sub _target_object {
   my $self = shift;
   my $type = shift;
 
+  # Add target or object
   if ($_[0]) {
     my %params = @_;
 
@@ -117,6 +117,7 @@ sub _target_object {
     return $obj;
   }
 
+  # Get target or object
   else {
     my $obj = $self->at($type);
 

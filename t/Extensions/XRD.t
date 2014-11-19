@@ -6,7 +6,7 @@ use lib '../lib', '../../lib';
 
 use Test::More;
 
-use Mojo::JSON;
+use Mojo::JSON qw/encode_json decode_json/;
 
 use_ok('XML::Loy::XRD');
 
@@ -53,9 +53,7 @@ ok($xrd->alias('http://sojolicio.us'), 'Add alias');
 is($array[0], 'https://sojolicio.us/', 'Get alias');
 is($array[1], 'http://sojolicio.us', 'Get alias');
 
-my $json = Mojo::JSON->new;
-
-my $jrd = $json->decode($xrd->to_json);
+my $jrd = decode_json($xrd->to_json);
 
 is($jrd->{subject}, 'http://sojolicio.us/', 'JRD Subject');
 is($jrd->{aliases}->[0], 'https://sojolicio.us/', 'JRD Alias');
@@ -196,7 +194,7 @@ is($xrd->at('Property[type="bar"]')->text, 'foo', 'DOM access Property');
 is($xrd->property('bar')->text, 'foo', 'DOM access Property');
 
 is_deeply(
-    Mojo::JSON->new->decode($xrd->to_json),
+    decode_json($xrd->to_json),
     { links =>
 	[ { rel => 'foo' } ] =>
 	  properties =>
@@ -273,15 +271,15 @@ XRD
 $xrd = XML::Loy::XRD->new($xrd_doc);
 
 is_deeply(
-  $json->decode($xrd->to_json),
-  $json->decode($jrd_doc), 'JRD'
+  decode_json($xrd->to_json),
+  decode_json($jrd_doc), 'JRD'
 );
 
 $xrd = XML::Loy::XRD->new($jrd_doc);
 
 is_deeply(
-  $json->decode($xrd->to_json),
-  $json->decode($jrd_doc), 'JRD'
+  decode_json($xrd->to_json),
+  decode_json($jrd_doc), 'JRD'
 );
 
 

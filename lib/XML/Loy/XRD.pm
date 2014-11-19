@@ -1,5 +1,5 @@
 package XML::Loy::XRD;
-use Mojo::JSON;
+use Mojo::JSON qw/encode_json decode_json/;
 use Mojo::Util 'quote';
 use Carp qw/carp/;
 use XML::Loy::Date::RFC3339;
@@ -81,7 +81,7 @@ sub alias {
 
     # Subject found
     my $sub = $self->find('Alias') or return;
-    return @{ $sub->pluck('text') };
+    return @{ $sub->map(sub { $_->text } ) };
   };
 
   # Add new alias
@@ -239,7 +239,7 @@ sub filter_rel {
   } @rel) : 'Link';
 
   # Remove unwanted link relations
-  $xrd->find($rel)->pluck('remove');
+  $xrd->find($rel)->map(sub { $_->remove });
   return $xrd;
 };
 
@@ -248,14 +248,13 @@ sub filter_rel {
 sub _to_xml {
   my $xrd = shift;
 
-  # Create new json object
-  my $json = Mojo::JSON->new;
-
   # Parse json document
-  my $jrd = $json->decode($_[0]);
+  my $jrd;
 
-  # There is a parsing error
-  carp $json->error unless $jrd;
+  # There may be a parsing error
+  eval {
+    $jrd = decode_json $_[0];
+  } or carp $@;
 
   # Itterate over all XRD elements
   foreach my $key (keys %$jrd) {
@@ -391,7 +390,7 @@ sub to_json {
       push(@links, \%link_prop);
     });
   $object{'links'} = \@links if @links;
-  return Mojo::JSON->new->encode(\%object);
+  return encode_json(\%object);
 };
 
 
@@ -488,7 +487,6 @@ documents with L<JRD|https://tools.ietf.org/html/rfc6415> support.
 
 This code may help you to create your own L<XML::Loy> extensions.
 
-B<This module is an early release! There may be significant changes in the future.>
 
 =head1 METHODS
 
@@ -671,7 +669,7 @@ L<Mojolicious>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2013, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
