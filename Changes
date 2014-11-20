@@ -1,3 +1,6 @@
+0.30 2014-11-20
+        - Switched to canonical use of map (sri++).
+
 0.29 2014-11-19
         - Switched to map from deprecated pluck in Mojo::Collection.
 	- Removed usage of deprecated OO Mojo::JSON access.

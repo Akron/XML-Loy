@@ -160,7 +160,7 @@ sub category {
     or return;
 
   if ($coll->[0]) {
-    $coll->map( sub { $_ = $_->{term} });
+    $coll->map(sub { $_ = $_->{term} });
   };
 
   return $coll;

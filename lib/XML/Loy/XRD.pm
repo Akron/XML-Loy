@@ -81,7 +81,7 @@ sub alias {
 
     # Subject found
     my $sub = $self->find('Alias') or return;
-    return @{ $sub->map(sub { $_->text } ) };
+    return @{ $sub->map('text') };
   };
 
   # Add new alias
@@ -239,7 +239,7 @@ sub filter_rel {
   } @rel) : 'Link';
 
   # Remove unwanted link relations
-  $xrd->find($rel)->map(sub { $_->remove });
+  $xrd->find($rel)->map('remove');
   return $xrd;
 };
 
