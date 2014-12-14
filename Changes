@@ -1,3 +1,7 @@
+0.31 2014-12-14
+        - Fixed access to root node.
+	- Fixed dependency for fixed root node access.
+
 0.30 2014-11-20
         - Switched to canonical use of map (sri++).
 

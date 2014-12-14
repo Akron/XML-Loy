@@ -46,7 +46,7 @@ sub new {
 
 # Set subject
 sub subject {
-  my $self = shift->root->at('*');;
+  my $self = shift->root;
 
   # Return subject
   unless ($_[0]) {
@@ -74,7 +74,7 @@ sub subject {
 
 # Add alias
 sub alias {
-  my $self = shift->root->at('*');
+  my $self = shift->root;
 
   # Return subject
   unless ($_[0]) {
@@ -191,7 +191,7 @@ sub expires {
 
 # Check for expiration
 sub expired {
-  my $self = shift->root->at('*');;
+  my $self = shift->root;
 
   # No expiration date given
   my $exp = $self->expires or return;

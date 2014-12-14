@@ -32,10 +32,11 @@ my $person = $as_entry->new_person(
   uri => 'http://sojolicio.us/bender'
 );
 $as_entry->actor($person);
-is($as_entry->at('entry > author > name')->text,
+
+is($as->at('entry > author > name')->text,
    'Bender',
     'Add author 2');
-is($as_entry->at('entry > author > uri')->text,
+is($as->at('entry > author > uri')->text,
    'http://sojolicio.us/bender',
     'Add author 3');
 is($as_entry->actor->at('name')->text, 'Bender', 'Bender Name');
