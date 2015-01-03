@@ -344,7 +344,7 @@ sub source {
   my $self = shift;
 
   # Only valid in entry
-  return if $self->type ne 'entry';
+  return if !$self->type || $self->type ne 'entry';
 
   # Set source
   return $self->set(source => @_) if $_[0];
@@ -359,7 +359,7 @@ sub subtitle {
   my $self = shift;
 
   # Only valid in feed or source or something
-  return if $self->type eq 'entry';
+  return if $self->type && $self->type eq 'entry';
 
   # Set subtitle
   return $self->_addset_text(set => subtitle => @_) if $_[0];
@@ -374,7 +374,7 @@ sub summary {
   my $self = shift;
 
   # Only valid in entry
-  return if $self->type ne 'entry';
+  return if !$self->type || $self->type ne 'entry';
 
   # Set summary
   return $self->_addset_text(set => summary => @_) if $_[0];

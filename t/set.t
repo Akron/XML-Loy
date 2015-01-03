@@ -23,7 +23,7 @@ ok(my $try = $xml->add('try'), 'Add 2');
 
 ok($xml->set('once' => { foo => 'bar' } ), 'Set 1');
 
-is($xml->at('test')->attr('serial\:once'), '', 'Serial once att');
+is($xml->at('test')->attr('loy:once'), '(once)', 'Loy once att');
 
 ok($xml->at('once[foo=bar]'), 'Find once');
 

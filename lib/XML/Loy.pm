@@ -5,8 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.31';
-
+our $VERSION = '0.32';
 
 # Todo:
 #  - Add ->clone
