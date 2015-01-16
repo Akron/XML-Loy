@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 # Todo:
 #  - Add ->clone
@@ -563,7 +563,9 @@ sub namespace {
   my $self = shift;
 
   # Get namespace
-  return $self->SUPER::namespace unless $_[0];
+  unless ($_[0]) {
+    return $self->SUPER::namespace || undef;
+  };
 
   my $ns = pop;
   my $prefix = shift;
@@ -882,7 +884,7 @@ sub _root_element {
   # Todo: Optimize! Often called!
 
   # Find root (Based on Mojo::DOM::root)
-  my $root = $self->tree;
+  my $root = $self->tree or return;
   my $tag;
 
   # Root is root node

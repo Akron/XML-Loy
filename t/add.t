@@ -18,6 +18,9 @@ ok(my $string = $xml->to_pretty_xml, 'Pretty Print');
 like($string, qr{<test />}, 'Check ' . $i++);
 like($string, qr{\Q$pi\E}, 'Check ' . $i++);
 
+is($xml->namespace, undef, 'Namespace is undef');
+
+
 ok($xml->add('foo'), 'Add element');
 ok($string = $xml->to_pretty_xml, 'Pretty Print');
 like($string, qr{<test>}, 'Check ' . $i++);
