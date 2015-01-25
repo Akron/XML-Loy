@@ -210,7 +210,7 @@ L<Time::Local>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011-2014, L<Nils Diewald|http://nils-diewald.de/>.
+Copyright (C) 2011-2015, L<Nils Diewald|http://nils-diewald.de/>.
 
 The code is heavily based on L<Mojo::Date>,
 written by Sebastian Riedel. See L<Mojo::Date>

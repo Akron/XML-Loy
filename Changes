@@ -1,3 +1,7 @@
+0.34 2015-01-25
+        - Fixed weird DESTROY warning with Mojolicious 5.73.
+	- Updated year.
+
 0.33 2015-01-16
         - Fixed namespace handling for 5.71 (renee++ for reporting!).
 	- Fixed root element handling in empty docs for 5.72.
