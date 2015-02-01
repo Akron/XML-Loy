@@ -1,3 +1,7 @@
+0.35 2015-02-01
+        - Added Socket dependency (probably for newer
+	  versions of Mojolicious).
+
 0.34 2015-01-25
         - Fixed weird DESTROY warning with Mojolicious 5.73.
 	- Updated year.

@@ -16,6 +16,7 @@ WriteMakefile(
   },
   PREREQ_PM => {
     'Mojolicious' => '5.69',
+    'Socket' => '1.97',
     'Time::Local' => '1.2'
   },
   LICENSE     => 'perl',
