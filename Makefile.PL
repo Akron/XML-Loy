@@ -24,7 +24,14 @@ WriteMakefile(
     requires  => { perl => '5.010001' },
     resources => {
       license     => 'http://www.opensource.org/licenses/artistic-license-2.0',
-      repository  => 'https://github.com/Akron/XML-Loy'
+      repository  => {
+        type => 'git',
+        web => 'https://github.com/Akron/XML-Loy',
+        url => 'https://github.com/Akron/XML-Loy.git',
+      },
+      bugtracker  => {
+        web => 'https://github.com/Akron/XML-Loy/issues',
+      },
     }
   },
   MIN_PERL_VERSION => '5.010001',
