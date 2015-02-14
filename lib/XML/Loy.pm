@@ -962,6 +962,8 @@ __END__
 
 =pod
 
+=encoding utf8
+
 =head1 NAME
 
 XML::Loy - Extensible XML Reader and Writer
@@ -1428,6 +1430,11 @@ For simple deserialization,
 try L<XML::Bare> and L<XML::Fast>.
 For similar scope, but without dependencies aside the core,
 try L<XML::MyXML>.
+
+
+=head1 CONTRIBUTORS
+
+L<Renée Bäcker|https://github.com/reneeb>
 
 
 =head1 AVAILABILITY
