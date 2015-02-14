@@ -306,7 +306,7 @@ XRD
 
 $xrd = XML::Loy::XRD->new($xrd_doc);
 
-my @prop = $xrd->root->at(':root')->children('Property')->each;
+my @prop = $xrd->at(':root')->children('Property')->each;
 
 is($prop[0]->attr('type'), 'permanentcheck', 'Found prop 1');
 is($prop[1]->attr('type'), 'foo', 'Found prop 2');

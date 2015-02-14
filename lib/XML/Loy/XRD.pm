@@ -338,7 +338,9 @@ sub _to_xml_properties {
 # Render JRD
 sub to_json {
   my $self = shift;
-  my $root  = $self->root->at(':root');
+  my $root  = $self->at(':root');
+
+#  warn $root;
 
   my %object;
 

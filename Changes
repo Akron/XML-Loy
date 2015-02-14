@@ -1,3 +1,7 @@
+0.36 2015-02-14
+        - Added more metadata to Makefile.PL (renee++).
+	- Fixed root element handling in XRD (renee++ for reporting).
+
 0.35 2015-02-01
         - Added Socket dependency (probably for newer
 	  versions of Mojolicious).
