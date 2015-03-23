@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use Test::Warn;
 
-use lib '../lib', '../../lib';
+use lib 'lib', '../lib', '../../lib';
 
 use_ok('XML::Loy::Atom');
 use_ok('XML::Loy::ActivityStreams');
@@ -28,6 +28,8 @@ is($entry->verb, 'http://activitystrea.ms/schema/1.0/loves', 'Verb');
 is($entry->object->at('name')->text, 'Leela', 'Actor name');
 is($entry->object->at('object-type')->text, 'http://activitystrea.ms/schema/1.0/person', 'Actor name');
 is($entry->title->all_text, 'Fry loves Leela', 'Title');
+
+
 is($entry->summary->all_text, 'Now it\'s official!', 'Summary');
 ok(my $time = $entry->published, 'Published time');
 ok(length($entry->published->to_string) > 5, 'Date length');

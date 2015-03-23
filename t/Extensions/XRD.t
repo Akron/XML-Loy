@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use lib '../lib', '../../lib';
+use lib 'lib', '../lib', '../../lib';
 
 use Test::More;
 
@@ -365,10 +365,10 @@ ok($xrd6->subject('Sorted Test'), 'Add subject');
 ok($xrd6->expires(time), 'Add expires');
 
 my $xrd6r = $xrd6->at('*');
-is($xrd6r->children->[0]->type, 'Subject', 'Check Subject');
-is($xrd6r->children->[1]->type, 'Expires', 'Check Subject');
-is($xrd6r->children->[2]->type, 'Link', 'Check Subject');
-is($xrd6r->children->[3]->type, 'Alias', 'Check Subject');
+is($xrd6r->children->[0]->tag, 'Subject', 'Check Subject');
+is($xrd6r->children->[1]->tag, 'Expires', 'Check Subject');
+is($xrd6r->children->[2]->tag, 'Link', 'Check Subject');
+is($xrd6r->children->[3]->tag, 'Alias', 'Check Subject');
 
 ok(my $xrd7 = XML::Loy->new('test'), 'New XRD with prefixes');
 ok($xrd7->extension(-XRD), 'Add extension');
@@ -378,10 +378,10 @@ ok($xrd7->subject('Sorted Test'), 'Add subject');
 ok($xrd7->expires(time), 'Add expires');
 
 my $xrd7r = $xrd7->at('*');
-is($xrd7r->children->[0]->type, 'xrd:Subject', 'Check Subject');
-is($xrd7r->children->[1]->type, 'xrd:Expires', 'Check Subject');
-is($xrd7r->children->[2]->type, 'xrd:Link', 'Check Subject');
-is($xrd7r->children->[3]->type, 'xrd:Alias', 'Check Subject');
+is($xrd7r->children->[0]->tag, 'xrd:Subject', 'Check Subject');
+is($xrd7r->children->[1]->tag, 'xrd:Expires', 'Check Subject');
+is($xrd7r->children->[2]->tag, 'xrd:Link', 'Check Subject');
+is($xrd7r->children->[3]->tag, 'xrd:Alias', 'Check Subject');
 
 
 my $wrapper = XML::Loy->new('test');

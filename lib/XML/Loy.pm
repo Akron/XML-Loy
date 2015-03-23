@@ -1,11 +1,11 @@
 package XML::Loy;
 use Mojo::ByteStream 'b';
-use Mojo::Loader;
+use Mojo::Loader qw/load_class/;
 use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 sub DESTROY;
 
@@ -249,7 +249,7 @@ sub set {
 
   # Get tag from document object
   if (ref $_[0]) {
-    $tag = $_[0]->at('*')->type;
+    $tag = $_[0]->at('*')->tag;
   }
 
   # Get tag
@@ -522,7 +522,7 @@ sub extension {
   return @ext unless $_[0];
 
   # New Loader
-  my $loader = Mojo::Loader->new;
+  # my $loader = Mojo::Loader->new;
 
   # Try all given extension names
   while (my $ext = shift( @_ )) {
@@ -535,7 +535,7 @@ sub extension {
     };
 
     # Unable to load extension
-    if (my $e = $loader->load($ext)) {
+    if (my $e = load_class $ext) {
       carp "Exception: $e"  if ref $e;
       carp qq{Unable to load extension "$ext"};
       next;
@@ -592,7 +592,7 @@ sub as {
   my $base = shift;
 
   # New Loader
-  my $loader = Mojo::Loader->new;
+  # my $loader = Mojo::Loader->new;
 
   # Default 'XML::Loy::' prefix
   if (index($base, '-') == 0) {
@@ -605,7 +605,7 @@ sub as {
   };
 
   # Unable to load extension
-  if (my $e = $loader->load($base)) {
+  if (my $e = load_class $base) {
     carp "Exception: $e"  if ref $e;
     carp qq{Unable to load base class "$e"};
     return;
