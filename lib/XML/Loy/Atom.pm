@@ -206,7 +206,7 @@ sub entry {
     my $id = shift;
 
     # Get based on xml:id
-    my $entry = $self->at(qq{entry[xml\:id="$id"]});
+    my $entry = $self->at(qq{entry[xml\\:id="$id"]});
     return $entry if $entry;
 
     # Get based on <entry><id>id</id></entry>
