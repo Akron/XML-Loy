@@ -130,7 +130,7 @@ XRD
 is($xrd->link('lrdd')->attr('template'), '/.well-known/webfinger?resource={uri}', 'Get link');
 
 is($xrd->property('private')->attr('xsi:nil'), 'true', 'Get property');
-
+is($xrd->subject, 'http://sojolicio.us/', 'Get subject');
 
 $xrd = XML::Loy::XRD->new(<<'JRD');
   {"subject":"http:\/\/sojolicio.us\/",

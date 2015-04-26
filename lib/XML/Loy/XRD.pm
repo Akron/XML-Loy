@@ -46,7 +46,8 @@ sub new {
 
 # Set subject
 sub subject {
-  my $self = shift->root;
+  my $self = $_[0]->type eq 'root' ?
+    shift : shift->root;
 
   # Return subject
   unless ($_[0]) {
@@ -74,7 +75,8 @@ sub subject {
 
 # Add alias
 sub alias {
-  my $self = shift->root;
+  my $self = $_[0]->type eq 'root' ?
+    shift : shift->root;
 
   # Return subject
   unless ($_[0]) {
@@ -191,7 +193,8 @@ sub expires {
 
 # Check for expiration
 sub expired {
-  my $self = shift->root;
+  my $self = $_[0]->type eq 'root' ?
+    shift : shift->root;
 
   # No expiration date given
   my $exp = $self->expires or return;
@@ -338,9 +341,9 @@ sub _to_xml_properties {
 # Render JRD
 sub to_json {
   my $self = shift;
-  my $root  = $self->at(':root');
 
-#  warn $root;
+  my $root = $self->type eq 'root' ?
+    $self : $self->root;
 
   my %object;
 
