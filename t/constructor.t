@@ -5,7 +5,7 @@ use warnings;
 use lib '../lib';
 use lib '../../lib';
 
-use Test::More;
+use Test::More tests => 35;
 
 my $pi = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
 

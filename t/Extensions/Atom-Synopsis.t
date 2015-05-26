@@ -8,7 +8,7 @@ use Mojo::ByteStream 'b';
 use Test::Mojo;
 use Mojolicious::Lite;
 
-use Test::More;
+use Test::More tests => 10;
 
 use_ok('XML::Loy::Atom');
 

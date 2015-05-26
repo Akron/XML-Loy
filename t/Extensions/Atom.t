@@ -8,7 +8,7 @@ use Mojo::ByteStream 'b';
 use Test::Mojo;
 use Mojolicious::Lite;
 
-use Test::More;
+use Test::More tests => 182;
 
 my $poco_ns  = 'http://www.w3.org/TR/2011/WD-contacts-api-20110616/';
 my $xhtml_ns = 'http://www.w3.org/1999/xhtml';

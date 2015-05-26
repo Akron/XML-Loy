@@ -4,7 +4,7 @@ use warnings;
 
 use lib 'lib', '../lib', '../../lib';
 
-use Test::More;
+use Test::More tests => 130;
 
 use Mojo::JSON qw/encode_json decode_json/;
 

@@ -4,7 +4,7 @@ use warnings;
 
 use lib '../../lib';
 
-use Test::More;
+use Test::More tests => 31;
 
 use_ok('XML::Loy::Date::RFC3339');
 

@@ -49,7 +49,7 @@ use XML::Loy with => (
 package main;
 use lib '../lib';
 
-use Test::More;
+use Test::More tests => 58;
 use Test::Warn;
 
 use_ok('XML::Loy::Atom');

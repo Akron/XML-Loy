@@ -4,7 +4,7 @@ use warnings;
 
 use lib '../../lib';
 
-use Test::More;
+use Test::More tests => 11;
 use Test::Warn;
 use Mojo::DOM;
 

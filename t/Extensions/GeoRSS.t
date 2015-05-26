@@ -4,7 +4,7 @@ use warnings;
 
 use lib 'lib', '../lib', '../../lib';
 
-use Test::More;
+use Test::More tests => 77;
 
 use_ok('XML::Loy::Atom');
 

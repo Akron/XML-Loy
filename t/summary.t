@@ -5,7 +5,7 @@ use warnings;
 use lib '../lib';
 use lib '../../lib';
 
-use Test::More;
+use Test::More tests => 22;
 
 use_ok('XML::Loy');
 

@@ -5,7 +5,7 @@ use warnings;
 use lib '../lib';
 use lib '../../lib';
 
-use Test::More;
+use Test::More tests => 25;
 
 # Todo: Looks funny right now:
 #<?xml version="1.0"?>

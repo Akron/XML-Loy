@@ -49,7 +49,7 @@ use XML::Loy with => (
 package main;
 use lib '../lib';
 
-use Test::More;
+use Test::More tests => 12;
 use Test::Warn;
 
 ok(my $atom = Atom->new('feed'), 'New atom');
