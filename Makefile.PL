@@ -9,15 +9,13 @@ WriteMakefile(
   AUTHOR       => 'Nils Diewald',
   ABSTRACT     => 'Extensible XML Reader and Writer',
   VERSION_FROM => 'lib/XML/Loy.pm',
-  BUILD_REQUIRES => {
-    'Test::More' => 0,
-    'Test::Warn' => '0.24',
-    'Scalar::Util' => 0
-  },
   PREREQ_PM => {
     'Mojolicious' => '6.05',
     'Socket' => '1.97',
-    'Time::Local' => '1.2'
+    'Time::Local' => '1.2',
+    'Test::More' => 0,
+    'Test::Warn' => '0.24',
+    'Scalar::Util' => 0
   },
   LICENSE     => 'perl',
   META_MERGE  => {
