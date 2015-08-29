@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
 
 sub DESTROY;
 
@@ -164,7 +164,7 @@ sub new {
     push(@$tree, $element);
 
     # Add text if given
-    push(@$element, [ text => $text ]) if $text;
+    push(@$element, [ text => $text ]) if defined $text;
 
     # Create root element by parent class
     $self = $class->SUPER::new->xml(1);
