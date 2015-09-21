@@ -102,7 +102,7 @@ sub property {
   my $type = shift;
 
   # Returns the first match
-  return $self->at( qq{Property[type="$type"]} ) unless scalar @_ == 1;
+  return $self->at( qq{Property[type="$type"]} ) unless scalar @_ >= 1;
 
   # Get possible attributes
   my %hash = ($_[0] && ref $_[0] && ref $_[0] eq 'HASH') ? %{ shift(@_) } : ();

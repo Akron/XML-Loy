@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 sub DESTROY;
 

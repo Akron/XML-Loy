@@ -4,7 +4,7 @@ use warnings;
 
 use lib 'lib', '../lib', '../../lib';
 
-use Test::More tests => 130;
+use Test::More tests => 133;
 
 use Mojo::JSON qw/encode_json decode_json/;
 
@@ -144,6 +144,9 @@ is($xrd->at('Alias')->text, 'https://sojolicio.us/', 'Get Alias');
 
 is($xrd->property('private')->attr('xsi:nil'), 'true', 'nil attribute');
 
+ok($xrd->property(works => 'nice'), 'Add property');
+ok($xrd->property(and_works => { -type => 'base64' }, 'evennicer'), 'Add property');
+is($xrd->property('and_works')->text, 'evennicer', 'armored property is correct');
 
 
 ##################################
