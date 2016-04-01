@@ -1,3 +1,8 @@
+0.43 2016-04-01
+        - Fixed Makefile.PL script to generate
+	  resource details in META files (Manwar++).
+	- Added travis support.
+
 0.42 2015-09-22
         - Fixed attribute parameter in XML::Loy::XRD.
 
