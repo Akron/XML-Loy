@@ -18,7 +18,8 @@ WriteMakefile(
     'Scalar::Util' => 0
   },
   LICENSE     => 'perl',
-  META_MERGE  => {
+  (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
+    'meta-spec' => { version => 2 },
     requires  => { perl => '5.010001' },
     resources => {
       license     => 'http://www.opensource.org/licenses/artistic-license-2.0',
@@ -31,7 +32,8 @@ WriteMakefile(
         web => 'https://github.com/Akron/XML-Loy/issues',
       },
     }
-  },
+  }) : (),
+  ),
   MIN_PERL_VERSION => '5.010001',
   test => {TESTS => 't/*.t t/Extensions/*.t t/Date/*.t' }
 );
