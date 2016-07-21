@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 
 sub DESTROY;
 
@@ -1016,8 +1016,6 @@ of small serialized XML documents with
 various namespaces.
 It focuses on simplicity and extensibility,
 while giving you the full power of L<Mojo::DOM>.
-
-B<This module is an early release! There may be significant changes in the future.>
 
 
 =head1 METHODS

@@ -115,8 +115,8 @@ is($entry->content->all_text, '<p>Test content 2', 'Content');
 $atom->find('entry')
     ->[1]->content(type    => 'movie',
 		   content => b('Test')->b64_encode);
-is($atom->at('entry content[type="movie"]')->text,
-    'VGVzdA==',
+like($atom->at('entry content[type="movie"]')->text,
+    qr!\s*VGVzdA==\s*!,
     'Add content 6');
 
 # Add author
@@ -324,8 +324,8 @@ ok($atom->subtitle(
   type => 'movie',
   content => b('Test')->b64_encode
 ), 'Set subtitle 5 1/2');
-is($atom->at('subtitle[type="movie"]')->text,
-   'VGVzdA==',
+like($atom->at('subtitle[type="movie"]')->text,
+   qr!\s*VGVzdA==\s*!,
    'Add subtitle 6');
 ok(my $subtitle = $atom->new_text('Test subtitle 2'), 'New test subtitle 2');
 ok($atom->subtitle($subtitle), 'Add subtitle 7');
@@ -360,8 +360,8 @@ ok($atom->find('entry')
        type => 'movie',
        content => b('Test')->b64_encode
      ), 'Set summary 6');
-is($atom->at('entry summary[type="movie"]')->text,
-    'VGVzdA==',
+like($atom->at('entry summary[type="movie"]')->text,
+    qr!\s*VGVzdA==\s*!,
     'Add summary 6');
 my $encode = b('Test')->b64_encode->trim;
 like($atom->find('entry')->[1]->summary->all_text,
@@ -442,10 +442,10 @@ $entry->content(html  => "I am <strong>Bender</strong>!");
 is($atom->at('content[type="html"]')->text,  'I am <strong>Bender</strong>!', 'Text');
 $entry->content(xhtml => "I am <strong>Bender</strong>!");
 is($atom->at('content[type="xhtml"]')->text,  '', 'Text');
-is($atom->at('content[type="xhtml"] div')->text,  'I am!', 'Text');
+like($atom->at('content[type="xhtml"] div')->text,  qr/I am\s*!/, 'Text');
 is($atom->at('content[type="xhtml"] div')->all_text,  'I am Bender!', 'Text');
 $atom->content(type => 'movie', content => b("I am Bender!")->b64_encode);
-is($atom->at('content[type="movie"]')->text, 'SSBhbSBCZW5kZXIh', 'Text');
+like($atom->at('content[type="movie"]')->text, qr!\s*SSBhbSBCZW5kZXIh\s*!, 'Text');
 
 $atom = XML::Loy::Atom->new(<<'ATOM');
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

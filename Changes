@@ -1,3 +1,6 @@
+0.44 2016-07-21
+        - Fixed Mojolicious 7 support.
+
 0.43 2016-04-01
         - Fixed Makefile.PL script to generate
 	  resource details in META files (Manwar++).

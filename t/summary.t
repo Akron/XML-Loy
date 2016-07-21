@@ -36,8 +36,8 @@ XML
 
 is($xml->at('SubTest')->attr('rel'), 'simple', 'Attribute');
 is($xml->at('SubTest[rel="hard"]')->text, 'Huhu', 'Text');
-is($xml->at('SubTest[rel="simple"]')->text, '', 'Text');
-is($xml->at('SubTest[rel="simple"]')->all_text, 'Huhu', 'All Text');
+like($xml->at('SubTest[rel="simple"]')->text, qr!\s*!, 'Text');
+like($xml->at('SubTest[rel="simple"]')->all_text, qr/^\s*Huhu\s*$/, 'All Text');
 
 $xml->add('ParaTest', { rel => "para" }, 'Para');
 
@@ -53,7 +53,7 @@ $body->add('p', 'Paragraph');
 is($xml->at('body')->attr('color'), '#ffffff', 'Attribute');
 is($xml->at('h1')->text, 'Headline', 'Text');
 is($xml->at('p')->text, 'Paragraph', 'Text');
-is($xml->at('body')->all_text, 'Headline Paragraph', 'Text');
+like($xml->at('body')->all_text, qr!Headline\s*Paragraph!, 'Text');
 
 
 # Add paragraph to document
