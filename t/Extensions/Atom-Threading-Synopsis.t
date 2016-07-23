@@ -33,6 +33,3 @@ ok($entry->replies('http://sojolicio.us/blog/1/replies' => {
 # Get threading information
 is($entry->in_reply_to->[0]->attr('href'),
 'http://sojolicio.us/blog/1', 'Correct href');
-
-
-done_testing;

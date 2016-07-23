@@ -61,5 +61,3 @@ ok($xml = XML::Loy->new(test => undef, 'Comment'),
 like($xml->to_pretty_xml, qr{<test />}, 'Pretty Print');
 like($xml->to_pretty_xml, qr{<!-- Comment -->}, 'Pretty Print');
 like($xml->to_pretty_xml, qr{\Q$pi\E}, 'Pretty Print');
-
-done_testing;

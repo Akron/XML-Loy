@@ -30,7 +30,4 @@ is($xrd->at('*')->namespace, 'http://docs.oasis-open.org/ns/xri/xrd-1.0', 'Names
 is($xrd->at('Host')->namespace, 'http://host-meta.net/xrd/1.0', 'Namespace');
 is($xrd->at('Host')->text, 'sojolicio.us', 'Host');
 
-done_testing;
-
-
 __END__

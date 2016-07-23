@@ -98,5 +98,3 @@ $xml->add('div' => { -type => 'raw' } => 'That\'s <b>coool</b>');
 my $read = XML::Loy->new($xml->to_pretty_xml);
 
 ok(!$read->at('div b'), 'Raw rendered');
-
-done_testing;

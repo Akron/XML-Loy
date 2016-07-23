@@ -59,5 +59,3 @@ is($feed->title->text, 'Bazinga!', 'title');
 
 is($entry->find('div > p')->[0]->text, 'First para', 'First para');
 is($entry->find('div > p')->[1]->text, 'Second para', 'Second para');
-done_testing;
-

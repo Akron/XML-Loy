@@ -82,5 +82,3 @@ ok($atom->total(8), 'Set total okay');
 is($atom->total, 8, 'Get total okay');
 ok($entry->total(7), 'Set total okay');
 is($entry->total, 7, 'Get total okay');
-
-done_testing;

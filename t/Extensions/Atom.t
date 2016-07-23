@@ -484,5 +484,3 @@ is(ref($atom), 'XML::Loy::Atom', 'new 1');
 
 ok($atom->content('Halä'), 'Add unicode content');
 is($atom->content->text, 'Halä', 'Get content');
-
-done_testing;

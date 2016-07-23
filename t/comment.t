@@ -55,6 +55,3 @@ ok($string = $xml->to_pretty_xml, 'Pretty Print');
 
 $string =~ s/\s//g;
 like($string, qr{<!--Comment1Comment2Comment3--><child}, 'Check ' . $i++);
-
-
-done_testing;

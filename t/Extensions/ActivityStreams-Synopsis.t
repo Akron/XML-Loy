@@ -38,6 +38,4 @@ like($entry->published->epoch, qr/^\d+$/, 'Date');
 is($entry->published->to_string, $time->to_string, 'Date');
 is($entry->published->epoch, $time->epoch, 'Date');
 
-done_testing;
-
 __END__

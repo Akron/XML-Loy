@@ -232,7 +232,3 @@ is($xml->to_pretty_xml, <<'PP', 'Pretty Print');
   </Child5>
 </test>
 PP
-
-done_testing;
-
-exit;

@@ -116,6 +116,4 @@ is($atom->at('polygon')->namespace, $geo_ns, 'Namespace');
 is($atom->at('author')->namespace, 'http://www.w3.org/2005/Atom', 'Namespace');
 is($atom->at('name')->namespace, 'http://www.w3.org/2005/Atom', 'Namespace');
 
-done_testing;
-
 __END__

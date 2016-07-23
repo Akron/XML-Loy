@@ -112,9 +112,3 @@ is($xml->to_pretty_xml(2), <<'PP', 'Pretty Print');
       </data>
     </entry>
 PP
-
-
-
-done_testing;
-
-exit;

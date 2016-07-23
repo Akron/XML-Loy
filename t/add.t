@@ -93,5 +93,3 @@ ok($xml = XML::Loy->new('<meta />'), 'Create new document');
 ok($xml->add('test'), 'Add <test />');
 like($xml->to_pretty_xml, qr!<test />!, 'test is empty');
 like($xml->to_pretty_xml, qr!<test />!, 'meta is empty');
-
-done_testing;

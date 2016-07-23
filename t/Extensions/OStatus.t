@@ -30,4 +30,3 @@ ok($atom->conversation('http://sojolicio.us/conv/34'), 'Add new conversation');
 is($atom->link('ostatus:conversation')->[0]->attr('href'), 'http://sojolicio.us/conv/34', 'Conversation link');
 is($atom->conversation, 'http://sojolicio.us/conv/34', 'Conversation link');
 
-done_testing;

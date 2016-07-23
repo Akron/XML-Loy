@@ -393,8 +393,4 @@ ok($wrapper->property(test => 'geht'), 'Set property');
 
 is($wrapper->at('*')->attr('xmlns:xsi'), 'http://www.w3.org/2001/XMLSchema-instance', 'xsi');
 
-done_testing;
-
-exit;
-
 __END__

@@ -90,7 +90,4 @@ is($as->target->at('displayName')->all_text,
 
 # diag $as->to_pretty_xml;
 
-done_testing;
-
-
 __END__

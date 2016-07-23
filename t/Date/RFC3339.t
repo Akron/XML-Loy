@@ -72,9 +72,6 @@ ok($date->parse('2002'), 'right format 7');
 is($date->to_string, '2002', 'correct date value');
 is($date->to_string(0), '2002-01-01T00:00:00Z', 'correct date value');
 
-done_testing;
-
-
 __END__
 
 Year:

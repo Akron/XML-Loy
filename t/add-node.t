@@ -30,5 +30,3 @@ $string =~ s/\s+//g;
 is($string,
    '<?xmlversion="1.0"encoding="UTF-8"standalone="yes"?><test><child/></test>',
    'String is okay');
-
-done_testing;

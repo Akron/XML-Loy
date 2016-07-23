@@ -173,10 +173,6 @@ warning_is {
 q{There is no document to associate the extension with},
   'Warning';
 
-
-done_testing;
-
-
 __END__
 
 $id = $node->add_id('1138');
