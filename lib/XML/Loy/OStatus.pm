@@ -1,4 +1,7 @@
 package XML::Loy::OStatus;
+use strict;
+use warnings;
+
 use XML::Loy with => (
   prefix => 'ostatus',
   namespace => 'http://ostatus.org/schema/1.0/'

@@ -12,6 +12,7 @@ t/Extensions/files
 *.log
 *.db
 *.old
+*.tar.gz
 .*
 t-*
 !.gitignore

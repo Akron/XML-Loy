@@ -1,4 +1,6 @@
 package XML::Loy::Atom::Threading;
+use strict;
+use warnings;
 
 our $PREFIX;
 BEGIN { $PREFIX = 'thr' };

@@ -1,4 +1,7 @@
 package XML::Loy::HostMeta;
+use strict;
+use warnings;
+
 use XML::Loy with => (
   prefix => 'hm',
   namespace => 'http://host-meta.net/xrd/1.0'

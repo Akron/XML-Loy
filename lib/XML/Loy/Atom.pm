@@ -1,5 +1,7 @@
 package XML::Loy::Atom;
 use Carp qw/carp/;
+use strict;
+use warnings;
 use Mojo::ByteStream 'b';
 use XML::Loy::Date::RFC3339;
 

@@ -1,4 +1,6 @@
 package XML::Loy::GeoRSS;
+use strict;
+use warnings;
 
 use XML::Loy with => (
   prefix => 'georss',

@@ -1,4 +1,7 @@
 package XML::Loy::XRD;
+use strict;
+use warnings;
+
 use Mojo::JSON qw/encode_json decode_json/;
 use Mojo::Util 'quote';
 use Carp qw/carp/;

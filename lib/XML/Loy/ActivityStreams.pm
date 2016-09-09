@@ -1,4 +1,6 @@
 package XML::Loy::ActivityStreams;
+use strict;
+use warnings;
 use XML::Loy with => (
   prefix    => 'activity',
   namespace => 'http://activitystrea.ms/schema/1.0/'
