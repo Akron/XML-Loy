@@ -5,7 +5,7 @@ use Carp qw/croak carp/;
 use Scalar::Util qw/blessed weaken/;
 use Mojo::Base 'Mojo::DOM';
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 
 sub DESTROY;
 
@@ -48,32 +48,31 @@ sub import {
 
   return unless my $flag = shift;
 
-  if ($flag =~ /^-?(?i:base|with)$/) {
+  return unless $flag =~ /^-?(?i:base|with)$/;
 
-    # Allow for manipulating the symbol table
-    no strict 'refs';
-    no warnings 'once';
+  # Allow for manipulating the symbol table
+  no strict 'refs';
+  no warnings 'once';
 
-    # The caller is the calling (inheriting) class
-    my $caller = caller;
-    push @{"${caller}::ISA"}, __PACKAGE__;
+  # The caller is the calling (inheriting) class
+  my $caller = caller;
+  push @{"${caller}::ISA"}, __PACKAGE__;
 
-    if (@_) {
+  if (@_) {
 
-      # Get class variables
-      my %param = @_;
+    # Get class variables
+    my %param = @_;
 
-      # Set class variables
-      foreach (qw/namespace prefix mime/) {
-	if (exists $param{$_}) {
-	  ${ "${caller}::" . uc $_ } = delete $param{$_};
-	};
+    # Set class variables
+    foreach (qw/namespace prefix mime/) {
+      if (exists $param{$_}) {
+        ${ "${caller}::" . uc $_ } = delete $param{$_};
       };
+    };
 
-      # Set class hook
-      if (exists $param{on_init}) {
-	*{"${caller}::ON_INIT"} = delete $param{on_init};
-      };
+    # Set class hook
+    if (exists $param{on_init}) {
+      *{"${caller}::ON_INIT"} = delete $param{on_init};
     };
   };
 
