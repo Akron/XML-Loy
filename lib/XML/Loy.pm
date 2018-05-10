@@ -9,7 +9,10 @@ our $VERSION = '0.46';
 
 sub DESTROY;
 
-# Todo:
+# TODO:
+#   - Support Mojolicious version > 7.77
+#     - "ns|*" namespace selector
+#
 #  - Add ->clone
 #    (Maybe via JSON serialisation of ->tree or using Storable or Dumper)
 #
@@ -38,7 +41,6 @@ sub DESTROY;
 #     (encoding, xml etc.) can be done
 #
 # - closest() (jQuery)
-
 
 our @CARP_NOT;
 
