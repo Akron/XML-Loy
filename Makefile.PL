@@ -16,7 +16,7 @@ WriteMakefile(
     'Test::More' => 0,
     'Test::Warn' => '0.24',
     'Scalar::Util' => 0,
-    'List::Util' => '1.5'
+    'List::Util' => '1.48'
   },
   LICENSE     => 'perl',
   (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
