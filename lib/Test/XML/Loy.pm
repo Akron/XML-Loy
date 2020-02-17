@@ -286,6 +286,26 @@ the same API. The documentation is heavily based on
 L<Test::Mojo>.
 
 
+=head1 ATTRIBUTES
+
+L<Test::XML::Loy> inherits all attributes from
+L<Mojo::Base> and implements the following new ones.
+
+=head2 loy
+
+  print $t->loy->to_pretty_XML;
+
+The L<XML::Loy> object to test against.
+
+
+=head2 success
+
+  my $bool = $t->success;
+  $t       = $t->success($bool);
+
+True if the last test was successful.
+
+
 =head1 METHODS
 
 L<Test::XML::Loy> inherits all methods from
