@@ -1,6 +1,7 @@
 package Test::XML::Loy;
 use Mojo::Base -base;
 use Mojo::Util 'encode';
+use XML::Loy;
 use Test::More;
 
 has [qw!loy success!];
